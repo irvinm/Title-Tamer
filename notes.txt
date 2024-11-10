@@ -1,0 +1,65 @@
+RegEx: https?:\/\/jira\.syncsort\.com\/[^\s]*
+tab.url: https://jira.syncsort.com/secure/RapidBoard.jspa?rapidView=1173
+
+RegEx: https?:\/\/accounts\.firefox\.com\/[^\s]*
+tab.url: https://accounts.firefox.com
+
+RegEx: https?:\/\/www\.google\.com\/[^\s]*
+tab.url: https://www.google.com/
+
+https:\/\/jira\.syncsort\.com\/browse\/([^\s\/]+)
+https://jira.syncsort.com/browse/SOLDEF-843
+Result: Matches and returns "SOLDEF-843" as match[1] ... using $1
+
+Raw URL: https://skynet.mis.gov/userui/ticket.php?ID=16733
+URL Match: skynet\.mis\.gov\/userui\/ticket\.php\?ID\=(.*)
+Title: Ticket $1
+
+If the number of rows added exceed the maximum height of the popup window, scrollbars will be added.
+Limitation of working on restricted sites like accounts.firefox.com, addons.mozilla.org... 
+    ... any listed in about:config -> extensions.webextensions.restrictedDomains
+If you delete a rule, that tab title might not be change until the tab reloads or changes
+    *** Force a reload of a tab that has been renamed but the rule was deleted <-- Maybe an option to enable this?
+Option coloring - Light, Dark, Auto
+Support for Firefox Sync (maybe except specific tabs!)
+Keyboard shortcuts? (Maybe for "Rename specific tab"?)
+PDF files:  PDF viewer is a privileged page that extensions cannot modify
+    https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/executeScript
+    "Note that some special pages do not allow this permission, including reader view, view-source, and PDF viewer pages."
+In order to update a title, the tab must not be discarded.  If a tab is found to need a title update, the tab will be make active first.
+
+https://regex101.com/ (Use ECMAScript)
+
+Matches:  
+    Exact string matches
+        Input as [Exact "(string)"] -> look for command, extract search term, compare against tab's URL as equal
+    Contains string matches (This would include "Domain matches")
+        Input as [Contains "(string)"] -> look for command, extract search term, compare against tab's URL with string "contains"
+    RegEx matches
+        Existing functionality
+    Title matches (value?) - Exact? Contains? Other?
+    Rename specific tabs (regardless of title or URL) [right-click tab options including TST - "Rename this tab"]
+        Addon button: Input as [Current] -> Replace title with string, but display "Tab #xxx" in the stored table
+        Right-click option: Replace title with temp string "Click addon button to change". Display "Tab #xxx" in the stored table
+        Will need to monitor if this tab is closed to delete the rule.
+        Will not work if tab is closed and then re-opened ... different Tab.id ... hence delete the rule when closed.
+        Could do this as a pop-up ... then store in the table.
+            Show URL & Current Tab Title ... text box for new Title.
+        Need "toggle" for enabling/disabling on specific tab or just handle thru table?
+
+Inspirations
+    (2018) https://addons.mozilla.org/en-US/firefox/addon/rename-tab-title/
+    (2019) https://addons.mozilla.org/en-US/firefox/addon/tab-retitle/
+
+
+pdf
+PDF
+	
+https:\/\/jira\.syncsort\.com\/browse\/([^\s\/]+)
+Jira: $1
+	
+google
+mygoogle
+	
+RapidBoard\.jspa\?rapidView\=1173
+Gov Refinement Status -

@@ -1,0 +1,85 @@
+body {
+    width: 790px; /* Set the width of the popup */
+}
+
+label {
+    display: inline-block;
+    width: 150px; /* Set a fixed width for the labels */
+}
+
+#regex, #title {
+    width: calc(100% - 210px); /* Adjust the width of the input fields to account for the label width and some padding */
+}
+
+form div {
+    margin-bottom: 5px;
+}
+
+.button-link-container {
+    display: flex;
+    align-items: center; /* Center align items vertically */
+    gap: 10px; /* Add some space between the button and the link */
+}
+
+#pattern-table {
+    table-layout: fixed; /* Ensure fixed table layout */
+    width: 99%; /* Ensure the table takes the full width */
+    border-collapse: collapse; /* Ensure borders are collapsed */
+    margin-top: 20px; /* Add 20px of space above the table */
+}
+
+#pattern-table th, #pattern-table td {
+    border: 1px solid #000; /* Add border to table cells */
+    padding: 5px; /* Add padding to table cells */
+}
+
+.regex-input, .title-input {
+    width: 99%; /* Set a fixed width for the input fields within the table */
+    box-sizing: border-box; /* Ensure padding is included in the width */
+}
+
+#pattern-table th:nth-child(1) {
+    width: 85%; /* Width for Info column */
+}
+
+#pattern-table th:nth-child(2) {
+    width: 17%; /* Width for Action column */
+}
+
+#pattern-table td:nth-child(2) {
+    text-align: center; /* Center the buttons horizontally */
+}
+
+#pattern-table td:nth-child(2) button {
+    display: inline-block; /* Keep buttons side by side */
+    margin: 0 2px; /* Add some space between the buttons */
+}
+
+.header-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Left justify the text */
+}
+
+.bold-text {
+    font-weight: bold;
+}
+
+.normal-text {
+    font-weight: normal;
+}
+
+.link-container {
+    text-align: center; /* Center the link */
+    margin-top: 10px; /* Add some space above the link */
+}
+
+.notes-link {
+    text-decoration: none; /* Remove underline from the link */
+    color: #007bff; /* Set link color */
+    padding-left: 65px; /* Add padding to the left of the link */
+}
+
+.notes-link:hover {
+    text-decoration: underline; /* Add underline on hover */
+}

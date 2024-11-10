@@ -1,0 +1,22 @@
+{
+  "manifest_version": 2,
+  "name": "Tab Title Modifier",
+  "version": "1.0",
+  "description": "Monitors tabs and changes their titles based on user-defined RegEx patterns.",
+  "permissions": [
+    "tabs",
+    "storage",
+    "<all_urls>"
+  ],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "browser_action": {
+    "default_popup": "options.html"
+  }
+}

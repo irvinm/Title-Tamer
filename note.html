@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes, Limitations, Examples</title>
+    <link rel="stylesheet" type="text/css" href="styles.css"> <!-- Optional: Link to a CSS file for styling -->
+</head>
+
+<body>
+    <h1>Notes, Limitations, Examples</h1>
+    <pre>
+RegEx: https?:\/\/jira\.syncsort\.com\/[^\s]*
+tab.url: https://jira.syncsort.com/secure/RapidBoard.jspa?rapidView=1173
+
+RegEx: https?:\/\/accounts\.firefox\.com\/[^\s]*
+tab.url: https://accounts.firefox.com
+
+RegEx: https?:\/\/www\.google\.com\/[^\s]*
+tab.url: https://www.google.com/
+
+https:\/\/jira\.syncsort\.com\/browse\/([^\s\/]+)
+https://jira.syncsort.com/browse/SOLDEF-843
+Result: Matches and returns "SOLDEF-843" as match[1] ... using $1
+
+If the number of rows added exceed the maximum height of the popup window, scrollbars will be added.
+Limitation of working on restricted sites like accounts.firefox.com, addons.mozilla.org... 
+    ... any listed in about:config -> extensions.webextensions.restrictedDomains
+If you delete a rule, that tab title might not be change until the tab reloads or changes
+
+https://regex101.com/
+
+Matches
+    </pre>
+</body>
+
+</html>

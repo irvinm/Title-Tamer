@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Tab Title Modifier Options</title>
+    <script src="options.js"></script>
+    <link rel="stylesheet" type="text/css" href="options.css">
+</head>
+
+<body>
+    <h1>Tab Title Modifier Options</h1>
+    <form id="pattern-form">
+        <div>
+            <label for="regex">RegEx to search for</label>
+            <input type="text" id="regex" placeholder="Enter RegEx" required>
+        </div>
+        <div>
+            <label for="title">Title to use if found</label>
+            <input type="text" id="title" placeholder="Enter Title" required>
+        </div>
+        <div class="button-link-container">
+            <button type="submit">Add Pattern</button>
+            <a href="note.html" class="notes-link" target="_blank">Notes, limitations, examples</a>
+        </div>
+    </form>
+    <table id="pattern-table">
+        <thead>
+            <tr>
+                <th>
+                    <div class="header-cell">
+                        <span class="bold-text">RegEx</span>
+                        <span class="normal-text">Title</span>
+                    </div>
+                </th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr id="no-values-message">
+                <td colspan="2">No values stored</td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+
+</html>
