@@ -22,6 +22,14 @@
     "open_in_tab": true
   },
   "browser_action": {
+    "default_icon": "icon-dark.svg",
+    "theme_icons": [
+      {
+        "light": "icon-light.svg",
+        "dark": "icon-dark.svg",
+        "size": 48
+      }
+    ],
     "default_popup": "options.html"
   }
 }
