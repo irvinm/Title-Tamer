@@ -8,7 +8,7 @@ async function updateTabTitle(tabId, changeInfo, tab) {
             const patterns = result.patterns || [];
             for (const pattern of patterns) {
                 try {
-                    const regex = new RegExp(pattern.regex);
+                    const regex = new RegExp(pattern.search);
                     const matches = tab.url.match(regex);
                     if (matches) {
                         console.log('Matches:', matches);
