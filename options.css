@@ -189,3 +189,22 @@ label {
     display: table-cell;
     align-items: center;
 }
+
+.open-options-link {
+    position: absolute;
+    top: 10px;
+    left: 620px; /* Change from left to right */
+    background-color: #007bff; /* Blue background */
+    color: white; /* White text */
+    text-decoration: none; /* Remove underline */
+    padding: 5px 10px;
+    border-radius: 5px; /* Rounded corners */
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow */
+}
+
+.open-options-link:hover {
+    background-color: #0056b3;
+}
