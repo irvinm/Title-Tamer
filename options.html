@@ -10,37 +10,48 @@
 <body>
     <h1>Title Tamer Options</h1>
     <form id="pattern-form">
-        <div>
-            <label for="regex">RegEx to search for</label>
-            <input type="text" id="regex" placeholder="Enter RegEx" required>
+        <div class="form-group">
+            <label for="match-type">Match type:</label>
+            <select id="match-type" name="match-type">
+                <option value="Exact">Exact string match</option>
+                <option value="Contains">Contains string match</option>
+                <option value="RegEx">RegEx match</option>
+            </select>
         </div>
-        <div>
-            <label for="title">Title to use if found</label>
+        <div class="form-group">
+            <label for="search">Search term:</label>
+            <input type="text" id="search" placeholder="Enter Search" required>
+        </div>
+        <div class="form-group">
+            <label for="title">Title to use if found:</label>
             <input type="text" id="title" placeholder="Enter Title" required>
         </div>
         <div class="button-link-container">
-            <button type="submit">Add Pattern</button>
-            <a href="note.html" class="notes-link" target="_blank">Notes, limitations, examples</a>
+            <button type="submit" class="add-pattern-button">Add Pattern</button>
+            <button type="button" class="notes-link" id="notes-button" onclick="openNotes()">
+                Notes & Examples <img src="open.png" alt="Open in new tab" class="open-icon">
+            </button>
         </div>
+        <table id="pattern-table">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>
+                        <div class="header-cell">
+                            <span class="bold-text">Search</span>
+                            <span class="normal-text">Title</span>
+                        </div>
+                    </th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr id="no-values-message">
+                    <td colspan="3">No values stored</td>
+                </tr>
+            </tbody>
+        </table>
     </form>
-    <table id="pattern-table">
-        <thead>
-            <tr>
-                <th>
-                    <div class="header-cell">
-                        <span class="bold-text">RegEx</span>
-                        <span class="normal-text">Title</span>
-                    </div>
-                </th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr id="no-values-message">
-                <td colspan="2">No values stored</td>
-            </tr>
-        </tbody>
-    </table>
 </body>
 
 </html>
