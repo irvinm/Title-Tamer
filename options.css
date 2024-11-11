@@ -126,8 +126,9 @@ label {
 }
 
 #match-type {
-  padding: 5px;
-  font-size: 14px;
+    padding: 5px;
+    font-size: 14px;
+    width: max-content;
 }
 
 .form-group {
@@ -148,6 +149,10 @@ label {
     flex: 1;
     padding: 5px;
     font-size: 14px;
+}
+
+.form-group select {
+    flex: 0;
 }
 
 .notes-link,
