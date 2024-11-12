@@ -186,10 +186,16 @@ async function saveRow(index) {
         await restoreOptions(); // Refresh the list after saving
 
         // Reapply search rules to all open tabs
+        /*
         const tabs = await browser.tabs.query({});
         for (const tab of tabs) {
             updateTabTitle(tab.id, { title: tab.title, url: tab.url }, tab);
         }
+        */
+
+        // Send a message to the background script with the new search/title/type pair
+        /* browser.runtime.sendMessage({ action: 'newPattern', pattern: { search, title, type } }); */
+        browser.runtime.sendMessage({ action: 'newPattern', pattern: patterns[index] });
     } catch (error) {
         console.error('Error saving row:', error);
     }
@@ -208,6 +214,7 @@ async function deletePattern(index) {
 }
 
 // Function to update tab title based on stored search patterns
+/*
 async function updateTabTitle(tabId, changeInfo, tab) {
     if (changeInfo.title || changeInfo.url) {
         try {
@@ -248,6 +255,7 @@ async function updateTabTitle(tabId, changeInfo, tab) {
         }
     }
 }
+*/
 
 function openNotes() {
     window.open('note.html', '_blank');
