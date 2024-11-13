@@ -19,9 +19,14 @@ async function updateTabTitle(tabId, changeInfo, tab, pattern) {
                         return matches[number] || match;
                     });
                     let wasDiscarded = false;
-                    if (tab.discarded) {
+                    if (tab.discarded) {    /* If discarded, process single tab after transition */
                         wasDiscarded = true;
                         browser.tabs.update(tab.id, { active: true });
+                    }
+                    else {  /* Not discarded, just change title now */
+                        browser.tabs.executeScript(tab.id, {
+                            code: `document.title = "${newTitle}";`
+                        });
                     }
                 }
             }
