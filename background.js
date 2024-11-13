@@ -2,15 +2,10 @@
 
 // Function to update tab title based on stored REGEX patterns
 async function updateTabTitle(tabId, changeInfo, tab, pattern) {
-    
-    console.log('tabId:', tabId);
-    console.log('changeInfo:', changeInfo);
-    console.log('tab:', tab);
-    console.log('Pattern:', pattern);
-    
 
-    // If pattern is provided, check only against that pattern for all tabs (new or updated pattern)
     console.log('Entering updateTabTitle -> tabId:', tabId, 'changeInfo:', changeInfo, 'tab:', tab, 'Pattern:', pattern);
+    
+    // If pattern is provided, check only against that pattern for all tabs (new or updated pattern)
     if (pattern) {
         try {
             console.log('Checking pattern for all tabs');
@@ -42,41 +37,38 @@ async function updateTabTitle(tabId, changeInfo, tab, pattern) {
     } else {
         // Check all patterns just for the single tab (new or updated tab)
         console.log('Checking all patterns for single tab: changeInfo ->', changeInfo);
-        if (changeInfo.url) {
-            console.log('Inside changeInfo.url');
-            try {
-                const result = await browser.storage.local.get('patterns');
-                const patterns = result.patterns || [];
-                for (const pattern of patterns) {
-                    console.log('Pattern:', pattern);
-                    try {
-                        const regex = new RegExp(pattern.search);
-                        const matches = tab.url.match(regex);
-                        if (matches) {
-                            console.log('tab.id', tab.id, 'Matches:', matches);
-                            const newTitle = pattern.title.replace(/\$(\d+)/g, (match, number) => {
-                                return matches[number] || match;
-                            });
-                            let wasDiscarded = false;
-                            if (tab.discarded) {
-                                wasDiscarded = true;
-                                await browser.tabs.update(tabId, { active: true });
-                            }
-                            await browser.tabs.executeScript(tabId, {
-                                code: `document.title = "${newTitle}";`
-                            });
-                            if (wasDiscarded) {
-                                await browser.tabs.discard(tabId);
-                            }
-                            break;
+        try {
+            const result = await browser.storage.local.get('patterns');
+            const patterns = result.patterns || [];
+            for (const pattern of patterns) {
+                console.log('tabId', tabId, 'Pattern:', pattern);
+                try {
+                    const regex = new RegExp(pattern.search);
+                    const matches = tab.url.match(regex);
+                    if (matches) {
+                        console.log('tabId', tabId, 'Matches:', matches);
+                        const newTitle = pattern.title.replace(/\$(\d+)/g, (match, number) => {
+                            return matches[number] || match;
+                        });
+                        let wasDiscarded = false;
+                        if (tab.discarded) {
+                            wasDiscarded = true;
+                            await browser.tabs.update(tabId, { active: true });
                         }
-                    } catch (e) {
-                        console.error(`Invalid regex pattern: ${pattern.regex}`, e);
+                        await browser.tabs.executeScript(tabId, {
+                            code: `document.title = "${newTitle}";`
+                        });
+                        if (wasDiscarded) {
+                            await browser.tabs.discard(tabId);
+                        }
+                        break;
                     }
+                } catch (e) {
+                    console.error(`Invalid regex pattern: ${pattern.regex}`, e);
                 }
-            } catch (error) {
-                console.error('Error accessing storage:', error);
             }
+        } catch (error) {
+            console.error('Error accessing storage:', error);
         }
     }
 
@@ -149,7 +141,12 @@ async function updateTabTitleForPattern(tab, regex, title) {
 */
 
 // Monitor tab creation and title changes
-browser.tabs.onCreated.addListener((tab) => updateTabTitle(tab.id, { title: tab.title, url: tab.url }, tab, pattern=undefined));
+browser.tabs.onCreated.addListener((tab) => {
+    console.log('Tab created:', tab);
+    updateTabTitle(tab.id, { title: tab.title, url: tab.url }, tab, undefined);
+});
+
+// Monitor tab updates
 browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (changeInfo.title || changeInfo.url) {   /* Only call if title or url changes */
         updateTabTitle(tabId, changeInfo, tab, pattern=undefined);
