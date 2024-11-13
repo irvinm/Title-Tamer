@@ -79,6 +79,10 @@ label {
     width: 75%; /* Width for Info column */
 }
 
+#pattern-table td:nth-child(2) {
+    font-family: 'Consolas', 'Menlo', 'Source Code Pro', 'Fira Code', 'Courier New', Courier, 'Lucida Console', 'Monaco', monospace;
+}
+
 #pattern-table th:nth-child(3) {
     width: 17%; /* Width for Action column */
     text-align: center; /* Center the buttons horizontally */
@@ -200,4 +204,6 @@ label {
 
 .open-options-link:hover {
     background-color: #0056b3;
+.monospace-font {
+    font-family: 'Consolas', 'Menlo', 'Source Code Pro', 'Fira Code', 'Courier New', Courier, 'Lucida Console', 'Monaco', monospace;
 }
