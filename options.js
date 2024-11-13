@@ -11,6 +11,24 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Selected match type:', matchType);
     });
     document.getElementById('notes-button').addEventListener('click', openNotes);
+
+    const toggleButton = document.getElementById('toggle-options');
+    const collapsibleContent = document.getElementById('additional-options');
+
+    toggleButton.addEventListener('click', () => {
+        if (collapsibleContent.style.display === 'none' || collapsibleContent.style.display === '') {
+            collapsibleContent.style.display = 'block';
+            toggleButton.classList.remove('collapsed');
+            toggleButton.classList.add('expanded');
+        } else {
+            collapsibleContent.style.display = 'none';
+            toggleButton.classList.remove('expanded');
+            toggleButton.classList.add('collapsed');
+        }
+    });
+
+    // Initialize the arrow direction
+    toggleButton.classList.add('collapsed');
 });
 
 async function savePattern(event) {
