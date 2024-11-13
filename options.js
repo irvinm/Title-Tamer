@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOMContentLoaded');
     restoreOptions().catch(console.error);
     document.getElementById('pattern-form').addEventListener('submit', (event) => {
         savePattern(event).catch(console.error);
@@ -12,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function savePattern(event) {
-    event.preventDefault();
     const search = document.getElementById('search').value; // Updated ID
     const title = document.getElementById('title').value;
     const type = document.getElementById('match-type').value; // Collect the dropdown value
@@ -35,6 +35,7 @@ async function savePattern(event) {
 }
 
 async function restoreOptions() {
+    console.log('restoreOptions');
     try {
         const result = await browser.storage.local.get('patterns');
         const patterns = result.patterns || [];
@@ -114,6 +115,7 @@ async function restoreOptions() {
 }
 
 function toggleEditRow(index, isEditing) {
+    console.log('toggleEditRow');
     const table = document.getElementById('pattern-table');
     const row = document.querySelector(`#pattern-table tbody tr[data-index="${index}"]`);
     if (!row) {
@@ -169,6 +171,7 @@ function toggleEditRow(index, isEditing) {
 }
 
 async function saveRow(index) {
+    console.log('saveRow');
     const row = document.querySelector(`#pattern-table tbody tr[data-index="${index}"]`);
     if (!row) {
         console.error(`Row with index ${index} not found`);
@@ -202,6 +205,7 @@ async function saveRow(index) {
 }
 
 async function deletePattern(index) {
+    console.log('deletePattern');
     try {
         const result = await browser.storage.local.get('patterns');
         const patterns = result.patterns || [];
@@ -258,5 +262,6 @@ async function updateTabTitle(tabId, changeInfo, tab) {
 */
 
 function openNotes() {
+    console.log('openNotes');
     window.open('note.html', '_blank');
 }
