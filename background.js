@@ -21,13 +21,7 @@ async function updateTabTitle(tabId, changeInfo, tab, pattern) {
                     let wasDiscarded = false;
                     if (tab.discarded) {
                         wasDiscarded = true;
-                        await browser.tabs.update(tab.id, { active: true });
-                    }
-                    await browser.tabs.executeScript(tab.id, {
-                        code: `document.title = "${newTitle}";`
-                    });
-                    if (wasDiscarded) {
-                        await browser.tabs.discard(tab.id);
+                        browser.tabs.update(tab.id, { active: true });
                     }
                 }
             }
