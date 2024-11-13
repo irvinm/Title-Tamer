@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function savePattern(event) {
+    console.log('savePattern');
     const search = document.getElementById('search').value; // Updated ID
     const title = document.getElementById('title').value;
     const type = document.getElementById('match-type').value; // Collect the dropdown value
