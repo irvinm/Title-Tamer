@@ -160,14 +160,7 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 // New or updated pattern ... check all tabs to see if they need to be updated against single pattern
 browser.runtime.onMessage.addListener(async (message) => {
     if (message.action === 'newPattern') {
-        console.log('New pattern:', message.pattern);
-        const { search, title } = message.pattern;
-        const tabs = await browser.tabs.query({});
-        for (const tab of tabs) {
-            /* await updateTabTitle(tab, search, title); */
-            /* await updateTabTitle(tab.id, {title: tab.title, url: tab.url }, tab, message.pattern); */
-            /* await updateTabTitle(null, null, null, message.pattern); */
-        }
+        console.log('Received new pattern message:', message.pattern);
         await updateTabTitle(null, null, null, message.pattern);
     }
 });
