@@ -27,8 +27,7 @@ label {
 .button-link-container {
     display: flex;
     align-items: center; /* Center align items vertically */
-    gap: 10px; /* Add some space between the button and the link */
-    margin-top: 15px;
+    /* margin-bottom: 10px; */
     text-align: center; /* Center the link */
 }
 
@@ -76,7 +75,7 @@ label {
 }
 
 #pattern-table th:nth-child(2) {
-    width: 75%; /* Width for Info column */
+    width: 80%; /* Width for Info column */
 }
 
 #pattern-table td:nth-child(2) {
@@ -154,7 +153,6 @@ label {
     transition: background-color 0.3s ease; /* Smooth transition for hover effect */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow */
     cursor: pointer; /* Change cursor to pointer */
-    margin-left: 160px;
 }
 
 .add-pattern-button:hover,
@@ -169,6 +167,10 @@ label {
     width: 16px; /* Adjust icon size */
     height: 16px; /* Adjust icon size */
     filter: invert(1); /* Invert colors */
+}
+
+.notes-link {
+    margin-left: 5px; /* Add space between buttons */
 }
 
 .narrow {
@@ -211,7 +213,7 @@ label {
     margin-top: 10px;
     border: 1px solid #ccc;
     padding: 10px;
-    width: calc(99% - 21px);
+    width: calc(99% - 22px);
 }
 
 .toggle-arrow {
