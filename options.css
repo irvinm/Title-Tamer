@@ -246,3 +246,7 @@ label {
 .monospace-font {
     font-family: 'Consolas', 'Menlo', 'Source Code Pro', 'Fira Code', 'Courier New', Courier, 'Lucida Console', 'Monaco', monospace;
 }
+
+.action-button {
+    width: 60px; /* Set a fixed width */
+}

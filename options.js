@@ -91,10 +91,10 @@ async function restoreOptions() {
                         </div>
                     </td>
                     <td>
-                        <button class="edit-button" data-index="${index}">Edit</button>
-                        <button class="save-button" data-index="${index}" style="display:none;">Save</button>
-                        <button class="discard-button" data-index="${index}" style="display:none;">Discard</button>
-                        <button class="delete-button" data-index="${index}">Delete</button>
+                        <button class="edit-button action-button" data-index="${index}">Edit</button>
+                        <button class="save-button action-button" data-index="${index}" style="display:none;">Save</button>
+                        <button class="discard-button action-button" data-index="${index}" style="display:none;">Discard</button>
+                        <button class="delete-button action-button" data-index="${index}">Delete</button>
                     </td>
                 `;
                 patternTableBody.appendChild(row);
