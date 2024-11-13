@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('DOMContentLoaded');
     restoreOptions().catch(console.error);
     document.getElementById('pattern-form').addEventListener('submit', (event) => {
+        event.preventDefault(); // Prevent the form from submitting
         savePattern(event).catch(console.error);
     });
     document.getElementById('match-type').addEventListener('change', function() {
@@ -84,6 +85,7 @@ async function restoreOptions() {
             // Add event listeners for edit, save, discard, and delete buttons
             document.querySelectorAll('.edit-button').forEach(button => {
                 button.addEventListener('click', (event) => {
+                    event.preventDefault();
                     const index = event.target.getAttribute('data-index');
                     toggleEditRow(index, true);
                 });
@@ -91,6 +93,7 @@ async function restoreOptions() {
 
             document.querySelectorAll('.save-button').forEach(button => {
                 button.addEventListener('click', async (event) => {
+                    event.preventDefault();
                     const index = event.target.getAttribute('data-index');
                     await saveRow(index);
                 });
@@ -98,6 +101,7 @@ async function restoreOptions() {
 
             document.querySelectorAll('.discard-button').forEach(button => {
                 button.addEventListener('click', (event) => {
+                    event.preventDefault();
                     const index = event.target.getAttribute('data-index');
                     toggleEditRow(index, false);
                 });
@@ -105,6 +109,7 @@ async function restoreOptions() {
 
             document.querySelectorAll('.delete-button').forEach(button => {
                 button.addEventListener('click', async (event) => {
+                    event.preventDefault();
                     const index = event.target.getAttribute('data-index');
                     await deletePattern(index);
                 });
