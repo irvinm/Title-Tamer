@@ -148,7 +148,10 @@ browser.tabs.onCreated.addListener((tab) => {
 
 // Monitor tab updates
 browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    if (changeInfo.title || changeInfo.url) {   /* Only call if title or url changes */
+    console.log('Tab updated:', tabId, changeInfo, tab);
+
+    if (changeInfo.title || changeInfo.url || changeInfo.status === 'complete') {
+        console.log('changeInfo = title, url or status=complete');
         updateTabTitle(tabId, changeInfo, tab, pattern=undefined);
     }
 });
