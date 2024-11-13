@@ -1,6 +1,7 @@
 body {
     width: 790px; /* Set the width of the popup */
     font-family: Arial, sans-serif; /* Set the font family for the entire document */
+    margin-right: 8px; /* Add some space on the right side */
 }
 
 h1 {
@@ -20,7 +21,7 @@ label {
 }
 
 #search, #title {
-    width: calc(100% - 210px); /* Adjust the width of the input fields to account for the label width and some padding */
+    width: calc(99% - 210px); /* Adjust the width of the input fields to account for the label width and some padding */
 }
 
 .button-link-container {
@@ -44,33 +45,17 @@ label {
     border-bottom: 2px solid #000; /* Solid bottom border */
 }
 
-/* Style for the header cells */
-#pattern-table th {
-    font-weight: bold; /* Bold text */
-    text-align: left; /* Left align text */
-    padding: 10px; /* Padding for header cells */
-    color: #333; /* Dark text color */
-}
-
-/* Default padding for table cells */
+/* Default font weight for all table cells */
 #pattern-table th, #pattern-table td {
+    font-weight: normal; /* Set font weight to normal */
     border: 2px solid #000; /* Add border to table cells */
     padding: 5px; /* Add padding to table cells */
     height: 2.3em; /* Set the desired height */
 }
 
-#pattern-table td:nth-child(1) {
-    font-weight: bold; /* Make the text bold */
-}
-
-/* Center the text in the Action header */
-#pattern-table th:nth-child(3) {
-    text-align: center; /* Center align text */
-}
-
-/* Ensure the Action column is centered */
-#pattern-table td:nth-child(3) {
-    text-align: center; /* Center align text */
+/* Font weight for the header row */
+#pattern-table th {
+    font-weight: bold; /* Make the header text bold */
 }
 
 /* Style for input fields within the table */
@@ -84,7 +69,10 @@ label {
 #pattern-table th:nth-child(1) {
     width: 10%; /* Width for Type column */
     text-align: center; /* Center the header text */
-    font-weight: bold; /* Make the text bold */
+}
+
+#pattern-table td:nth-child(1) {
+    text-align: center; /* Center the type values */
 }
 
 #pattern-table th:nth-child(2) {
@@ -93,19 +81,17 @@ label {
 
 #pattern-table th:nth-child(3) {
     width: 17%; /* Width for Action column */
-}
-
-#pattern-table td:nth-child(1) {
-    text-align: center; /* Center the type values */
+    text-align: center; /* Center the buttons horizontally */
 }
 
 #pattern-table td:nth-child(3) {
-    text-align: center; /* Center the buttons horizontally */
+    text-align: center; /* Center the type values */
 }
 
 #pattern-table td:nth-child(3) button {
     display: inline-block; /* Keep buttons side by side */
     margin: 0 2px; /* Add some space between the buttons */
+    text-align: center; /* Center align text */
 }
 
 .header-cell {
@@ -114,11 +100,6 @@ label {
     justify-content: center;
     height: 100%;
     align-items: flex-start; /* Left justify the text */
-    /* margin-left: 5px; */
-}
-
-.bold-text {
-    font-weight: bold;
 }
 
 .normal-text {
@@ -169,9 +150,6 @@ label {
     transition: background-color 0.3s ease; /* Smooth transition for hover effect */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow */
     cursor: pointer; /* Change cursor to pointer */
-}
-
-.add-pattern-button {
     margin-left: 160px;
 }
 

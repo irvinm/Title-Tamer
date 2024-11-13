@@ -61,7 +61,7 @@ async function restoreOptions() {
                     </td>
                     <td>
                         <div>
-                            <span class="search-text"><strong>${pattern.search}</strong></span>
+                            <span class="search-text">${pattern.search}</span>
                             <input class="search-input" type="text" value="${pattern.search}" style="display:none;">
                         </div>
                         <div>
