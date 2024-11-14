@@ -105,6 +105,7 @@ async function restoreOptions() {
                 button.addEventListener('click', (event) => {
                     event.preventDefault();
                     const index = event.target.getAttribute('data-index');
+                    disableButtons(index);
                     toggleEditRow(index, true);
                 });
             });
@@ -114,6 +115,7 @@ async function restoreOptions() {
                     event.preventDefault();
                     const index = event.target.getAttribute('data-index');
                     await saveRow(index);
+                    enableButtons();
                 });
             });
 
@@ -122,6 +124,7 @@ async function restoreOptions() {
                     event.preventDefault();
                     const index = event.target.getAttribute('data-index');
                     toggleEditRow(index, false);
+                    enableButtons();
                 });
             });
 
@@ -135,6 +138,32 @@ async function restoreOptions() {
         }
     } catch (error) {
         console.error('Error restoring options:', error);
+    }
+}
+
+function disableButtons(exceptIndex) {
+    const buttons = document.querySelectorAll('button.action-button');
+    buttons.forEach(button => {
+        const index = button.getAttribute('data-index');
+        if (index !== exceptIndex && !button.classList.contains('notes-examples-button')) {
+            button.disabled = true;
+        }
+    });
+    const addPatternButton = document.getElementById('add-pattern-button');
+    if (addPatternButton) {
+        //addPatternButton.disabled = true;
+        addPatternButton.setAttribute('disabled', 'true');
+    }
+}
+
+function enableButtons() {
+    const buttons = document.querySelectorAll('button.action-button');
+    buttons.forEach(button => {
+        button.disabled = false;
+    });
+    const addPatternButton = document.getElementById('add-pattern-button');
+    if (addPatternButton) {
+        addPatternButton.disabled = false;
     }
 }
 

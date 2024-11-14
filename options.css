@@ -160,6 +160,17 @@ label {
     background-color: #0056b3;
 }
 
+.add-pattern-button.disabled {
+    background-color: #ccc; /* Grey background */
+    cursor: not-allowed; /* Change cursor to not-allowed */
+}
+
+button:disabled {
+    background-color: #ccc; /* Grey background */
+    cursor: not-allowed; /* Change cursor to not-allowed */
+    opacity: 0.5; /* Optional: reduce opacity to indicate disabled state */
+}
+
 .notes-link img.open-icon {
     margin-left: 8px; /* Space between text and icon */
     margin-top: -3px; /* Adjust vertical alignment */
