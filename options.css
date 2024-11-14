@@ -190,14 +190,6 @@ button:disabled {
     margin-left: 5px; /* Add space between buttons */
 }
 
-.narrow {
-    display: flex;
-    justify-content: center; /* Center horizontally */
-    align-items: center; /* Center vertically */
-    padding: 0px;
-    text-align: center;
-}
-
 /* Remove top and bottom margins for cells in edit mode */
 .no-margin {
     padding-top: 0 !important;
