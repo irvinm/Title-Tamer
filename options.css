@@ -1,5 +1,5 @@
 body {
-    width: 790px; /* Set the width of the popup */
+    min-width: 790px; /* Set the width of the popup */
     font-family: Arial, sans-serif; /* Set the font family for the entire document */
     margin-right: 8px; /* Add some space on the right side */
 }
@@ -31,9 +31,13 @@ label {
     text-align: center; /* Center the link */
 }
 
+#pattern-form {
+    margin-right: 10px; /* Add some space on the right side */
+}
+
 #pattern-table {
     table-layout: fixed; /* Ensure fixed table layout */
-    width: 99%; /* Ensure the table takes the full width */
+    width: 100%; /* Ensure the table takes the full width */
     border-collapse: collapse; /* Ensure borders are collapsed */
     margin-top: 10px; /* Add 20px of space above the table */
 }
@@ -59,14 +63,16 @@ label {
 
 /* Style for input fields within the table */
 .search-input, .title-input {
-    width: 99%; /* Set a fixed width for the input fields within the table */
+    font-family: 'Consolas', 'Menlo', 'Source Code Pro', 'Fira Code', 'Courier New', Courier, 'Lucida Console', 'Monaco', monospace;
+    font-size: 14px;
+    width: 100%; /* Set a fixed width for the input fields within the table */
     box-sizing: border-box; /* Ensure padding is included in the width */
     height: 30px; /* Set a fixed height for the input fields */
 }
 
 /* Column widths */
 #pattern-table th:nth-child(1) {
-    width: 10%; /* Width for Type column */
+    width: 10ch; /* Width for Type column */
     text-align: center; /* Center the header text */
 }
 
@@ -75,7 +81,7 @@ label {
 }
 
 #pattern-table th:nth-child(2) {
-    width: 80%; /* Width for Info column */
+    width: auto; /* Width for Info column */
 }
 
 #pattern-table td:nth-child(2) {
@@ -83,7 +89,7 @@ label {
 }
 
 #pattern-table th:nth-child(3) {
-    width: 10%; /* Width for Action column */
+    width: 10ch; /* Width for Action column */
     text-align: center; /* Center the buttons horizontally */
 }
 
@@ -119,7 +125,7 @@ label {
     display: flex;
     align-items: center;
     margin-bottom: 10px;
-    width: 99%;
+    /* width: 99%; */
 }
 
 .form-group label {
@@ -203,7 +209,7 @@ button:disabled {
 .open-options-link {
     position: absolute;
     top: 10px;
-    left: 620px; /* Change from left to right */
+    right: 20px;
     background-color: #007bff; /* Blue background */
     color: white; /* White text */
     text-decoration: none; /* Remove underline */
