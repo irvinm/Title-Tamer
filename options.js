@@ -67,6 +67,12 @@ async function restoreOptions() {
                 row.setAttribute('data-index', index);
                 row.innerHTML = `
                     <td>
+                        <button class="edit-button action-button" data-index="${index}">Edit</button>
+                        <button class="save-button action-button" data-index="${index}" style="display:none;">Save</button>
+                        <button class="discard-button action-button" data-index="${index}" style="display:none;">Discard</button>
+                        <button class="delete-button action-button" data-index="${index}">Delete</button>
+                    </td>    
+                    <td>
                         <div>
                             <span class="search-text">${pattern.search}</span>
                             <input class="search-input" type="text" value="${pattern.search}" style="display:none;">
@@ -75,12 +81,6 @@ async function restoreOptions() {
                             <span class="title-text">${pattern.title}</span>
                             <input class="title-input" type="text" value="${pattern.title}" style="display:none;">
                         </div>
-                    </td>
-                    <td>
-                        <button class="edit-button action-button" data-index="${index}">Edit</button>
-                        <button class="save-button action-button" data-index="${index}" style="display:none;">Save</button>
-                        <button class="discard-button action-button" data-index="${index}" style="display:none;">Discard</button>
-                        <button class="delete-button action-button" data-index="${index}">Delete</button>
                     </td>
                 `;
                 patternTableBody.appendChild(row);

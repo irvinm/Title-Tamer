@@ -84,24 +84,24 @@ label {
 }
 
 /* Column widths */
-#pattern-table th:nth-child(1) {
+#pattern-table th:nth-child(2) {
     width: auto; /* Width for Info column */
 }
 
-#pattern-table td:nth-child(1) {
+#pattern-table td:nth-child(2) {
     font-family: 'Consolas', 'Menlo', 'Source Code Pro', 'Fira Code', 'Courier New', Courier, 'Lucida Console', 'Monaco', monospace;
 }
 
-#pattern-table th:nth-child(2) {
+#pattern-table th:nth-child(1) {
     text-align: center; /* Center the buttons horizontally */
 }
 
-#pattern-table td:nth-child(2) {
+#pattern-table td:nth-child(1) {
     text-align: center; /* Center the type values */
     background-color: #f9f9f9; /* Light grey background */
 }
 
-#pattern-table td:nth-child(2) button {
+#pattern-table td:nth-child(1) button {
     display: inline-block; /* Keep buttons side by side */
     margin: 0 2px; /* Add some space between the buttons */
     text-align: center; /* Center align text */
@@ -110,7 +110,7 @@ label {
     border-radius: 5px; /* Rounded corners */
 }
 
-#pattern-table td:nth-child(2) button:hover {
+#pattern-table td:nth-child(1) button:hover {
     background-color: #c82333; /* Darker red on hover */
 }
 
@@ -118,13 +118,13 @@ label {
     background-color: #f1f1f1; /* Slightly darker grey for even rows */
 }
 
-#pattern-table th:nth-child(1),
-#pattern-table td:nth-child(1) {
+#pattern-table th:nth-child(2),
+#pattern-table td:nth-child(2) {
     width: 100%;
 }
 
-#pattern-table th:nth-child(2),
-#pattern-table td:nth-child(2) {
+#pattern-table th:nth-child(1),
+#pattern-table td:nth-child(1) {
     width: 10ch; /* Fixed width for the third column */
 }
 
