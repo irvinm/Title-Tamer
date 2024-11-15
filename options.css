@@ -2,12 +2,14 @@ body {
     min-width: 790px; /* Set the width of the popup */
     font-family: Arial, sans-serif; /* Set the font family for the entire document */
     margin-right: 8px; /* Add some space on the right side */
+    background-color: #f0f2f5; /* Light grey background */
+    color: #333; /* Dark text color */
 }
 
 h1 {
     font-size: 2.5em; /* Increase font size */
     font-weight: bold; /* Make the text bold */
-    color: #333; /* Dark text color */
+    color: #007bff; /* Blue text color */
     text-align: left; /* Center align the text */
     margin-top: 20px; /* Add some space above the title */
     margin-bottom: 20px; /* Add some space below the title */
@@ -18,10 +20,14 @@ h1 {
 label {
     display: inline-block;
     width: 150px; /* Set a fixed width for the labels */
+    color: #555; /* Slightly lighter text color */
 }
 
 #search, #title {
     width: calc(99% - 210px); /* Adjust the width of the input fields to account for the label width and some padding */
+    border: 1px solid #ccc; /* Light grey border */
+    border-radius: 5px; /* Rounded corners */
+    padding: 10px; /* Add padding */
 }
 
 .button-link-container {
@@ -29,6 +35,7 @@ label {
     align-items: center; /* Center align items vertically */
     /* margin-bottom: 10px; */
     text-align: center; /* Center the link */
+    margin-top: 10px; /* Add space above buttons */
 }
 
 #pattern-form {
@@ -40,18 +47,23 @@ label {
     width: 100%; /* Ensure the table takes the full width */
     border-collapse: collapse; /* Ensure borders are collapsed */
     margin-top: 10px; /* Add 20px of space above the table */
+    background-color: #fff; /* White background */
+    border-radius: 10px; /* Rounded corners */
+    overflow: hidden; /* Clip content */
+    box-shadow: 0 0 0 1px black; /* Add a 1px solid black border using box-shadow */
 }
 
 /* Style for the header row */
 #pattern-table thead {
-    background-color: #dadada; /* Light grey background */
+    background-color: #007bff; /* Blue background */
     border-bottom: 2px solid #000; /* Solid bottom border */
+    color: #fff; /* White text */
 }
 
 /* Default font weight for all table cells */
 #pattern-table th, #pattern-table td {
     font-weight: normal; /* Set font weight to normal */
-    border: 2px solid #000; /* Add border to table cells */
+    border: none; /* Remove borders */
     padding: 5px; /* Add padding to table cells */
     height: 2.3em; /* Set the desired height */
 }
@@ -59,6 +71,7 @@ label {
 /* Font weight for the header row */
 #pattern-table th {
     font-weight: bold; /* Make the header text bold */
+    text-transform: uppercase; /* Uppercase text */
 }
 
 /* Style for input fields within the table */
@@ -95,12 +108,24 @@ label {
 
 #pattern-table td:nth-child(3) {
     text-align: center; /* Center the type values */
+    background-color: #f9f9f9; /* Light grey background */
 }
 
 #pattern-table td:nth-child(3) button {
     display: inline-block; /* Keep buttons side by side */
     margin: 0 2px; /* Add some space between the buttons */
     text-align: center; /* Center align text */
+    background-color: #dc3545; /* Red background */
+    color: #fff; /* White text */
+    border-radius: 5px; /* Rounded corners */
+}
+
+#pattern-table td:nth-child(3) button:hover {
+    background-color: #c82333; /* Darker red on hover */
+}
+
+#pattern-table tr:nth-child(even) td {
+    background-color: #f1f1f1; /* Slightly darker grey for even rows */
 }
 
 .header-cell {
@@ -159,11 +184,14 @@ label {
     transition: background-color 0.3s ease; /* Smooth transition for hover effect */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow */
     cursor: pointer; /* Change cursor to pointer */
+    border: none; /* Remove border */
+    font-weight: bold; /* Bold text */
 }
 
 .add-pattern-button:hover,
 .notes-link:hover {
     background-color: #0056b3;
+    transform: translateY(-2px); /* Slight lift on hover */
 }
 
 .add-pattern-button.disabled {
@@ -223,12 +251,16 @@ button:disabled {
     border: 1px solid #ccc;
     padding: 10px;
     width: calc(99% - 22px);
+    background-color: #fff; /* White background */
+    border-radius: 5px; /* Rounded corners */
 }
 
 .toggle-arrow {
     cursor: pointer;
     display: flex;
     align-items: center;
+    color: #007bff; /* Blue text color */
+    width: 99%;
 }
 
 .toggle-arrow.collapsed::before {
@@ -254,6 +286,9 @@ button:disabled {
 
 .monospace-font {
     font-family: 'Consolas', 'Menlo', 'Source Code Pro', 'Fira Code', 'Courier New', Courier, 'Lucida Console', 'Monaco', monospace;
+    border: 1px solid #ccc; /* Light grey border */
+    border-radius: 5px; /* Rounded corners */
+    padding: 10px; /* Add padding */
 }
 
 .action-button {
