@@ -263,7 +263,7 @@ button:disabled {
     margin-top: 10px;
     border: 1px solid #ccc;
     padding: 10px;
-    width: calc(99% - 22px);
+    width: calc(100% - 20px);
     background-color: #fff; /* White background */
     border-radius: 5px; /* Rounded corners */
 }
