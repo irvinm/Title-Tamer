@@ -85,31 +85,23 @@ label {
 
 /* Column widths */
 #pattern-table th:nth-child(1) {
-    text-align: center; /* Center the header text */
-}
-
-#pattern-table td:nth-child(1) {
-    text-align: center; /* Center the type values */
-}
-
-#pattern-table th:nth-child(2) {
     width: auto; /* Width for Info column */
 }
 
-#pattern-table td:nth-child(2) {
+#pattern-table td:nth-child(1) {
     font-family: 'Consolas', 'Menlo', 'Source Code Pro', 'Fira Code', 'Courier New', Courier, 'Lucida Console', 'Monaco', monospace;
 }
 
-#pattern-table th:nth-child(3) {
+#pattern-table th:nth-child(2) {
     text-align: center; /* Center the buttons horizontally */
 }
 
-#pattern-table td:nth-child(3) {
+#pattern-table td:nth-child(2) {
     text-align: center; /* Center the type values */
     background-color: #f9f9f9; /* Light grey background */
 }
 
-#pattern-table td:nth-child(3) button {
+#pattern-table td:nth-child(2) button {
     display: inline-block; /* Keep buttons side by side */
     margin: 0 2px; /* Add some space between the buttons */
     text-align: center; /* Center align text */
@@ -118,7 +110,7 @@ label {
     border-radius: 5px; /* Rounded corners */
 }
 
-#pattern-table td:nth-child(3) button:hover {
+#pattern-table td:nth-child(2) button:hover {
     background-color: #c82333; /* Darker red on hover */
 }
 
@@ -128,16 +120,11 @@ label {
 
 #pattern-table th:nth-child(1),
 #pattern-table td:nth-child(1) {
-    width: 10ch; /* Fixed width for the first column */
+    width: 100%;
 }
 
 #pattern-table th:nth-child(2),
 #pattern-table td:nth-child(2) {
-    width: 100%;
-}
-
-#pattern-table th:nth-child(3),
-#pattern-table td:nth-child(3) {
     width: 10ch; /* Fixed width for the third column */
 }
 
@@ -151,12 +138,6 @@ label {
 
 .normal-text {
     font-weight: normal;
-}
-
-#match-type {
-    padding: 5px;
-    font-size: 14px;
-    width: max-content;
 }
 
 .form-group {

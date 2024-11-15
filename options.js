@@ -5,11 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault(); // Prevent the form from submitting
         savePattern(event).catch(console.error);
     });
-    document.getElementById('match-type').addEventListener('change', function() {
-        var matchType = this.value;
-        // Handle the selection change
-        console.log('Selected match type:', matchType);
-    });
     document.getElementById('notes-button').addEventListener('click', openNotes);
 
     const toggleButton = document.getElementById('toggle-options');
@@ -35,12 +30,11 @@ async function savePattern(event) {
     console.log('savePattern');
     const search = document.getElementById('search').value; // Updated ID
     const title = document.getElementById('title').value;
-    const type = document.getElementById('match-type').value; // Collect the dropdown value
 
     try {
         const result = await browser.storage.local.get('patterns');
         const patterns = result.patterns || [];
-        patterns.push({ search, title, type }); // Include the dropdown value
+        patterns.push({ search, title }); // Include the dropdown value
         await browser.storage.local.set({ patterns });
         await restoreOptions(); // Load and display all existing search-title-type pairs
 
@@ -48,7 +42,7 @@ async function savePattern(event) {
         document.getElementById('pattern-form').reset();
 
         // Send a message to the background script with the new search/title/type pair
-        browser.runtime.sendMessage({ action: 'newPattern', pattern: { search, title, type } });
+        browser.runtime.sendMessage({ action: 'newPattern', pattern: { search, title } });
     } catch (error) {
         console.error('Error saving pattern:', error);
     }
@@ -72,14 +66,6 @@ async function restoreOptions() {
                 const row = document.createElement('tr');
                 row.setAttribute('data-index', index);
                 row.innerHTML = `
-                    <td>
-                        <span class="type-text">${pattern.type}</span>
-                        <select class="type-select" style="display:none;">
-                            <option value="Exact" ${pattern.type === 'Exact' ? 'selected' : ''}>Exact</option>
-                            <option value="Contains" ${pattern.type === 'Contains' ? 'selected' : ''}>Contains</option>
-                            <option value="Regx" ${pattern.type === 'RegEx' ? 'selected' : ''}>RegEx</option>
-                        </select>
-                    </td>
                     <td>
                         <div>
                             <span class="search-text">${pattern.search}</span>
@@ -179,8 +165,6 @@ function toggleEditRow(index, isEditing) {
     const searchInput = row.querySelector('.search-input');
     const titleText = row.querySelector('.title-text');
     const titleInput = row.querySelector('.title-input');
-    const typeText = row.querySelector('.type-text');
-    const typeSelect = row.querySelector('.type-select');
     const searchCell = searchInput.closest('td'); // Select the cell containing searchInput
     const titleCell = titleInput.closest('td'); // Select the cell containing titleInput
     const editButton = row.querySelector('.edit-button');
@@ -198,9 +182,6 @@ function toggleEditRow(index, isEditing) {
         titleInput.style.display = 'inline';
         titleInput.style.height = '1.5em'; // Set the height of the input
         titleCell.classList.add('no-margin'); // Add no-margin class to the title cell
-        typeText.style.display = 'none';
-        typeSelect.style.display = 'inline';
-        typeSelect.classList.add('narrow'); // Add narrow class to typeSelect
         editButton.style.display = 'none';
         saveButton.style.display = 'inline';
         discardButton.style.display = 'inline';
@@ -213,9 +194,6 @@ function toggleEditRow(index, isEditing) {
         titleText.style.display = 'inline';
         titleInput.style.display = 'none';
         titleCell.classList.remove('no-margin'); // Remove no-margin class from the title cell
-        typeText.style.display = 'inline';
-        typeSelect.style.display = 'none';
-        typeSelect.classList.remove('narrow'); // Remove narrow class from typeSelect
         editButton.style.display = 'inline';
         saveButton.style.display = 'none';
         discardButton.style.display = 'none';
@@ -232,12 +210,11 @@ async function saveRow(index) {
     }
     const searchInput = row.querySelector('.search-input').value;
     const titleInput = row.querySelector('.title-input').value;
-    const typeSelect = row.querySelector('.type-select').value;
 
     try {
         const result = await browser.storage.local.get('patterns');
         const patterns = result.patterns || [];
-        patterns[index] = { search: searchInput, title: titleInput, type: typeSelect };
+        patterns[index] = { search: searchInput, title: titleInput };
         await browser.storage.local.set({ patterns });
         await restoreOptions(); // Refresh the list after saving
 
