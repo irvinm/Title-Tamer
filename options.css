@@ -64,8 +64,9 @@ label {
 #pattern-table th, #pattern-table td {
     font-weight: normal; /* Set font weight to normal */
     border: none; /* Remove borders */
-    padding: 5px; /* Add padding to table cells */
-    height: 2.3em; /* Set the desired height */
+    padding: 3px; /* Add padding to table cells */
+    height: 3.25em; /* Set the desired height */
+    box-sizing: border-box; /* Include padding in height calculation */
 }
 
 /* Font weight for the header row */
