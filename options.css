@@ -85,7 +85,6 @@ label {
 
 /* Column widths */
 #pattern-table th:nth-child(1) {
-    width: 10ch; /* Width for Type column */
     text-align: center; /* Center the header text */
 }
 
@@ -102,7 +101,6 @@ label {
 }
 
 #pattern-table th:nth-child(3) {
-    width: 10ch; /* Width for Action column */
     text-align: center; /* Center the buttons horizontally */
 }
 
@@ -126,6 +124,21 @@ label {
 
 #pattern-table tr:nth-child(even) td {
     background-color: #f1f1f1; /* Slightly darker grey for even rows */
+}
+
+#pattern-table th:nth-child(1),
+#pattern-table td:nth-child(1) {
+    width: 10ch; /* Fixed width for the first column */
+}
+
+#pattern-table th:nth-child(2),
+#pattern-table td:nth-child(2) {
+    width: 100%;
+}
+
+#pattern-table th:nth-child(3),
+#pattern-table td:nth-child(3) {
+    width: 10ch; /* Fixed width for the third column */
 }
 
 .header-cell {
