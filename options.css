@@ -256,16 +256,18 @@ button:disabled {
     align-items: center;
     color: #007bff; /* Blue text color */
     width: 99%;
+    height:
 }
 
 .toggle-arrow.collapsed::before {
     content: '\25B6'; /* Right-pointing arrow */
-    margin-right: 5px;
+    width: 20px;
+    margin-bottom: 3px;
 }
 
 .toggle-arrow.expanded::before {
     content: '\25BC'; /* Down-pointing arrow */
-    margin-right: 5px;
+    width: 20px;
 }
 
 .toggle-arrow {
@@ -273,6 +275,7 @@ button:disabled {
     display: flex;
     align-items: center;
     width: 99%;
+    height: 20px;
 }
 
 #toggle-options {
