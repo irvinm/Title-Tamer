@@ -11,6 +11,7 @@ async function updateTabTitle(tabId, changeInfo, tab, pattern) {
             console.log('Checking pattern for all tabs');
             const tabs = await browser.tabs.query({});
             const regex = new RegExp(pattern.search);
+            const { loadDiscardedTabs } = await browser.storage.local.get('loadDiscardedTabs'); // Retrieve the value from storage
             for (const tab of tabs) {
                 const matches = tab.url.match(regex);
                 if (matches) {
@@ -19,15 +20,24 @@ async function updateTabTitle(tabId, changeInfo, tab, pattern) {
                         return matches[number] || match;
                     });
                     let wasDiscarded = false;
-                    if (tab.discarded) {    /* If discarded, process single tab after transition */
-                        wasDiscarded = true;
-                        browser.tabs.update(tab.id, { active: true });
-                    }
-                    else {  /* Not discarded, just change title now */
+                    if (tab.discarded) {
+                        if (loadDiscardedTabs) {    /* If discarded and loadDiscardedTabs is true, load the tab then update the title */
+                            wasDiscarded = true;
+                            browser.tabs.update(tab.id, { active: true });
+                        } else {    /* If discarded and loadDiscardedTabs is false, do nothing */
+                            console.log('Tab is discarded and loadDiscardedTabs is false, skipping update.');
+                        }
+                    } else {    /* If not discarded, update the tab to make it active and update the title */
+                        //await browser.tabs.update(tab.id, { active: true });
                         browser.tabs.executeScript(tab.id, {
                             code: `document.title = "${newTitle}";`
                         });
                     }
+                    /*
+                    if (wasDiscarded) {
+                        browser.tabs.discard(tab.id);
+                    }
+                    */
                 }
             }
         } catch (e) {
@@ -51,15 +61,29 @@ async function updateTabTitle(tabId, changeInfo, tab, pattern) {
                         });
                         let wasDiscarded = false;
                         if (tab.discarded) {
-                            wasDiscarded = true;
-                            await browser.tabs.update(tabId, { active: true });
+                            if (loadDiscardedTabs) {    /* If discarded and loadDiscardedTabs is true, load the tab then update the title */
+                                wasDiscarded = true;
+                                browser.tabs.update(tabId, { active: true });
+                                /*
+                                await browser.tabs.executeScript(tabId, {
+                                    code: `document.title = "${newTitle}";`
+                                });
+                                */
+                            } else {    /* If discarded and loadDiscardedTabs is false, do nothing */
+                                console.log('Tab is discarded and loadDiscardedTabs is false, skipping update.');
+                            }
+                        } else {    /* If not discarded, update the tab to make it active and update the title */
+                            //await browser.tabs.update(tabId, { active: true });
+                            await browser.tabs.executeScript(tabId, {
+                                code: `document.title = "${newTitle}";`
+                            });
                         }
-                        await browser.tabs.executeScript(tabId, {
-                            code: `document.title = "${newTitle}";`
-                        });
+                        /* Can't discard this tab while active */
+                        /*
                         if (wasDiscarded) {
                             await browser.tabs.discard(tabId);
                         }
+                        */
                         break;
                     }
                 } catch (e) {

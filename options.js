@@ -1,10 +1,12 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     console.log('DOMContentLoaded');
-    restoreOptions().catch(console.error);
+    await restoreOptions().catch(console.error);
+
     document.getElementById('pattern-form').addEventListener('submit', (event) => {
         event.preventDefault(); // Prevent the form from submitting
         savePattern(event).catch(console.error);
     });
+
     document.getElementById('notes-button').addEventListener('click', openNotes);
 
     const toggleButton = document.getElementById('toggle-options');
@@ -24,6 +26,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize the arrow direction
     toggleButton.classList.add('collapsed');
+
+    // Load the loadDiscardedTabs value from storage and set the checkbox state
+    const { loadDiscardedTabs = false } = await browser.storage.local.get('loadDiscardedTabs');
+    document.getElementById('load-discarded-tabs').checked = loadDiscardedTabs;
+
+    document.getElementById('load-discarded-tabs').addEventListener('change', function() {
+        const loadDiscardedTabs = this.checked;
+        browser.storage.local.set({ loadDiscardedTabs });
+    });
 });
 
 async function savePattern(event) {
