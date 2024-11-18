@@ -256,7 +256,7 @@ button:disabled {
     align-items: center;
     color: #007bff; /* Blue text color */
     width: 99%;
-    height:
+    height: 20px;
 }
 
 .toggle-arrow.collapsed::before {
