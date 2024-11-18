@@ -17,10 +17,29 @@ h1 {
     font-family: 'Arial', sans-serif; /* Use a clean, sans-serif font */
 }
 
+/*
 label {
     display: inline-block;
-    width: 150px; /* Set a fixed width for the labels */
+    width: 150px; 
+    color: #555; 
+}
+*/
+
+.fixed-width-label {
+    width: 150px;
+    display: inline-block; /* Ensure the width is applied */
     color: #555; /* Slightly lighter text color */
+}
+
+.nested-options {
+    margin-left: 20px; /* Indent the nested options */
+    margin-top: 3px;
+}
+
+.inline-input {
+    width: 40px; /* Set a fixed width for the input */
+    display: inline-block; /* Ensure the input stays on the same line */
+    border-radius: 3px; /* Rounded corners */
 }
 
 #search, #title {
@@ -259,16 +278,26 @@ button:disabled {
     height: 20px;
 }
 
+/*
 .toggle-arrow.collapsed::before {
-    content: '\25B6'; /* Right-pointing arrow */
-    width: 20px;
-    margin-bottom: 3px;
+	content: '\25B6';
+	width: 20px;
+	margin-bottom: 3px;
+	align-content: center !important;
+	justify-content: center;
+	display: flex;
 }
 
 .toggle-arrow.expanded::before {
-    content: '\25BC'; /* Down-pointing arrow */
-    width: 20px;
+	content: '\25BC';
+	width: 20px;
+	align-content: center;
+	justify-content: center;
+	display: flex;
+	margin-right: 3px;
+	height: 20px;
 }
+*/
 
 .toggle-arrow {
     cursor: pointer;
@@ -291,4 +320,23 @@ button:disabled {
 
 .action-button {
     width: 60px; /* Set a fixed width */
+}
+
+.toggle-arrow::before {
+    content: '\25B6'; /* Right-pointing arrow */
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: rotate(0deg); /* Default rotation */
+}
+
+.toggle-arrow.collapsed::before {
+    transform: rotate(0deg); /* Right-pointing arrow */
+    margin-bottom: 2px;
+}
+
+.toggle-arrow.expanded::before {
+    transform: rotate(90deg); /* Down-pointing arrow */
 }

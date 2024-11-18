@@ -12,11 +12,11 @@
     <h1>Title Tamer Options</h1>
     <form id="pattern-form">
         <div class="form-group">
-            <label for="search">Search term:</label>
+            <label for="search" class="fixed-width-label">Search term:</label>
             <input type="text" id="search" class="monospace-font" placeholder="Enter Search" required>
         </div>
         <div class="form-group">
-            <label for="title">Title to use if found:</label>
+            <label for="title" class="fixed-width-label">Title to use if found:</label>
             <input type="text" id="title" class="monospace-font" placeholder="Enter Title" required>
         </div>
         <div class="form-group">
@@ -30,16 +30,20 @@
         </div>
         <div id="toggle-options" class="toggle-arrow">Additional Options</div>
         <div id="additional-options" class="collapsible-content">
-            <!-- Additional options content goes here -->
-            <p>Option 1</p>
-            <p>Option 2</p>
             <!-- Additional Options Section -->
-            <div id="additional-options">
-                <!-- Other options -->
+            <div class="form-group2">
                 <label>
                     <input type="checkbox" id="load-discarded-tabs" />
                     Load discarded tabs after rule is added or updated
                 </label>
+                <div class="nested-options" id="re-discard-options" style="display: none;">
+                    <label>
+                        <input type="checkbox" id="re-discard-tabs" />
+                        Discard these tabs after
+                        <input type="number" id="discard-delay" class="inline-input" placeholder="Enter seconds" min="0" />
+                    </label>
+                    <label>seconds</label>
+                </div>
             </div>
         </div>
         <table id="pattern-table">

@@ -4,14 +4,19 @@
 async function updateTabTitle(tabId, changeInfo, tab, pattern) {
 
     console.log('Entering updateTabTitle -> tabId:', tabId, 'changeInfo:', changeInfo, 'tab:', tab, 'Pattern:', pattern);
-    
+
     // If pattern is provided, check only against that pattern for all tabs (new or updated pattern)
     if (pattern) {
         try {
             console.log('Checking pattern for all tabs');
             const tabs = await browser.tabs.query({});
             const regex = new RegExp(pattern.search);
-            const { loadDiscardedTabs } = await browser.storage.local.get('loadDiscardedTabs'); // Retrieve the value from storage
+            const { loadDiscardedTabs = false, reDiscardTabs = false, discardDelay = 0 } = await browser.storage.local.get(['loadDiscardedTabs', 'reDiscardTabs', 'discardDelay']); // Retrieve the values from storage
+
+            // Track the currently active tab
+            const activeTab = (await browser.tabs.query({ active: true, currentWindow: true }))[0];
+            const wokenUpTabs = [];
+
             for (const tab of tabs) {
                 const matches = tab.url.match(regex);
                 if (matches) {
@@ -23,23 +28,49 @@ async function updateTabTitle(tabId, changeInfo, tab, pattern) {
                     if (tab.discarded) {
                         if (loadDiscardedTabs) {    /* If discarded and loadDiscardedTabs is true, load the tab then update the title */
                             wasDiscarded = true;
-                            browser.tabs.update(tab.id, { active: true });
+                            console.log('Tab is discarded and loadDiscardedTabs is true, waking tab up.');
+                            await browser.tabs.update(tab.id, { active: true });
+                            wokenUpTabs.push(tab.id);
                         } else {    /* If discarded and loadDiscardedTabs is false, do nothing */
                             console.log('Tab is discarded and loadDiscardedTabs is false, skipping update.');
                         }
                     } else {    /* If not discarded, update the tab to make it active and update the title */
-                        //await browser.tabs.update(tab.id, { active: true });
-                        browser.tabs.executeScript(tab.id, {
+                        console.log('Tab is not discarded, updating title: ', newTitle);
+                        await browser.tabs.executeScript(tab.id, {
                             code: `document.title = "${newTitle}";`
                         });
                     }
-                    /*
-                    if (wasDiscarded) {
-                        browser.tabs.discard(tab.id);
-                    }
-                    */
                 }
             }
+
+            // Set the active tab back to the original active tab
+            await browser.tabs.update(activeTab.id, { active: true });
+
+            if (wokenUpTabs.length > 0) {
+                await Promise.all(wokenUpTabs.map(tabId => new Promise((resolve) => {
+                    const listener = (updatedTabId, changeInfo) => {
+                        if (updatedTabId === tabId && changeInfo.status === 'complete') {
+                            browser.tabs.onUpdated.removeListener(listener);
+                            resolve();
+                        }
+                    };
+                    browser.tabs.onUpdated.addListener(listener);
+                })));
+
+                // Add a delay after all tabs have finished loading based on discardDelay value
+                await new Promise(resolve => setTimeout(resolve, discardDelay * 1000));
+            }
+
+            // Set the active tab back to the original active tab
+            // await browser.tabs.update(activeTab.id, { active: true });
+
+            // Discard all the tabs that were woken up if reDiscardTabs is true
+            if (reDiscardTabs) {
+                for (const tabId of wokenUpTabs) {
+                    await browser.tabs.discard(tabId);
+                }
+            }
+
         } catch (e) {
             console.error(`Invalid regex pattern: ${pattern.regex}`, e);
         }
@@ -60,38 +91,25 @@ async function updateTabTitle(tabId, changeInfo, tab, pattern) {
                             return matches[number] || match;
                         });
                         let wasDiscarded = false;
-                        if (tab.discarded) {
-                            if (loadDiscardedTabs) {    /* If discarded and loadDiscardedTabs is true, load the tab then update the title */
-                                wasDiscarded = true;
-                                browser.tabs.update(tabId, { active: true });
-                                /*
-                                await browser.tabs.executeScript(tabId, {
-                                    code: `document.title = "${newTitle}";`
-                                });
-                                */
-                            } else {    /* If discarded and loadDiscardedTabs is false, do nothing */
-                                console.log('Tab is discarded and loadDiscardedTabs is false, skipping update.');
-                            }
-                        } else {    /* If not discarded, update the tab to make it active and update the title */
-                            //await browser.tabs.update(tabId, { active: true });
-                            await browser.tabs.executeScript(tabId, {
+                        if (tab.discarded && loadDiscardedTabs) {    /* If discarded, process single tab after transition */
+                            wasDiscarded = true;
+                            await browser.tabs.update(tab.id, { active: true });
+                        } else {  /* Not discarded, just change title now */
+                            await browser.tabs.executeScript(tab.id, {
                                 code: `document.title = "${newTitle}";`
                             });
                         }
-                        /* Can't discard this tab while active */
-                        /*
                         if (wasDiscarded) {
-                            await browser.tabs.discard(tabId);
+                            await browser.tabs.discard(tab.id);
                         }
-                        */
-                        break;
+                        break; // Exit the loop once a match is found
                     }
                 } catch (e) {
                     console.error(`Invalid regex pattern: ${pattern.regex}`, e);
                 }
             }
-        } catch (error) {
-            console.error('Error accessing storage:', error);
+        } catch (e) {
+            console.error('Error retrieving patterns:', e);
         }
     }
 

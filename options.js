@@ -28,12 +28,43 @@ document.addEventListener('DOMContentLoaded', async () => {
     toggleButton.classList.add('collapsed');
 
     // Load the loadDiscardedTabs value from storage and set the checkbox state
-    const { loadDiscardedTabs = false } = await browser.storage.local.get('loadDiscardedTabs');
+    // const { loadDiscardedTabs = true, reDiscardTabs = true, discardDelay = 1 } = await browser.storage.local.get(['loadDiscardedTabs', 'reDiscardTabs', 'discardDelay']);
+    const { loadDiscardedTabs, reDiscardTabs, discardDelay } = await browser.storage.local.get(['loadDiscardedTabs', 'reDiscardTabs', 'discardDelay']);
+
+    // Write default values to storage if they are used
+    /*
+    if (loadDiscardedTabs === true) {
+        browser.storage.local.set({ loadDiscardedTabs });
+    }
+    if (reDiscardTabs === true) {
+        browser.storage.local.set({ reDiscardTabs });
+    }
+    if (discardDelay === 1) {
+        browser.storage.local.set({ discardDelay });
+    }
+    */
+
     document.getElementById('load-discarded-tabs').checked = loadDiscardedTabs;
+    document.getElementById('re-discard-tabs').checked = reDiscardTabs;
+    document.getElementById('discard-delay').value = discardDelay;
+
+    // Show or hide re-discard options based on loadDiscardedTabs state
+    document.getElementById('re-discard-options').style.display = loadDiscardedTabs ? 'block' : 'none';
 
     document.getElementById('load-discarded-tabs').addEventListener('change', function() {
         const loadDiscardedTabs = this.checked;
         browser.storage.local.set({ loadDiscardedTabs });
+        document.getElementById('re-discard-options').style.display = loadDiscardedTabs ? 'block' : 'none';
+    });
+
+    document.getElementById('re-discard-tabs').addEventListener('change', function() {
+        const reDiscardTabs = this.checked;
+        browser.storage.local.set({ reDiscardTabs });
+    });
+
+    document.getElementById('discard-delay').addEventListener('input', function() {
+        const discardDelay = parseInt(this.value, 10) || 1;
+        browser.storage.local.set({ discardDelay });
     });
 });
 
@@ -50,9 +81,10 @@ async function savePattern(event) {
         await restoreOptions(); // Load and display all existing search-title-type pairs
 
         // Clear the input fields
-        document.getElementById('pattern-form').reset();
+        document.getElementById('search').value = '';
+        document.getElementById('title').value = '';
 
-        // Send a message to the background script with the new search/title/type pair
+        // Send a message to the background script to update the tabs
         browser.runtime.sendMessage({ action: 'newPattern', pattern: { search, title } });
     } catch (error) {
         console.error('Error saving pattern:', error);
@@ -62,6 +94,22 @@ async function savePattern(event) {
 async function restoreOptions() {
     console.log('restoreOptions');
     try {
+        // Check if the loadDiscardedTabs, reDiscardTabs, and discardDelay values are stored
+        let { loadDiscardedTabs, reDiscardTabs, discardDelay } = await browser.storage.local.get(['loadDiscardedTabs', 'reDiscardTabs', 'discardDelay']);
+        
+        if (loadDiscardedTabs === undefined) {
+            loadDiscardedTabs = true;
+            browser.storage.local.set({ loadDiscardedTabs });
+        }
+        if (reDiscardTabs === undefined) {
+            reDiscardTabs = true;
+            browser.storage.local.set({ reDiscardTabs });
+        }
+        if (discardDelay === undefined) {
+            discardDelay = 1;
+            browser.storage.local.set({ discardDelay });
+        }
+        
         const result = await browser.storage.local.get('patterns');
         const patterns = result.patterns || [];
         const patternTableBody = document.getElementById('pattern-table').getElementsByTagName('tbody')[0];
