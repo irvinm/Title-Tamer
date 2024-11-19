@@ -66,6 +66,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         const discardDelay = parseInt(this.value, 10) || 1;
         browser.storage.local.set({ discardDelay });
     });
+
+    const table = document.getElementById('pattern-table');
+    table.addEventListener('click', (event) => {
+        event.preventDefault();
+        if (event.target.classList.contains('move-up-button')) {
+            moveRow(event.target.closest('tr'), 'up');
+        } else if (event.target.classList.contains('move-down-button')) {
+            moveRow(event.target.closest('tr'), 'down');
+        }
+    });
 });
 
 async function savePattern(event) {
@@ -140,6 +150,10 @@ async function restoreOptions() {
                             <span class="title-text">${pattern.title}</span>
                             <input class="title-input" type="text" value="${pattern.title}" style="display:none;">
                         </div>
+                    </td>
+                    <td>
+                        <button class="move-up-button move-button">Up</button>
+                        <button class="move-down-button move-button">Down</button>
                     </td>
                 `;
                 patternTableBody.appendChild(row);
@@ -353,4 +367,27 @@ async function updateTabTitle(tabId, changeInfo, tab) {
 function openNotes() {
     console.log('openNotes');
     window.open('note.html', '_blank');
+}
+
+async function moveRow(row, direction) {
+    const index = parseInt(row.getAttribute('data-index'), 10);
+    const result = await browser.storage.local.get('patterns');
+    const patterns = result.patterns || [];
+
+    if (direction === 'up' && index > 0) {
+        // Swap patterns in the array
+        [patterns[index - 1], patterns[index]] = [patterns[index], patterns[index - 1]];
+    } else if (direction === 'down' && index < patterns.length - 1) {
+        // Swap patterns in the array
+        [patterns[index + 1], patterns[index]] = [patterns[index], patterns[index + 1]];
+    }
+
+    // Store the updated patterns array
+    await browser.storage.local.set({ patterns });
+
+    // Refresh the UI
+    await restoreOptions();
+
+    // Send a message to background.js to rerun the patterns
+    browser.runtime.sendMessage({ action: 'rerunPatterns' });
 }

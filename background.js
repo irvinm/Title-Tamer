@@ -4,14 +4,14 @@
 async function updateTabTitle(tabId, changeInfo, tab, pattern) {
 
     console.log('Entering updateTabTitle -> tabId:', tabId, 'changeInfo:', changeInfo, 'tab:', tab, 'Pattern:', pattern);
-
+    
     // If pattern is provided, check only against that pattern for all tabs (new or updated pattern)
     if (pattern) {
         try {
             console.log('Checking pattern for all tabs');
+            const { loadDiscardedTabs = false, reDiscardTabs = false, discardDelay = 0 } = await browser.storage.local.get(['loadDiscardedTabs', 'reDiscardTabs', 'discardDelay']); // Retrieve the values from storage
             const tabs = await browser.tabs.query({});
             const regex = new RegExp(pattern.search);
-            const { loadDiscardedTabs = false, reDiscardTabs = false, discardDelay = 0 } = await browser.storage.local.get(['loadDiscardedTabs', 'reDiscardTabs', 'discardDelay']); // Retrieve the values from storage
 
             // Track the currently active tab
             const activeTab = (await browser.tabs.query({ active: true, currentWindow: true }))[0];
@@ -29,13 +29,14 @@ async function updateTabTitle(tabId, changeInfo, tab, pattern) {
                         if (loadDiscardedTabs) {    /* If discarded and loadDiscardedTabs is true, load the tab then update the title */
                             wasDiscarded = true;
                             console.log('Tab is discarded and loadDiscardedTabs is true, waking tab up.');
-                            await browser.tabs.update(tab.id, { active: true });
+                            browser.tabs.update(tab.id, { active: true });
                             wokenUpTabs.push(tab.id);
+
                         } else {    /* If discarded and loadDiscardedTabs is false, do nothing */
-                            console.log('Tab is discarded and loadDiscardedTabs is false, skipping update.');
+                            console.log('Tab is discarded but loadDiscardedTabs is false, skipping update.');
                         }
-                    } else {    /* If not discarded, update the tab to make it active and update the title */
-                        console.log('Tab is not discarded, updating title: ', newTitle);
+                    } else {  /* Not discarded, just change title now */
+                        console.log('Tab is not discarded, updating title: ', newTitle);  /* Tab should be awake now, update the title */
                         await browser.tabs.executeScript(tab.id, {
                             code: `document.title = "${newTitle}";`
                         });
@@ -56,6 +57,13 @@ async function updateTabTitle(tabId, changeInfo, tab, pattern) {
                     };
                     browser.tabs.onUpdated.addListener(listener);
                 })));
+              
+                // Update the titles of all woken-up tabs
+                for (const { tabId, newTitle } of wokenUpTabs) {
+                    await browser.tabs.executeScript(tabId, {
+                        code: `document.title = "${newTitle}";`
+                    });
+                }
 
                 // Add a delay after all tabs have finished loading based on discardDelay value
                 await new Promise(resolve => setTimeout(resolve, discardDelay * 1000));
@@ -78,8 +86,10 @@ async function updateTabTitle(tabId, changeInfo, tab, pattern) {
         // Check all patterns just for the single tab (new or updated tab)
         console.log('Checking all patterns for single tab: changeInfo ->', changeInfo);
         try {
+            const { loadDiscardedTabs = false, reDiscardTabs = false, discardDelay = 0 } = await browser.storage.local.get(['loadDiscardedTabs', 'reDiscardTabs', 'discardDelay']); // Retrieve the values from storage
             const result = await browser.storage.local.get('patterns');
             const patterns = result.patterns || [];
+            
             for (const pattern of patterns) {
                 console.log('tabId', tabId, 'Pattern:', pattern);
                 try {
@@ -99,9 +109,11 @@ async function updateTabTitle(tabId, changeInfo, tab, pattern) {
                                 code: `document.title = "${newTitle}";`
                             });
                         }
+                        /*
                         if (wasDiscarded) {
                             await browser.tabs.discard(tab.id);
                         }
+                        */
                         break; // Exit the loop once a match is found
                     }
                 } catch (e) {
@@ -202,6 +214,25 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 browser.runtime.onMessage.addListener(async (message) => {
     if (message.action === 'newPattern') {
         console.log('Received new pattern message:', message.pattern);
-        await updateTabTitle(null, null, null, message.pattern);
+        updateTabTitle(null, null, null, message.pattern);
     }
 });
+
+browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === 'rerunPatterns') {
+        rerunPatterns();
+    }
+});
+
+async function rerunPatterns() {
+    const result = await browser.storage.local.get('patterns');
+    const patterns = result.patterns || [];
+    // Logic to rerun the patterns
+    console.log('Rerunning patterns:', patterns);
+    
+    // Implement your pattern matching logic here
+    const tabs = await browser.tabs.query({});
+    for (const tab of tabs) {
+        updateTabTitle(tab.id, undefined, tab, undefined);
+    }
+}

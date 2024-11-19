@@ -104,21 +104,22 @@ label {
 }
 
 /* Column widths */
-#pattern-table th:nth-child(2) {
-    width: auto; /* Width for Info column */
-}
-
-#pattern-table td:nth-child(2) {
-    font-family: 'Consolas', 'Menlo', 'Source Code Pro', 'Fira Code', 'Courier New', Courier, 'Lucida Console', 'Monaco', monospace;
-}
-
 #pattern-table th:nth-child(1) {
+    text-align: center; /* Center the buttons horizontally */
+}
+
+#pattern-table th:nth-child(3) {
     text-align: center; /* Center the buttons horizontally */
 }
 
 #pattern-table td:nth-child(1) {
     text-align: center; /* Center the type values */
-    background-color: #f9f9f9; /* Light grey background */
+    /* background-color: #f9f9f9; Light grey background */
+}
+
+#pattern-table td:nth-child(3) {
+    text-align: center; /* Center the type values */
+    /* background-color: #f9f9f9; Light grey background */
 }
 
 #pattern-table td:nth-child(1) button {
@@ -138,6 +139,27 @@ label {
     background-color: #f1f1f1; /* Slightly darker grey for even rows */
 }
 
+#pattern-table th:nth-child(2) {
+    width: auto; /* Width for Info column */
+}
+
+#pattern-table th:nth-child(3) {
+    width: 10%; /* Width for move buttons column */
+}
+
+#pattern-table td:nth-child(3) button {
+    display: inline-block; /* Keep buttons side by side */
+    margin: 0 2px; /* Add some space between the buttons */
+    text-align: center; /* Center align text */
+    background-color: #dc3545; /* Red background */
+    color: #fff; /* White text */
+    border-radius: 5px; /* Rounded corners */
+}
+
+#pattern-table td:nth-child(2) {
+    font-family: 'Consolas', 'Menlo', 'Source Code Pro', 'Fira Code', 'Courier New', Courier, 'Lucida Console', 'Monaco', monospace;
+}
+
 #pattern-table th:nth-child(2),
 #pattern-table td:nth-child(2) {
     width: 100%;
@@ -145,6 +167,11 @@ label {
 
 #pattern-table th:nth-child(1),
 #pattern-table td:nth-child(1) {
+    width: 10ch; /* Fixed width for the first column */
+}
+
+#pattern-table th:nth-child(3),
+#pattern-table td:nth-child(3) {
     width: 10ch; /* Fixed width for the third column */
 }
 
@@ -318,7 +345,8 @@ button:disabled {
     padding: 10px; /* Add padding */
 }
 
-.action-button {
+.action-button,
+.move-button {
     width: 60px; /* Set a fixed width */
 }
 
