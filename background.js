@@ -5,26 +5,29 @@ async function updateTabTitle(tabId, changeInfo, tab, pattern) {
 
     console.log('Entering updateTabTitle -> tabId:', tabId, 'changeInfo:', changeInfo, 'tab:', tab, 'Pattern:', pattern);
     
+    var wasDiscarded = false;
+
     // If pattern is provided, check only against that pattern for all tabs (new or updated pattern)
     if (pattern) {
         try {
             console.log('Checking pattern for all tabs');
+
             const { loadDiscardedTabs = false, reDiscardTabs = false, discardDelay = 0 } = await browser.storage.local.get(['loadDiscardedTabs', 'reDiscardTabs', 'discardDelay']); // Retrieve the values from storage
             const tabs = await browser.tabs.query({});
             const regex = new RegExp(pattern.search);
-
-            // Track the currently active tab
-            const activeTab = (await browser.tabs.query({ active: true, currentWindow: true }))[0];
+            const activeTab = (await browser.tabs.query({ active: true, currentWindow: true }))[0];  // Track the currently active tab
             const wokenUpTabs = [];
 
             for (const tab of tabs) {
                 const matches = tab.url.match(regex);
+                wasDiscarded = false;
+
                 if (matches) {
                     console.log('tab.id', tab.id, 'Matches:', matches);
                     const newTitle = pattern.title.replace(/\$(\d+)/g, (match, number) => {
                         return matches[number] || match;
                     });
-                    let wasDiscarded = false;
+
                     if (tab.discarded) {
                         if (loadDiscardedTabs) {    /* If discarded and loadDiscardedTabs is true, load the tab then update the title */
                             wasDiscarded = true;
@@ -90,6 +93,8 @@ async function updateTabTitle(tabId, changeInfo, tab, pattern) {
             const result = await browser.storage.local.get('patterns');
             const patterns = result.patterns || [];
             
+            wasDiscarded = false;  // Initialize wasDiscarded to false
+
             for (const pattern of patterns) {
                 console.log('tabId', tabId, 'Pattern:', pattern);
                 try {
@@ -100,7 +105,7 @@ async function updateTabTitle(tabId, changeInfo, tab, pattern) {
                         const newTitle = pattern.title.replace(/\$(\d+)/g, (match, number) => {
                             return matches[number] || match;
                         });
-                        let wasDiscarded = false;
+
                         if (tab.discarded && loadDiscardedTabs) {    /* If discarded, process single tab after transition */
                             wasDiscarded = true;
                             await browser.tabs.update(tab.id, { active: true });
@@ -125,6 +130,8 @@ async function updateTabTitle(tabId, changeInfo, tab, pattern) {
         }
     }
 
+    console.log('Exiting updateTabTitle -> wasDiscarded:', wasDiscarded);
+    return wasDiscarded;
     // Old working code
     /*
     if (changeInfo.title || changeInfo.url) {
@@ -225,14 +232,55 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 async function rerunPatterns() {
-    const result = await browser.storage.local.get('patterns');
-    const patterns = result.patterns || [];
-    // Logic to rerun the patterns
-    console.log('Rerunning patterns:', patterns);
-    
-    // Implement your pattern matching logic here
-    const tabs = await browser.tabs.query({});
-    for (const tab of tabs) {
-        updateTabTitle(tab.id, undefined, tab, undefined);
+    try {
+        const result = await browser.storage.local.get('patterns');
+        const discardDelay = await browser.storage.local.get('discardDelay');
+        const patterns = result.patterns || [];
+        console.log('Rerunning patterns:', patterns);
+
+        // Track the currently active tab
+        const activeTab = (await browser.tabs.query({ active: true, currentWindow: true }))[0];
+        const previouslyDiscardedTabs = [];
+
+        const tabs = await browser.tabs.query({});
+        for (const tab of tabs) {
+            const wasDiscarded = await updateTabTitle(tab.id, undefined, tab, undefined);
+            if (wasDiscarded) {
+                previouslyDiscardedTabs.push(tab.id);
+            }
+        }
+
+        if (previouslyDiscardedTabs.length > 0) {
+            await Promise.all(previouslyDiscardedTabs.map(tabId => new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                    browser.tabs.onUpdated.removeListener(listener);
+                    reject(new Error(`Timeout waiting for tab ${tabId} to load`));
+                }, 10000); // 10 seconds timeout
+
+                const listener = (updatedTabId, changeInfo) => {
+                    if (updatedTabId === tabId && changeInfo.status === 'complete') {
+                        clearTimeout(timeout);
+                        browser.tabs.onUpdated.removeListener(listener);
+                        resolve();
+                    }
+                };
+
+                browser.tabs.onUpdated.addListener(listener);
+            }))).catch(error => {
+                console.error('Error waiting for tabs to load:', error);
+            });
+        }
+
+        await new Promise(resolve => setTimeout(resolve, discardDelay * 1000));
+
+        // Set the active tab back to the starting tab
+        await browser.tabs.update(activeTab.id, { active: true });
+
+        // Discard all the tabs that were previously discarded
+        for (const tabId of previouslyDiscardedTabs) {
+            await browser.tabs.discard(tabId);
+        }
+    } catch (error) {
+        console.error('Error in rerunPatterns:', error);
     }
 }
