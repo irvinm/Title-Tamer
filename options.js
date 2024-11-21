@@ -152,8 +152,8 @@ async function restoreOptions() {
                         </div>
                     </td>
                     <td>
-                        <button class="move-up-button move-button">Up</button>
-                        <button class="move-down-button move-button">Down</button>
+                        <button class="move-up-button move-button">&#x25B2</button>
+                        <button class="move-down-button move-button">&#x25BC</button>
                     </td>
                 `;
                 patternTableBody.appendChild(row);

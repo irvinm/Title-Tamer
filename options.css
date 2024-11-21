@@ -156,6 +156,10 @@ label {
     border-radius: 5px; /* Rounded corners */
 }
 
+#pattern-table td:nth-child(3) button:hover {
+    background-color: #c82333; /* Darker red on hover */
+}
+
 #pattern-table td:nth-child(2) {
     font-family: 'Consolas', 'Menlo', 'Source Code Pro', 'Fira Code', 'Courier New', Courier, 'Lucida Console', 'Monaco', monospace;
 }
@@ -172,7 +176,7 @@ label {
 
 #pattern-table th:nth-child(3),
 #pattern-table td:nth-child(3) {
-    width: 10ch; /* Fixed width for the third column */
+    width: 5ch; /* Fixed width for the third column */
 }
 
 .header-cell {
@@ -345,10 +349,15 @@ button:disabled {
     padding: 10px; /* Add padding */
 }
 
-.action-button,
-.move-button {
+.action-button {
     width: 60px; /* Set a fixed width */
 }
+
+/*
+.move-button {
+    width: 30px;
+}
+*/
 
 .toggle-arrow::before {
     content: '\25B6'; /* Right-pointing arrow */
