@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             showCustomAlert([
                 `${patterns.length} patterns exported successfully!`,
-                `Filename: ${filename}`,
+                `Saved as: ${filename}`,
                 `Saved to: Default download directory`
             ]);
         } catch (error) {
