@@ -3,7 +3,7 @@
 
 <head>
     <title>Title Tamer Options</title>
-    <script src="options.js"></script>
+    <script type="module" src="options.js"></script>
     <link rel="stylesheet" type="text/css" href="options.css">
 </head>
 
@@ -47,9 +47,9 @@
             </div>
             <!-- Export and Import Options -->
             <div class="form-group2">
-                <button type="button" id="export-button">Export Patterns</button>
-                <input type="file" id="import-file" style="display: none;" />
-                <button type="button" id="import-button">Import Patterns</button>
+                <button type="button" id="import-export-button" class="add-pattern-button">
+                    Import/Export Options <img class="open-icon" src="open.png" alt="Open in new tab" class="open-icon">
+                </button>
             </div>
         </div>
         <table id="pattern-table">

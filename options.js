@@ -77,66 +77,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    document.getElementById('export-button').addEventListener('click', function() {
-        // Fetch the patterns and titles from storage (assuming browser.storage.local)
-        browser.storage.local.get('patterns').then((result) => {
-            const patterns = result.patterns || [];
-            if (patterns.length === 0) {
-                alert('No patterns to export.');
-                return;
-            }
-            const blob = new Blob([JSON.stringify(patterns, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            
-            // Generate filename with current date and time
-            const now = new Date();
-            const dateTime = now.toISOString().replace(/[:.]/g, '-'); // Replace colons and dots to make it a valid filename
-            const filename = `patterns(${dateTime}).json`;
-            
-            a.href = url;
-            a.download = filename;
-            a.click();
-            URL.revokeObjectURL(url);
-            alert(`${patterns.length} patterns exported successfully.\n\nSaved as: ${filename}`);
-        }).catch((error) => {
-            console.error('Error fetching patterns from storage:', error);
-        });
-    });
-
-    document.getElementById('import-button').addEventListener('click', function() {
-        console.log('Import button clicked');
-        document.getElementById('import-file').click();
-    });
-
-    document.getElementById('import-file').addEventListener('change', function(event) {
-        console.log('File input changed');
-        const file = event.target.files[0];
-        if (file) {
-            console.log('File selected:', file.name);
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                console.log('FileReader onload event triggered');
-                try {
-                    const patterns = JSON.parse(e.target.result);
-                    console.log('Parsed patterns:', patterns);
-                    // Save the imported patterns to storage (assuming localStorage)
-                    //localStorage.setItem('patterns', JSON.stringify(patterns));
-                    await browser.storage.local.set({ patterns });
-                    console.log('Patterns saved to localStorage');
-                    // Update the UI to reflect the imported patterns
-                    await restoreOptions();
-                    alert(`${patterns.length} patterns imported successfully!`);
-                } catch (error) {
-                    console.error('Error parsing JSON:', error);
-                    alert('Failed to import patterns. Invalid JSON format.');
-                }
-            };
-            reader.readAsText(file);
-            console.log('FileReader readAsText called');
-        } else {
-            console.log('No file selected');
-        }
+    document.getElementById('import-export-button').addEventListener('click', () => {
+        window.open('import-export.html', '_blank');
     });
 });
 
@@ -163,7 +105,7 @@ async function savePattern(event) {
     }
 }
 
-async function restoreOptions() {
+export async function restoreOptions() {
     console.log('restoreOptions');
     try {
         // Check if the loadDiscardedTabs, reDiscardTabs, and discardDelay values are stored
