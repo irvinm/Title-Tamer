@@ -65,10 +65,13 @@ label {
     table-layout: fixed; /* Ensure fixed table layout */
     width: 100%; /* Ensure the table takes the full width */
     border-collapse: collapse; /* Ensure borders are collapsed */
-    margin-top: 10px; /* Add 20px of space above the table */
     background-color: #fff; /* White background */
     border-radius: 10px; /* Rounded corners */
     overflow: hidden; /* Clip content */
+    /* box-shadow: 0 0 0 1px black; Add a 1px solid black border using box-shadow */
+}
+
+#patterns-table tr {
     box-shadow: 0 0 0 1px black; /* Add a 1px solid black border using box-shadow */
 }
 
@@ -442,3 +445,56 @@ button:disabled {
     margin: 10px 0;
     line-height: 1.5;
 }
+/*
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+*/  
+
+  .patterns-table-container {
+    height: 300px; /* Fixed height for the container */
+    overflow-y: auto; /* Enable vertical scrolling */
+    margin-top: 10px; /* Add 20px of space above the table */
+    border-radius: 10px; /* Rounded corners */
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  thead {
+    position: sticky;
+    top: 0; /* Sticks the header to the top of the container */
+    /* background-color: #f9f9f9;  Background color for better visibility */
+    /* z-index: 1;  Ensures the header stays above the body rows */
+  }
+  
+  thead th {
+    /* border: 1px solid #ddd; */
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .header-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  /*
+  tbody td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+*/
+
+  #no-values-message {
+    text-align: center;
+    font-style: italic;
+    color: #666; /* Optional styling for the "No values stored" row */
+  }
+  
