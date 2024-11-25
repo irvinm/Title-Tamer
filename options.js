@@ -105,7 +105,7 @@ async function savePattern(event) {
     }
 }
 
-export async function restoreOptions() {
+async function restoreOptions() {
     console.log('restoreOptions');
     try {
         // Check if the loadDiscardedTabs, reDiscardTabs, and discardDelay values are stored

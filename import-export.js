@@ -1,5 +1,3 @@
-import { restoreOptions } from './options.js';
-
 function showCustomAlert(lines) {
     const customAlert = document.getElementById('custom-alert');
     const customAlertMessage = document.getElementById('custom-alert-message');
