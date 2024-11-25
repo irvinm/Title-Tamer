@@ -186,6 +186,9 @@ async function rerunPatterns() {
             }
         }
 
+        // Set the active tab back to the starting tab
+        await browser.tabs.update(activeTab.id, { active: true });
+        
         if (previouslyDiscardedTabs.length > 0) {
             await Promise.all(previouslyDiscardedTabs.map(tabId => new Promise((resolve, reject) => {
                 const timeout = setTimeout(() => {
@@ -206,9 +209,6 @@ async function rerunPatterns() {
                 console.error('Error waiting for tabs to load:', error);
             });
         }
-
-        // Set the active tab back to the starting tab
-        await browser.tabs.update(activeTab.id, { active: true });
         
         // Delay handling
         console.log(`Waiting for ${discardDelay} seconds delay before discarding tabs...`);
