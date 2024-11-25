@@ -390,7 +390,7 @@ async function moveRow(row, direction) {
     await browser.storage.local.set({ patterns });
 
     // Refresh the UI
-    await restoreOptions();
+    restoreOptions();
 
     // Send a message to background.js to rerun the patterns
     browser.runtime.sendMessage({ action: 'rerunPatterns' });
