@@ -76,6 +76,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     `${patterns.length} patterns imported successfully!`,
                     `Filename: ${file.name}`
                 ]);
+
+                // Send a message to background.js to rerun the patterns
+                browser.runtime.sendMessage({ action: 'rerunPatterns' });
             } catch (error) {
                 console.error('Error parsing JSON:', error);
                 showCustomAlert(['Failed to import patterns.', 'Invalid JSON format.']);
