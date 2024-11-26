@@ -2,6 +2,8 @@
 
 ![CI/CD](https://github.com/irvinm/Title-Tamer/workflows/CI/CD/badge.svg) ![Mozilla Add-on](https://img.shields.io/amo/users/Title-Tamer.svg?style=flat-square) ![](https://img.shields.io/amo/v/Title-Tamer.svg?style=flat-square)
 
+![image](https://github.com/user-attachments/assets/78f5973c-f9d5-4dff-8d72-113df255fe10)
+
 ## Features
 - Monitor tab URLs and change their titles based on user-defined search patterns.
 - Monitor for new tabs, changed URLs, and changed titles.
