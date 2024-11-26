@@ -4,35 +4,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notes, Limitations, Examples</title>
-    <link rel="stylesheet" type="text/css" href="styles.css"> <!-- Optional: Link to a CSS file for styling -->
+    <title>Features, Examples, Limitations, Roadmap</title>
+    <link rel="stylesheet" type="text/css" href="options.css"> <!-- Link to the existing CSS file for consistent styling -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        h1{
+            text-align: center;
+            font-size: xx-large; 
+        }
+
+        .faq-section {
+            margin-bottom: 20px;
+        }
+
+        .faq-section h2 {
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        ul {
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+
+        pre {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .code-block {
+            background: #272822;
+            color: #f8f8f2;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .code-block code {
+            color: #66d9ef;
+        }
+    </style>
 </head>
 
 <body>
-    <h1>Notes, Limitations, Examples</h1>
-    <pre>
-RegEx: https?:\/\/jira\.syncsort\.com\/[^\s]*
-tab.url: https://jira.syncsort.com/secure/RapidBoard.jspa?rapidView=1173
+    <div class="container">
+        <h1>Examples, Limitations, Roadmap, Changelog</h1>
+        <div class="faq-section">
+            <h2>Examples</h2>
+            <pre class="code-block">
+<code>
+Matching Examples:
+------------------
+    Search: jira.com\/browse\/(.*)
+     Title: JIRA - $1
+   Tab URL: https://www.jira.com/browse/SOLDEF-843
+    Result: JIRA - SOLDEF-843
+   Comment: Matches and returns "SOLDEF-843" as match[1] ... using $1
 
-RegEx: https?:\/\/accounts\.firefox\.com\/[^\s]*
-tab.url: https://accounts.firefox.com
+    Search: https?:\/\/(www\.)?github\.com/([^/]+)/([^/]+)
+     Title: Repo: $2/$3
+   Tab URL: https://github.com/irvinm/Title-Tamer
+    Result: Repo: irvinm/Title-Tamer
+   Comment: Matches and returns "irvinm" as match[2] and "Title-Tamer" as match[3] ... using $2 and $3
 
-RegEx: https?:\/\/www\.google\.com\/[^\s]*
-tab.url: https://www.google.com/
+    Search: https?:\/\/(www\.)?stackoverflow\.com\/questions\/\d+\/([^/]+)
+     Title: SO: $2
+   Tab URL: https://stackoverflow.com/questions/68646141/regex-matching-the-entire-string-and-nothing-else
+    Result: SO: regex-matching-the-entire-string-and-nothing-else
+   Comment: Matches and returns "regex-matching-the-entire-string-and-nothing-else" as match[2] ... using $2
 
-https:\/\/jira\.syncsort\.com\/browse\/([^\s\/]+)
-https://jira.syncsort.com/browse/SOLDEF-843
-Result: Matches and returns "SOLDEF-843" as match[1] ... using $1
+    Search: https?:\/\/www\.google\.com\/.*[?&]q=([^&]+)
+     Title: Google: $1
+   Tab URL: https://www.google.com/search?client=firefox-b-1-d&q=url+regex+examples
+    Result: Google: url+regex+examples
+   Comment: Matches and returns "url+regex+examples" as match[1] ... using $1
 
-If the number of rows added exceed the maximum height of the popup window, scrollbars will be added.
-Limitation of working on restricted sites like accounts.firefox.com, addons.mozilla.org... 
-    ... any listed in about:config -> extensions.webextensions.restrictedDomains
-If you delete a rule, that tab title might not be change until the tab reloads or changes
+    Search: https?:\/\/([a-zA-Z0-9-]+\.)*google\.[a-z]+(\/|$)
+     Title: Google (Any)
+   Tab URL: https://www.google.com/search?client=firefox-b-1-d&q=url+regex+examples
+    Result: Google (Any)
+   Comment: Matches (http/https)://*.google.* that matches any domain with google in it
 
-https://regex101.com/
+ Specific Domain Example:
+ ------------------------
+    Search: google.com
+     Title: Google (USA)
+   Tab URL: https://www.google.com/search?client=firefox-b-1-d&q=url+regex+examples
+    Result: Google (USA)
+   Comment: Matches the domain "google.com" and replaces the title with "Google USA"
 
-Matches
-    </pre>
+ Substring Example:
+ ------------------
+    Search: firefox
+     Title: Firefox related
+   Tab URL: https://www.mozilla.org/en-US/firefox/
+   Tab URL: https://support.mozilla.org/en-US/kb/search-firefox-address-bar
+   Tab URL: https://sigmaos.com/tips/browsers/how-to-copy-url-on-mozilla-firefox
+   Tab URL: https://www.cnet.com/tech/computing/mozilla-streamlines-firefox-in-browser-rejuvenation-project/
+   Tab URL: https://www.wikihow.com/Remove-Bing-from-Firefox <-- Will not match if "case sensitive" is on
+    Result: Firefox related
+   Comment: Matches the substring "firefox" and replaces the title with "Firefox related"
+
+ Exact Match Example:
+ --------------------
+   Search: ^https:\/\/firefox-source-docs\.mozilla\.org\/$
+    Title: Firefox Source Docs - Main Page
+  Tab URL: https://firefox-source-docs.mozilla.org/ <-- Matches
+  Tab URL: https://firefox-source-docs.mozilla.org/contributing/contribution_quickref.html <-- Does not match
+   Result: Firefox Source Docs - Main Page
+  Comment: Matches the exact URL "https://firefox-source-docs.mozilla.org/", no more no less
+</code>
+            </pre>
+        </div>
+        <div class="faq-section">
+            <h2>Limitations</h2>
+            <div class="faq-section-content">
+                <ol>
+                    <li>As I am not a RegEx expert, the best way to get a high degree of confidence with a pattern is to:
+                        <ol style="list-style-type: lower-alpha; padding-left: 30px;">
+                            <li>Go to <a href="https://regex101.com/" target="_blank">https://regex101.com/</a></li>
+                            <li>Enable "ECMAScript (JavaScript)" under "FLAVOR" in the left nav bar</li>
+                            <li>Enter your pattern in the "REGULAR EXPRESSION" box</li>
+                            <li>Enter your test URL in the "TEST STRING" box</li>
+                            <li>Ensure your pattern matches the URL as expected</li>
+                        </ol>
+                    </li>
+                    <li>Will not work on browser built-in pages like about:debugging, about:addons, etc.</li>
+                    <li>Requires host permission for certain pages like reader view, view-source, and PDF viewer pages.</li>
+                    <li>Title Tamer updates the document.title to update the title, and that can only be done with a loaded tab.</li>
+                    <li>Discarded tabs' title cannot be updated until loaded.</li>
+                    <li>Title Tamer tries to wait for a "complete" loading message from a tab that is woken up before trying to discard it again (if enabled):
+                        <ol style="list-style-type: lower-alpha; padding-left: 30px;">
+                            <li>However, if that tab redirects to a login screen or SSO, that site will send result in a "complete".</li>
+                            <li>Title Tamer will then just wait for the user wait time to expire and then discard the tab again.</li>
+                            <li>If the timer is too short, it may stay on the login screen and never return to the original site.</li>
+                            <li>If you are using this addon on similar sites, ensure your wait timer is long enough to redirect back.</li>
+                            <li>I saw this issue with Jira using SSO, but increasing the timeout was a reasonable workaround.</li>
+                        </ol>
+                    </li>
+                    <li>If you enabled "load discarded tabs" and move rules up/down, all rules will be rerun to ensure priority order.</li>
+                    <li>Importing patterns had to be moved away from the main options page due to a Firefox limitation between the addon popup and the file picker.</li>
+                </ol>
+            </div>
+        </div>
+        <div class="faq-section">
+            <h2>Roadmap (Not in priority order)</h2>
+            <ul>
+                <li>Add dark mode to options & pages.</li>
+                <li>Support for Firefox Sync.</li>
+                <li>Keyboard shortcuts for quick actions.</li>
+                <li>Add badge option to show the number of patterns being monitored.</li>
+                <li>Option to reload tabs after deleting a rule to restore titles.</li>
+                <li>Add support for FF and TST for UI options to "Rename this tab".</li>
+                <li>Default rules are case sensitive, give user option to disable.</li>
+                <li>Add total number of existing patterns somewhere on the options page.</li>
+            </ul>
+        </div>
+        <div class="faq-section">
+            <h2>Feature Changelog</h2>
+            <h3>Version 0.9.0</h3>
+            <ul>
+                <li>Monitor tab URLs and changes the tabs title based on user-defined search patterns.</li>
+                <li>Monitor for new tabs, changed URLs, and changed titles.</li>
+                <li>Support regular expressions for advanced pattern matching including groups and exact matches.</li>
+                <li>Support string searches for substring matches including basic domain matches.</li>
+                <li>Option to load and discard tabs when rules are added or edited.</li>
+                <li>Import and export patterns for easy sharing and backup.</li>
+                <li>Support opening the options in a separate tab for a wider view of your patterns.</li>
+                <li>Initial support to add, delete, update, reorder patterns in priority order.</li>
+            </ul>
+        </div>
+    </div>
 </body>
 
 </html>
