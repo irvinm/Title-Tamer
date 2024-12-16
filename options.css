@@ -80,6 +80,7 @@ label {
     background-color: #007bff; /* Blue background */
     border-bottom: 2px solid #000; /* Solid bottom border */
     color: #fff; /* White text */
+    z-index: 1; /* Ensure the header stays above the body rows */
 }
 
 /* Default font weight for all table cells */
