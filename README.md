@@ -41,6 +41,10 @@
 4. Enter your test URL in the "TEST STRING" box
 5. Ensure your pattern matches the URL as expected
 
+## Inspiration
+- Rename Tab Title - https://addons.mozilla.org/en-US/firefox/addon/rename-tab-title/
+- Tab ReTitle - https://addons.mozilla.org/en-US/firefox/addon/tab-retitle/
+
 ## Changelog
 
 ### Version 0.9.1 (Dec 15, 2024)
