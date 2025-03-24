@@ -47,6 +47,9 @@
 
 ## Changelog
 
+### Version 0.9.2 (Mar 24, 2025)
+- Fixed issue when dealing with dark mode and addon icon under certain conditions. (https://github.com/irvinm/Title-Tamer/issues/5)
+
 ### Version 0.9.1 (Dec 15, 2024)
 - Fixed issue when editing rules that some buttons showed thru the header of the table. (https://github.com/irvinm/Title-Tamer/issues/1)
 
