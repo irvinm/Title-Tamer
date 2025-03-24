@@ -29,6 +29,16 @@
       {
         "light": "icon-light.svg",
         "dark": "icon-dark.svg",
+        "size": 16
+      },
+      {
+        "light": "icon-light.svg",
+        "dark": "icon-dark.svg",
+        "size": 32
+      },
+      {
+        "light": "icon-light.svg",
+        "dark": "icon-dark.svg",
         "size": 48
       }
     ],
