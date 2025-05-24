@@ -159,6 +159,10 @@ browser.runtime.onMessage.addListener(async (message) => {
         console.log('Received new pattern message:', message.pattern);
         updateTabTitle(null, null, null, message.pattern);
     }
+    // Handle deletePatternReload for restoring original titles
+    if (message.action === 'deletePatternReload') {
+        await handleDeletePatternReload(message.pattern, message.reloadDiscarded);
+    }
 });
 
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -220,5 +224,44 @@ async function rerunPatterns() {
         }
     } catch (error) {
         console.error('Error in rerunPatterns:', error);
+    }
+}
+
+// Handle restoring original titles after rule deletion
+async function handleDeletePatternReload(deletedPattern, reloadDiscarded) {
+    try {
+        // Find all tabs that matched the deleted pattern
+        const regex = new RegExp(deletedPattern.search);
+        const tabs = await browser.tabs.query({});
+        const affectedTabs = tabs.filter(tab => tab.url && regex.test(tab.url));
+        const discardDelay = (await browser.storage.local.get('discardDelay')).discardDelay || 1;
+        for (const tab of affectedTabs) {
+            if (tab.discarded) {
+                if (reloadDiscarded) {
+                    // Wake up the tab (reload)
+                    await browser.tabs.update(tab.id, { active: true });
+                    // Wait for the tab to finish loading
+                    await new Promise(resolve => {
+                        const listener = (updatedTabId, changeInfo) => {
+                            if (updatedTabId === tab.id && changeInfo.status === 'complete') {
+                                browser.tabs.onUpdated.removeListener(listener);
+                                resolve();
+                            }
+                        };
+                        browser.tabs.onUpdated.addListener(listener);
+                    });
+                    // Wait for configured delay
+                    await new Promise(resolve => setTimeout(resolve, discardDelay * 1000));
+                    // Discard the tab again
+                    await browser.tabs.discard(tab.id);
+                }
+                // If not reloading discarded tabs, do nothing
+            } else {
+                // Reload the tab to restore the original title
+                await browser.tabs.reload(tab.id);
+            }
+        }
+    } catch (error) {
+        console.error('Error in handleDeletePatternReload:', error);
     }
 }

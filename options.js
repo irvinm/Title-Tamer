@@ -316,9 +316,28 @@ async function deletePattern(index) {
     try {
         const result = await browser.storage.local.get('patterns');
         const patterns = result.patterns || [];
+        // Save the pattern being deleted for matching
+        const deletedPattern = patterns[index];
         patterns.splice(index, 1);
         await browser.storage.local.set({ patterns });
         await restoreOptions(); // Refresh the list after deletion
+
+        // Prompt the user for reload options
+        if (deletedPattern) {
+            const reload = confirm('Do you want to reload all tabs affected by this rule to restore their original titles?');
+            let reloadDiscarded = false;
+            if (reload) {
+                reloadDiscarded = confirm('Also reload and re-discard affected discarded tabs?');
+            }
+            // Send message to background to handle tab reloads
+            if (reload) {
+                browser.runtime.sendMessage({
+                    action: 'deletePatternReload',
+                    pattern: deletedPattern,
+                    reloadDiscarded: reloadDiscarded
+                });
+            }
+        }
     } catch (error) {
         console.error('Error deleting pattern:', error);
     }
