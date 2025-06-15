@@ -2,7 +2,8 @@
 
 ![CI/CD](https://github.com/irvinm/Title-Tamer/workflows/CI/CD/badge.svg) ![Mozilla Add-on](https://img.shields.io/amo/users/Title-Tamer.svg?style=flat-square) ![](https://img.shields.io/amo/v/Title-Tamer.svg?style=flat-square)
 
-![image](https://github.com/user-attachments/assets/78f5973c-f9d5-4dff-8d72-113df255fe10)
+![Light Mode](https://github.com/user-attachments/assets/78f5973c-f9d5-4dff-8d72-113df255fe10)
+![Dark Mode](https://github.com/user-attachments/assets/4ba17621-4a1b-4849-9042-5b24499ae298)
 
 ## Features
 - Monitor tab URLs and change their titles based on user-defined search patterns.
@@ -46,6 +47,10 @@
 - Tab ReTitle - https://addons.mozilla.org/en-US/firefox/addon/tab-retitle/
 
 ## Changelog
+
+### Version 0.9.3 (Jun 15, 2025)
+- Added dark mode support for options popup (https://github.com/irvinm/Title-Tamer/issues/6)
+- Cleaned up popup UI a little
 
 ### Version 0.9.2 (Mar 24, 2025)
 - Fixed issue when dealing with dark mode and addon icon under certain conditions. (https://github.com/irvinm/Title-Tamer/issues/5)
