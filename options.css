@@ -1,3 +1,24 @@
+/* Moved from options.html inline styles */
+.discarded-tab-preferences-fieldset {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 10px;
+}
+.discarded-tab-preferences-legend {
+    font-weight: bold;
+    color: #007bff;
+}
+.discard-delay-label {
+    display: block;
+    margin-bottom: 8px;
+}
+.delete-modal-reload-label {
+    display: block;
+    margin: 10px 0;
+}
+.delete-modal-buttons {
+    text-align: right;
+}
 body {
     min-width: 790px; /* Set the width of the popup */
     font-family: Arial, sans-serif; /* Set the font family for the entire document */
@@ -328,22 +349,22 @@ button:disabled {
 
 /*
 .toggle-arrow.collapsed::before {
-	content: '\25B6';
-	width: 20px;
-	margin-bottom: 3px;
-	align-content: center !important;
-	justify-content: center;
-	display: flex;
+    content: '\25B6';
+    width: 20px;
+    margin-bottom: 3px;
+    align-content: center !important;
+    justify-content: center;
+    display: flex;
 }
 
 .toggle-arrow.expanded::before {
-	content: '\25BC';
-	width: 20px;
-	align-content: center;
-	justify-content: center;
-	display: flex;
-	margin-right: 3px;
-	height: 20px;
+    content: '\25BC';
+    width: 20px;
+    align-content: center;
+    justify-content: center;
+    display: flex;
+    margin-right: 3px;
+    height: 20px;
 }
 */
 

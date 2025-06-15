@@ -30,20 +30,23 @@
         </div>
         <div id="toggle-options" class="toggle-arrow">Additional Options</div>
         <div id="additional-options" class="collapsible-content">
-            <!-- Additional Options Section -->
+            <!-- Discarded Tab Preferences Section -->
             <div class="form-group2">
-                <label>
-                    <input type="checkbox" id="load-discarded-tabs" />
-                    Load discarded tabs after rule is added or updated
-                </label>
-                <div class="nested-options" id="re-discard-options" style="display: none;">
-                    <label>
-                        <input type="checkbox" id="re-discard-tabs" />
-                        Discard these tabs after
-                        <input type="number" id="discard-delay" class="inline-input" placeholder="Enter seconds" min="0" />
+                <fieldset class="discarded-tab-preferences-fieldset">
+                    <legend class="discarded-tab-preferences-legend">Discarded Tab Preferences</legend>
+                    <label style="display:block; margin-bottom:8px;">
+                        <input type="checkbox" id="discarded-tabs-option" checked />
+                        Reload discarded tabs after rules are added, changed, or deleted
                     </label>
-                    <label>seconds</label>
-                </div>
+                    <div class="nested-options" id="discarded-tabs-options-details" style="display: block;">
+                        <label class="discard-delay-label">
+                            <input type="checkbox" id="discard-delay-enabled" checked />
+                            Discard these tabs after
+                            <input type="number" id="discard-delay" class="inline-input" placeholder="Enter seconds" min="0" value="1" />
+                            seconds
+                        </label>
+                    </div>
+                </fieldset>
             </div>
             <!-- Export and Import Options -->
             <div class="form-group2">
