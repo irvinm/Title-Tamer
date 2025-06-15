@@ -1,4 +1,58 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    // Theme handling
+    const themeRadios = [
+        document.getElementById('theme-light'),
+        document.getElementById('theme-dark'),
+        document.getElementById('theme-system')
+    ];
+
+    // Helper to apply theme
+    function applyTheme(theme) {
+        document.body.classList.remove('theme-light', 'theme-dark');
+        if (theme === 'dark') {
+            document.body.classList.add('theme-dark');
+        } else if (theme === 'light') {
+            document.body.classList.add('theme-light');
+        } else if (theme === 'system') {
+            // Use system preference
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.body.classList.remove('theme-light', 'theme-dark');
+            document.body.classList.add(isDark ? 'theme-dark' : 'theme-light');
+        }
+    }
+
+    // Listen for system theme changes if 'system' is selected
+    let systemThemeListener = null;
+    function setSystemThemeListener(enabled) {
+        if (systemThemeListener) {
+            window.matchMedia('(prefers-color-scheme: dark)').removeEventListener('change', systemThemeListener);
+            systemThemeListener = null;
+        }
+        if (enabled) {
+            systemThemeListener = (e) => {
+                // Always remove both classes before applying
+                document.body.classList.remove('theme-light', 'theme-dark');
+                applyTheme('system');
+            };
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', systemThemeListener);
+        }
+    }
+
+    // Restore theme from storage
+    const { theme = 'light' } = await browser.storage.local.get('theme');
+    themeRadios.forEach(r => r.checked = (r.value === theme));
+    applyTheme(theme);
+    setSystemThemeListener(theme === 'system');
+
+    themeRadios.forEach(radio => {
+        radio.addEventListener('change', async () => {
+            if (radio.checked) {
+                await browser.storage.local.set({ theme: radio.value });
+                applyTheme(radio.value);
+                setSystemThemeListener(radio.value === 'system');
+            }
+        });
+    });
     console.log('DOMContentLoaded');
     await restoreOptions().catch(console.error);
 
@@ -44,20 +98,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     */
 
-    document.getElementById('load-discarded-tabs').checked = loadDiscardedTabs;
-    document.getElementById('re-discard-tabs').checked = reDiscardTabs;
+    document.getElementById('discarded-tabs-option').checked = loadDiscardedTabs;
+    document.getElementById('discard-delay-enabled').checked = reDiscardTabs;
     document.getElementById('discard-delay').value = discardDelay;
 
-    // Show or hide re-discard options based on loadDiscardedTabs state
-    document.getElementById('re-discard-options').style.display = loadDiscardedTabs ? 'block' : 'none';
+    // Show or hide discard delay options based on loadDiscardedTabs state
+    document.getElementById('discarded-tabs-options-details').style.display = loadDiscardedTabs ? 'block' : 'none';
 
-    document.getElementById('load-discarded-tabs').addEventListener('change', function() {
+    document.getElementById('discarded-tabs-option').addEventListener('change', function() {
         const loadDiscardedTabs = this.checked;
         browser.storage.local.set({ loadDiscardedTabs });
-        document.getElementById('re-discard-options').style.display = loadDiscardedTabs ? 'block' : 'none';
+        document.getElementById('discarded-tabs-options-details').style.display = loadDiscardedTabs ? 'block' : 'none';
     });
 
-    document.getElementById('re-discard-tabs').addEventListener('change', function() {
+    document.getElementById('discard-delay-enabled').addEventListener('change', function() {
         const reDiscardTabs = this.checked;
         browser.storage.local.set({ reDiscardTabs });
     });

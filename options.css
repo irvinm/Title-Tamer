@@ -1,8 +1,94 @@
+.theme-preferences-fieldset {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
+.theme-preferences-fieldset .theme-options-row {
+    display: flex;
+    flex-direction: row;
+    gap: 2em;
+    align-items: center;
+}
+
+.theme-preferences-fieldset .theme-options-row label {
+    margin-bottom: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 0.3em;
+    line-height: 1.1;
+}
+#pattern-table thead, #pattern-table thead th {
+    background-color: #007bff !important;
+    color: #fff !important;
+}
+#pattern-table td, #pattern-table th {
+    background-color: var(--secondary-bg) !important;
+}
+.collapsible-content {
+    display: none;
+    margin-top: 10px;
+    border: 1px solid var(--input-border);
+    padding: 10px;
+    width: calc(100% - 20px);
+    background-color: var(--secondary-bg);
+    border-radius: 5px;
+    color: var(--text-color);
+}
+
+/* Container for fieldsets and theme section */
+.form-group2 {
+    margin-bottom: 10px;
+    background: var(--secondary-bg);
+    border-radius: 6px;
+    color: var(--text-color);
+}
+
+.patterns-table-container {
+    height: 300px;
+    overflow-y: auto;
+    margin-top: 10px;
+    border-radius: 10px;
+    background: var(--secondary-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text-color);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--secondary-bg);
+    color: var(--text-color);
+}
+
+thead {
+    position: sticky;
+    top: 0;
+    background-color: var(--table-header-bg);
+    color: var(--table-header-color);
+    z-index: 1;
+}
+
+thead th {
+    padding: 8px;
+    text-align: left;
+    background-color: var(--table-header-bg);
+    color: var(--table-header-color);
+}
+/* Replaces inline style="display:block; margin-bottom:8px;" */
+.block-label {
+    display: block;
+    margin-bottom: 8px;
+}
+
+/* Replaces inline style="display: block;" for nested options */
+.nested-options.show {
+    display: block;
+}
 /* Moved from options.html inline styles */
 .discarded-tab-preferences-fieldset {
     border: 1px solid #ccc;
     border-radius: 6px;
-    padding: 10px;
 }
 .discarded-tab-preferences-legend {
     font-weight: bold;
@@ -10,7 +96,6 @@
 }
 .discard-delay-label {
     display: block;
-    margin-bottom: 8px;
 }
 .delete-modal-reload-label {
     display: block;
@@ -19,12 +104,134 @@
 .delete-modal-buttons {
     text-align: right;
 }
+
 body {
-    min-width: 790px; /* Set the width of the popup */
-    font-family: Arial, sans-serif; /* Set the font family for the entire document */
-    margin-right: 8px; /* Add some space on the right side */
-    background-color: #f0f2f5; /* Light grey background */
-    color: #333; /* Dark text color */
+    min-width: 790px;
+    font-family: Arial, sans-serif;
+    margin-right: 8px;
+    background-color: var(--background-color, #f0f2f5);
+    color: var(--text-color, #333);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Light Theme Variables */
+:root,
+.theme-light {
+    --background-color: #f0f2f5;
+    --text-color: #333;
+    --primary-color: #007bff;
+    --secondary-bg: #fff;
+    --table-header-bg: #007bff;
+    --table-header-color: #fff;
+    --button-bg: #007bff;
+    --button-hover-bg: #0056b3;
+    --button-text: #fff;
+    --input-bg: #fff;
+    --input-border: #ccc;
+    --row-even-bg: #f1f1f1;
+}
+
+/* Dark Theme Variables */
+.theme-dark {
+    --background-color: #181a1b;
+    --text-color: #e0e0e0;
+    --primary-color: #3399ff;
+    --secondary-bg: #2d3138;
+    --table-header-bg: #23272a;
+    --table-header-color: #e0e0e0;
+    --button-bg: #3399ff;
+    --button-hover-bg: #2673b6;
+    --button-text: #fff;
+    --input-bg: #23272a;
+    --input-border: #888;
+    --row-even-bg: #222426;
+}
+
+
+/* Theme-specific styles using variables */
+h1 {
+    color: var(--primary-color);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+#pattern-table {
+    background-color: var(--secondary-bg);
+    color: var(--text-color);
+    border-radius: 10px;
+}
+
+#pattern-table thead {
+    background-color: var(--table-header-bg);
+    color: var(--table-header-color);
+}
+
+
+#pattern-table tr:nth-child(even) td {
+    background-color: var(--row-even-bg) !important;
+}
+
+#pattern-table th, #pattern-table td {
+    background-color: transparent;
+    color: var(--text-color);
+}
+
+.add-pattern-button,
+.notes-link,
+#import-export-button,
+.open-options-link {
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    transition: background-color 0.3s, color 0.3s;
+    border: none;
+}
+
+.add-pattern-button:hover,
+.notes-link:hover,
+#import-export-button:hover,
+.open-options-link:hover {
+    background-color: var(--button-hover-bg);
+}
+
+input,
+select,
+textarea {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    border: 1px solid var(--input-border);
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled {
+    background-color: #222 !important;
+    color: #aaa !important;
+    opacity: 0.7;
+}
+
+/* Fieldset and legend for both light and dark themes */
+fieldset,
+.discarded-tab-preferences-fieldset,
+.theme-preferences-fieldset {
+    background: var(--secondary-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text-color);
+}
+
+legend,
+.discarded-tab-preferences-legend,
+.theme-preferences-legend {
+    font-weight: bold;
+    color: var(--primary-color);
+    background: transparent;
+    font-size: 1.1em;
+    letter-spacing: 0.5px;
+}
+
+/* Theme section styling */
+.theme-preferences-fieldset {
+    border-radius: 6px;
+    margin-bottom: 10px;
 }
 
 h1 {
@@ -49,7 +256,7 @@ label {
 .fixed-width-label {
     width: 150px;
     display: inline-block; /* Ensure the width is applied */
-    color: #555; /* Slightly lighter text color */
+    color: var(--text-color, #555); /* Use theme text color */
 }
 
 .nested-options {
@@ -98,8 +305,8 @@ label {
 
 /* Style for the header row */
 #pattern-table thead {
-    background-color: #007bff; /* Blue background */
-    border-bottom: 2px solid #000; /* Solid bottom border */
+    background-color: #007bff !important; /* Always use blue background */
+    border-bottom: 2px solid var(--input-border, #000); /* Use theme border color */
     color: #fff; /* White text */
     z-index: 1; /* Ensure the header stays above the body rows */
 }
@@ -331,11 +538,12 @@ button:disabled {
 .collapsible-content {
     display: none;
     margin-top: 10px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--input-border);
     padding: 10px;
     width: calc(100% - 20px);
-    background-color: #fff; /* White background */
-    border-radius: 5px; /* Rounded corners */
+    background-color: var(--secondary-bg);
+    border-radius: 5px;
+    color: var(--text-color);
 }
 
 .toggle-arrow {

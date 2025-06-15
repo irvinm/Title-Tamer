@@ -34,16 +34,36 @@
             <div class="form-group2">
                 <fieldset class="discarded-tab-preferences-fieldset">
                     <legend class="discarded-tab-preferences-legend">Discarded Tab Preferences</legend>
-                    <label style="display:block; margin-bottom:8px;">
+                    <label class="block-label">
                         <input type="checkbox" id="discarded-tabs-option" checked />
                         Reload discarded tabs after rules are added, changed, or deleted
                     </label>
-                    <div class="nested-options" id="discarded-tabs-options-details" style="display: block;">
+                    <div class="nested-options show" id="discarded-tabs-options-details">
                         <label class="discard-delay-label">
                             <input type="checkbox" id="discard-delay-enabled" checked />
                             Discard these tabs after
                             <input type="number" id="discard-delay" class="inline-input" placeholder="Enter seconds" min="0" value="1" />
                             seconds
+                        </label>
+                    </div>
+                </fieldset>
+            </div>
+            <!-- Theme Section -->
+            <div class="form-group2">
+                <fieldset class="theme-preferences-fieldset">
+                    <legend class="theme-preferences-legend">Theme</legend>
+                    <div class="theme-options-row">
+                        <label class="block-label">
+                            <input type="radio" name="theme" id="theme-light" value="light" checked />
+                            Light
+                        </label>
+                        <label class="block-label">
+                            <input type="radio" name="theme" id="theme-dark" value="dark" />
+                            Dark
+                        </label>
+                        <label class="block-label">
+                            <input type="radio" name="theme" id="theme-system" value="system" />
+                            System
                         </label>
                     </div>
                 </fieldset>
