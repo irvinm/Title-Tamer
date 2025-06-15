@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Title Tamer",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "description": "Monitors tabs and changes their titles based on user-defined search patterns.",
   "homepage_url": "https://github.com/irvinm/Title-Tamer",
   "permissions": [
