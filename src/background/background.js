@@ -6,7 +6,7 @@ async function updateTabTitle(tabId, changeInfo, tab, pattern) {
 
     try {
         console.log('Entering updateTabTitle -> tabId:', tabId, 'changeInfo:', changeInfo, 'tab:', tab, 'Pattern:', pattern);
-        
+
         // Retrieve the values from storage with error handling
         let loadDiscardedTabs = false;
         let reDiscardTabs = false;
@@ -32,12 +32,10 @@ async function updateTabTitle(tabId, changeInfo, tab, pattern) {
                 const wokenUpTabs = [];
 
                 for (const tab of tabs) {
-                    const matches = tab.url.match(regex);
+                    const matches = matchUrl(tab.url, pattern.search);
                     if (matches) {
                         console.log('tab.id', tab.id, 'Matches:', matches);
-                        const newTitle = pattern.title.replace(/\$(\d+)/g, (match, number) => {
-                            return matches[number] || match;
-                        });
+                        const newTitle = buildTitle(pattern.title, matches);
                         if (tab.discarded) {
                             if (loadDiscardedTabs) {    /* If discarded and loadDiscardedTabs is true, load the tab then update the title */
                                 wasDiscarded = true;
@@ -101,13 +99,10 @@ async function updateTabTitle(tabId, changeInfo, tab, pattern) {
                 for (const pattern of patterns) {
                     console.log('tabId', tabId, 'Pattern:', pattern);
                     try {
-                        const regex = new RegExp(pattern.search);
-                        const matches = tab.url.match(regex);
+                        const matches = matchUrl(tab.url, pattern.search);
                         if (matches) {
                             console.log('tabId', tabId, 'Matches:', matches);
-                            const newTitle = pattern.title.replace(/\$(\d+)/g, (match, number) => {
-                                return matches[number] || match;
-                            });
+                            const newTitle = buildTitle(pattern.title, matches);
                             if (tab.discarded && loadDiscardedTabs) {    /* If discarded, process single tab after transition */
                                 wasDiscarded = true;
                                 await browser.tabs.update(tab.id, { active: true });
@@ -148,7 +143,7 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
     if (changeInfo.title || changeInfo.url || changeInfo.status === 'complete') {
         console.log('changeInfo = title, url or status=complete');
-        updateTabTitle(tabId, changeInfo, tab, pattern=undefined);
+        updateTabTitle(tabId, changeInfo, tab, pattern = undefined);
     }
 });
 
@@ -188,7 +183,7 @@ async function rerunPatterns() {
 
         // Set the active tab back to the starting tab
         await browser.tabs.update(activeTab.id, { active: true });
-        
+
         if (previouslyDiscardedTabs.length > 0) {
             await Promise.all(previouslyDiscardedTabs.map(tabId => new Promise((resolve, reject) => {
                 const timeout = setTimeout(() => {
@@ -209,7 +204,7 @@ async function rerunPatterns() {
                 console.error('Error waiting for tabs to load:', error);
             });
         }
-        
+
         // Delay handling
         console.log(`Waiting for ${discardDelay} seconds delay before discarding tabs...`);
         await new Promise(resolve => setTimeout(resolve, discardDelay.discardDelay * 1000));
