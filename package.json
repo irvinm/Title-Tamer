@@ -1,0 +1,34 @@
+{
+    "name": "title-tamer",
+    "version": "0.9.4",
+    "description": "Firefox extension that monitors tabs and changes their titles based on user-defined search patterns.",
+    "main": "index.js",
+    "directories": {
+        "test": "tests"
+    },
+    "scripts": {
+        "test": "mocha tests/unit/*.test.js",
+        "test:integration": "mocha tests/integration/*.test.js",
+        "test:all": "mocha tests/**/*.test.js",
+        "build": "web-ext build --source-dir . --artifacts-dir web-ext-artifacts --overwrite-dest",
+        "lint": "web-ext lint --source-dir .",
+        "start": "web-ext run --source-dir ."
+    },
+    "keywords": [
+        "firefox",
+        "extension",
+        "tab",
+        "title"
+    ],
+    "author": "irvinm",
+    "license": "MIT",
+    "type": "commonjs",
+    "devDependencies": {
+        "chai": "^6.2.2",
+        "eslint": "^9.39.0",
+        "eslint-config-prettier": "^10.1.8",
+        "mocha": "^11.7.5",
+        "prettier": "^3.8.1",
+        "web-ext": "^9.2.0"
+    }
+}

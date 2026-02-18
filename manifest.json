@@ -10,7 +10,10 @@
     "<all_urls>"
   ],
   "background": {
-    "scripts": ["src/background/background.js"],
+    "scripts": [
+      "src/lib/pattern-utils.js",
+      "src/background/background.js"
+    ],
     "persistent": false
   },
   "browser_specific_settings": {

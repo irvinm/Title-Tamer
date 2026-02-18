@@ -1,0 +1,32 @@
+# Development and documentation files
+tests/
+specs/
+docs/
+.specify/
+.github/
+.agent/
+.gemini/
+node_modules/
+
+# Config files
+package.json
+package-lock.json
+.eslintrc.json
+.eslintignore
+.prettierrc
+.prettierignore
+.gitignore
+.webextignore
+GEMINI.md
+
+# Build artifacts
+web-ext-artifacts/
+*.xpi
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/

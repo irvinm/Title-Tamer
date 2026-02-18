@@ -4,14 +4,24 @@ on: [push]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
-    - name: build xpi
-      run: make
-    - uses: actions/upload-artifact@master
+    - uses: actions/checkout@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
       with:
-        name: TitleTamer.xpi
-        path: TitleTamer.xpi
+        node-version: '20'
+        cache: 'npm'
+    - name: Install dependencies
+      run: npm install
+    - name: Lint extension
+      run: npm run lint
+    - name: Run tests
+      run: npm test
+    - name: Build extension
+      run: npm run build
+    - uses: actions/upload-artifact@v4
+      with:
+        name: title-tamer-xpi
+        path: web-ext-artifacts/*.zip
