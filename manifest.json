@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Title Tamer",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "Monitors tabs and changes their titles based on user-defined search patterns.",
   "homepage_url": "https://github.com/irvinm/Title-Tamer",
   "permissions": [
@@ -10,7 +10,7 @@
     "<all_urls>"
   ],
   "background": {
-    "scripts": ["background.js"],
+    "scripts": ["src/background/background.js"],
     "persistent": false
   },
   "browser_specific_settings": {
@@ -19,29 +19,29 @@
     }
   },
   "options_ui": {
-    "page": "options.html",
+    "page": "src/options/options.html",
     "open_in_tab": true
   },
   "browser_action": {
-    "default_icon": "icon-dark.svg",
+    "default_icon": "src/icons/icon-dark.svg",
     "default_title": "Title Tamer",
     "theme_icons": [
       {
-        "light": "icon-light.svg",
-        "dark": "icon-dark.svg",
+        "light": "src/icons/icon-light.svg",
+        "dark": "src/icons/icon-dark.svg",
         "size": 16
       },
       {
-        "light": "icon-light.svg",
-        "dark": "icon-dark.svg",
+        "light": "src/icons/icon-light.svg",
+        "dark": "src/icons/icon-dark.svg",
         "size": 32
       },
       {
-        "light": "icon-light.svg",
-        "dark": "icon-dark.svg",
+        "light": "src/icons/icon-light.svg",
+        "dark": "src/icons/icon-dark.svg",
         "size": 48
       }
     ],
-    "default_popup": "options.html"
+    "default_popup": "src/options/options.html"
   }
 }

@@ -105,18 +105,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Show or hide discard delay options based on loadDiscardedTabs state
     document.getElementById('discarded-tabs-options-details').style.display = loadDiscardedTabs ? 'block' : 'none';
 
-    document.getElementById('discarded-tabs-option').addEventListener('change', function() {
+    document.getElementById('discarded-tabs-option').addEventListener('change', function () {
         const loadDiscardedTabs = this.checked;
         browser.storage.local.set({ loadDiscardedTabs });
         document.getElementById('discarded-tabs-options-details').style.display = loadDiscardedTabs ? 'block' : 'none';
     });
 
-    document.getElementById('discard-delay-enabled').addEventListener('change', function() {
+    document.getElementById('discard-delay-enabled').addEventListener('change', function () {
         const reDiscardTabs = this.checked;
         browser.storage.local.set({ reDiscardTabs });
     });
 
-    document.getElementById('discard-delay').addEventListener('input', function() {
+    document.getElementById('discard-delay').addEventListener('input', function () {
         const discardDelay = parseInt(this.value, 10) || 1;
         browser.storage.local.set({ discardDelay });
     });
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     document.getElementById('import-export-button').addEventListener('click', () => {
-        window.open('import-export.html', '_blank');
+        window.open('../import-export/import-export.html', '_blank');
     });
 });
 
@@ -164,7 +164,7 @@ async function restoreOptions() {
     try {
         // Check if the loadDiscardedTabs, reDiscardTabs, and discardDelay values are stored
         let { loadDiscardedTabs, reDiscardTabs, discardDelay } = await browser.storage.local.get(['loadDiscardedTabs', 'reDiscardTabs', 'discardDelay']);
-        
+
         if (loadDiscardedTabs === undefined) {
             loadDiscardedTabs = true;
             browser.storage.local.set({ loadDiscardedTabs });
@@ -177,7 +177,7 @@ async function restoreOptions() {
             discardDelay = 1;
             browser.storage.local.set({ discardDelay });
         }
-        
+
         const result = await browser.storage.local.get('patterns');
         const patterns = result.patterns || [];
         const patternTableBody = document.getElementById('pattern-table').getElementsByTagName('tbody')[0];
@@ -424,7 +424,7 @@ async function updateTabTitle(tabId, changeInfo, tab) {
 
 function openNotes() {
     console.log('openNotes');
-    window.open('note.html', '_blank');
+    window.open('../notes/note.html', '_blank');
 }
 
 async function moveRow(row, direction) {

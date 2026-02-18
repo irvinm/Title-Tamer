@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Features, Examples, Limitations, Roadmap</title>
-    <link rel="stylesheet" type="text/css" href="options.css"> <!-- Link to the existing CSS file for consistent styling -->
+    <link rel="stylesheet" type="text/css" href="../options/options.css">
+    <!-- Link to the existing CSS file for consistent styling -->
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -24,13 +25,14 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
-        h1, h2 {
+        h1,
+        h2 {
             color: #333;
         }
 
-        h1{
+        h1 {
             text-align: center;
-            font-size: xx-large; 
+            font-size: xx-large;
         }
 
         .faq-section {
@@ -142,7 +144,8 @@ Matching Examples:
             <h2>Limitations</h2>
             <div class="faq-section-content">
                 <ol>
-                    <li>As I am not a RegEx expert, the best way to get a high degree of confidence with a pattern is to:
+                    <li>As I am not a RegEx expert, the best way to get a high degree of confidence with a pattern is
+                        to:
                         <ol style="list-style-type: lower-alpha; padding-left: 30px;">
                             <li>Go to <a href="https://regex101.com/" target="_blank">https://regex101.com/</a></li>
                             <li>Enable "ECMAScript (JavaScript)" under "FLAVOR" in the left nav bar</li>
@@ -152,20 +155,32 @@ Matching Examples:
                         </ol>
                     </li>
                     <li>Will not work on browser built-in pages like about:debugging, about:addons, etc.</li>
-                    <li>Requires host permission for certain pages like reader view, view-source, and PDF viewer pages.</li>
-                    <li>Title Tamer updates the document.title to update the title, and that can only be done with a loaded tab.</li>
+                    <li>Requires host permission for certain pages like reader view, view-source, and PDF viewer pages.
+                    </li>
+                    <li>Title Tamer updates the document.title to update the title, and that can only be done with a
+                        loaded tab.</li>
                     <li>Discarded tabs' title cannot be updated until loaded.</li>
-                    <li>Title Tamer tries to wait for a "complete" loading message from a tab that is woken up before trying to discard it again (if enabled):
+                    <li>Title Tamer tries to wait for a "complete" loading message from a tab that is woken up before
+                        trying to discard it again (if enabled):
                         <ol style="list-style-type: lower-alpha; padding-left: 30px;">
-                            <li>However, if that tab redirects to a login screen or SSO, that site will send result in a "complete".</li>
-                            <li>Title Tamer will then just wait for the user wait time to expire and then discard the tab again.</li>
-                            <li>If the timer is too short, it may stay on the login screen and never return to the original site.</li>
-                            <li>If you are using this addon on similar sites, ensure your wait timer is long enough to redirect back.</li>
-                            <li>I saw this issue with Jira using SSO, but increasing the timeout was a reasonable workaround.</li>
+                            <li>However, if that tab redirects to a login screen or SSO, that site will send result in a
+                                "complete".</li>
+                            <li>Title Tamer will then just wait for the user wait time to expire and then discard the
+                                tab again.</li>
+                            <li>If the timer is too short, it may stay on the login screen and never return to the
+                                original site.</li>
+                            <li>If you are using this addon on similar sites, ensure your wait timer is long enough to
+                                redirect back.</li>
+                            <li>I saw this issue with Jira using SSO, but increasing the timeout was a reasonable
+                                workaround.</li>
                         </ol>
                     </li>
-                    <li>If you enabled "load discarded tabs" and move rules up/down, all rules will be rerun to ensure priority order.</li>
-                    <li>Importing patterns had to be moved away from the main options page due to a Firefox limitation between the addon popup and the file picker (<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1378527" target="_blank">Bugzilla - #1378527</a>).</li>
+                    <li>If you enabled "load discarded tabs" and move rules up/down, all rules will be rerun to ensure
+                        priority order.</li>
+                    <li>Importing patterns had to be moved away from the main options page due to a Firefox limitation
+                        between the addon popup and the file picker (<a
+                            href="https://bugzilla.mozilla.org/show_bug.cgi?id=1378527" target="_blank">Bugzilla -
+                            #1378527</a>).</li>
                 </ol>
             </div>
         </div>
