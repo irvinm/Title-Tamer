@@ -7,11 +7,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v5
       with:
-        node-version: '20'
+        node-version: '22'
         cache: 'npm'
     - name: Install dependencies
       run: npm install
@@ -21,7 +21,7 @@ jobs:
       run: npm test
     - name: Build extension
       run: npm run build
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v5
       with:
         name: title-tamer-xpi
         path: web-ext-artifacts/*.zip
