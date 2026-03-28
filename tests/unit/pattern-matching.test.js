@@ -52,6 +52,33 @@ describe('matchUrl', function () {
         );
         expect(result).to.be.null;
     });
+
+    // Issue #7 — decode URL before matching
+    it('should match against decoded URL with Chinese characters', function () {
+        const result = matchUrl(
+            'https://example.com/search?q=%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C',
+            '\\?q=(\u4f60\u597d\u4e16\u754c)'
+        );
+        expect(result).to.not.be.null;
+        expect(result[1]).to.equal('\u4f60\u597d\u4e16\u754c');
+    });
+
+    it('should match against decoded URL with %22 as double quote', function () {
+        const result = matchUrl(
+            'https://example.com/?f_search=%22exact+phrase%22',
+            'f_search="([^"]+)"'
+        );
+        expect(result).to.not.be.null;
+        expect(result[1]).to.equal('exact+phrase');
+    });
+
+    it('should handle URLs with malformed percent-encoding gracefully', function () {
+        const result = matchUrl(
+            'https://example.com/100%done',
+            'example\\.com'
+        );
+        expect(result).to.not.be.null;
+    });
 });
 
 describe('buildTitle', function () {
@@ -79,6 +106,32 @@ describe('buildTitle', function () {
         const matches = 'https://google.com'.match(/google\.com/);
         const result = buildTitle('Google (USA)', matches);
         expect(result).to.equal('Google (USA)');
+    });
+
+    // Issue #7 — URL percent-encoding decoding
+    it('should decode %22 (double quote) in captured groups', function () {
+        const result = buildTitle('Search: $1', ['full', '%22exact+phrase%22']);
+        expect(result).to.equal('Search: "exact+phrase"');
+    });
+
+    it('should decode %20 as a space in captured groups', function () {
+        const result = buildTitle('$1', ['full', 'hello%20world']);
+        expect(result).to.equal('hello world');
+    });
+
+    it('should decode %2B as a literal + sign', function () {
+        const result = buildTitle('$1', ['full', 'C%2B%2B']);
+        expect(result).to.equal('C++');
+    });
+
+    it('should handle malformed percent-encoding gracefully', function () {
+        const result = buildTitle('$1', ['full', '100%']);
+        expect(result).to.equal('100%');
+    });
+
+    it('should not alter title when no percent-encoding is present', function () {
+        const result = buildTitle('Static Title', ['full']);
+        expect(result).to.equal('Static Title');
     });
 });
 
@@ -141,5 +194,30 @@ describe('applyPattern', function () {
         });
         expect(result.matched).to.be.false;
         expect(result.newTitle).to.be.null;
+    });
+
+    // Issue #7 — end-to-end decode-before-match
+    it('should decode URL and capture readable text (Issue #7 — exact phrase)', function () {
+        const result = applyPattern(
+            'https://somewebsite.com/?f_search=%22exact+phrase%22',
+            {
+                search: 'f_search="([^"]+)"',
+                title: 'Search: $1',
+            }
+        );
+        expect(result.matched).to.be.true;
+        expect(result.newTitle).to.equal('Search: exact+phrase');
+    });
+
+    it('should decode URL and capture Chinese characters (Issue #7)', function () {
+        const result = applyPattern(
+            'https://example.com/search?q=%E4%BD%A0%E5%A5%BD%E4%B8%96%E7%95%8C',
+            {
+                search: '\\?q=(\u4f60\u597d\u4e16\u754c)',
+                title: 'Search: $1',
+            }
+        );
+        expect(result.matched).to.be.true;
+        expect(result.newTitle).to.equal('Search: \u4f60\u597d\u4e16\u754c');
     });
 });

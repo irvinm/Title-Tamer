@@ -3,14 +3,18 @@
 
 /**
  * Test whether a URL matches a search pattern (regex string).
+ * Decodes percent-encoding before matching so patterns can use
+ * human-readable characters (Issue #7).
  * @param {string} url - The tab URL to test.
  * @param {string} searchPattern - The regex pattern string.
  * @returns {RegExpMatchArray|null} The match result, or null if no match.
  */
 function matchUrl(url, searchPattern) {
     try {
+        let decodedUrl;
+        try { decodedUrl = decodeURIComponent(url); } catch (e) { decodedUrl = url; }
         const regex = new RegExp(searchPattern);
-        return url.match(regex);
+        return decodedUrl.match(regex);
     } catch (e) {
         return null;
     }
@@ -24,9 +28,14 @@ function matchUrl(url, searchPattern) {
  * @returns {string} The resolved title string.
  */
 function buildTitle(titleTemplate, matches) {
-    return titleTemplate.replace(/\$(\d+)/g, (match, number) => {
+    let newTitle = titleTemplate.replace(/\$(\d+)/g, (match, number) => {
         return matches[number] || match;
     });
+
+    // Decode URL percent-encoding from captured groups (Issue #7)
+    try { newTitle = decodeURIComponent(newTitle); } catch (e) { /* malformed URI — keep as-is */ }
+
+    return newTitle;
 }
 
 /**
