@@ -48,7 +48,7 @@ async function updateTabTitle(tabId, changeInfo, tab, pattern) {
                         } else {    /* If not discarded, update the tab to make it active and update the title */
                             console.log('Tab is not discarded, updating title: ', newTitle);
                             await browser.tabs.executeScript(tab.id, {
-                                code: `document.title = "${newTitle}";`
+                                code: `document.title = ${JSON.stringify(newTitle)};`
                             });
                         }
                     }
@@ -75,7 +75,7 @@ async function updateTabTitle(tabId, changeInfo, tab, pattern) {
                     // Update the titles of all woken-up tabs
                     for (const { tabId, newTitle } of wokenUpTabs) {
                         await browser.tabs.executeScript(tabId, {
-                            code: `document.title = "${newTitle}";`
+                            code: `document.title = ${JSON.stringify(newTitle)};`
                         });
                     }
                 }
@@ -108,7 +108,7 @@ async function updateTabTitle(tabId, changeInfo, tab, pattern) {
                                 await browser.tabs.update(tab.id, { active: true });
                             } else {  /* Not discarded, just change title now */
                                 await browser.tabs.executeScript(tab.id, {
-                                    code: `document.title = "${newTitle}";`
+                                    code: `document.title = ${JSON.stringify(newTitle)};`
                                 });
                             }
                             if (wasDiscarded) {
