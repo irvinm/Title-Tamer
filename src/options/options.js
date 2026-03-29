@@ -159,6 +159,16 @@ async function savePattern(event) {
     }
 }
 
+function escapeHTML(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 async function restoreOptions() {
     console.log('restoreOptions');
     try {
@@ -190,6 +200,8 @@ async function restoreOptions() {
             patternTableBody.appendChild(noValuesMessage);
         } else {
             patterns.forEach((pattern, index) => {
+                const escapedSearch = escapeHTML(pattern.search);
+                const escapedTitle = escapeHTML(pattern.title);
                 const row = document.createElement('tr');
                 row.setAttribute('data-index', index);
                 row.innerHTML = `
@@ -201,12 +213,12 @@ async function restoreOptions() {
                     </td>    
                     <td>
                         <div>
-                            <span class="search-text">${pattern.search}</span>
-                            <input class="search-input" type="text" value="${pattern.search}" style="display:none;">
+                            <span class="search-text">${escapedSearch}</span>
+                            <input class="search-input" type="text" value="${escapedSearch}" style="display:none;">
                         </div>
                         <div>
-                            <span class="title-text">${pattern.title}</span>
-                            <input class="title-input" type="text" value="${pattern.title}" style="display:none;">
+                            <span class="title-text">${escapedTitle}</span>
+                            <input class="title-input" type="text" value="${escapedTitle}" style="display:none;">
                         </div>
                     </td>
                     <td>
