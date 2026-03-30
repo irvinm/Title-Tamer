@@ -5,15 +5,13 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - name: Setup Node.js
-      uses: actions/setup-node@v5
+      uses: actions/setup-node@v6
       with:
-        node-version: '22'
+        node-version: '24'
         cache: 'npm'
     - name: Install dependencies
       run: npm install
@@ -23,7 +21,7 @@ jobs:
       run: npm test
     - name: Build extension
       run: npm run build
-    - uses: actions/upload-artifact@v5
+    - uses: actions/upload-artifact@v6
       with:
         name: title-tamer-xpi
         path: web-ext-artifacts/*.zip
