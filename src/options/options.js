@@ -279,10 +279,14 @@ async function renameGroup(oldName) {
 }
 
 // Show the delete-group dialog modal
-function showDeleteGroupDialog(groupName) {
+async function showDeleteGroupDialog(groupName) {
     const dialog = document.getElementById('delete-group-dialog');
-    document.getElementById('delete-group-dialog-message').textContent =
-        `What would you like to do with the patterns in group "${groupName}"?`;
+    const result = await browser.storage.local.get('patterns');
+    const patterns = result.patterns || [];
+    const groupPatternsCount = patterns.filter(p => p.group === groupName).length;
+
+    document.getElementById('delete-group-dialog-message').innerText =
+        `Group "${groupName}" contains ${groupPatternsCount} pattern${groupPatternsCount === 1 ? '' : 's'}.\n\nWhat would you like to do with them?`;
 
     document.getElementById('delete-group-ungroup-btn').onclick = async () => {
         dialog.close();

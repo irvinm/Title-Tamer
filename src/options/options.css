@@ -879,8 +879,13 @@ dialog#delete-group-dialog p {
 dialog#delete-group-dialog .delete-modal-buttons {
     display: flex;
     gap: 8px;
-    justify-content: flex-end;
+    justify-content: center;
     flex-wrap: wrap;
+}
+
+#delete-group-ungroup-btn {
+    padding: 10px 20px !important;
+    font-size: 16px !important;
 }
 
 .delete-group-deleteall-btn {
