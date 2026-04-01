@@ -18,13 +18,18 @@
     gap: 0.3em;
     line-height: 1.1;
 }
-#pattern-table thead, #pattern-table thead th {
+
+#pattern-table thead,
+#pattern-table thead th {
     background-color: #007bff !important;
     color: #fff !important;
 }
-#pattern-table td, #pattern-table th {
+
+#pattern-table td,
+#pattern-table th {
     background-color: var(--secondary-bg) !important;
 }
+
 .collapsible-content {
     display: none;
     margin-top: 10px;
@@ -96,6 +101,7 @@ thead th {
     background-color: var(--table-header-bg);
     color: var(--table-header-color);
 }
+
 /* Replaces inline style="display:block; margin-bottom:8px;" */
 .block-label {
     display: block;
@@ -106,22 +112,27 @@ thead th {
 .nested-options.show {
     display: block;
 }
+
 /* Moved from options.html inline styles */
 .discarded-tab-preferences-fieldset {
     border: 1px solid #ccc;
     border-radius: 6px;
 }
+
 .discarded-tab-preferences-legend {
     font-weight: bold;
     color: #007bff;
 }
+
 .discard-delay-label {
     display: block;
 }
+
 .delete-modal-reload-label {
     display: block;
     margin: 10px 0;
 }
+
 .delete-modal-buttons {
     text-align: right;
 }
@@ -204,7 +215,8 @@ h1 {
     background-color: var(--row-even-bg) !important;
 }
 
-#pattern-table th, #pattern-table td {
+#pattern-table th,
+#pattern-table td {
     background-color: transparent;
     color: var(--text-color);
 }
@@ -286,7 +298,8 @@ h1 {
     margin-bottom: 4px;
 }
 
-#search, #title {
+#search,
+#title {
     width: calc(100% - 170px);
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -314,29 +327,41 @@ h1 {
 }
 
 #pattern-table {
-    table-layout: fixed; /* Ensure fixed table layout */
-    width: 100%; /* Ensure the table takes the full width */
-    border-collapse: collapse; /* Ensure borders are collapsed */
-    background-color: #fff; /* White background */
-    border-radius: 10px; /* Rounded corners */
-    overflow: hidden; /* Clip content */
+    table-layout: fixed;
+    /* Ensure fixed table layout */
+    width: 100%;
+    /* Ensure the table takes the full width */
+    border-collapse: collapse;
+    /* Ensure borders are collapsed */
+    background-color: #fff;
+    /* White background */
+    border-radius: 10px;
+    /* Rounded corners */
+    overflow: hidden;
+    /* Clip content */
     /* box-shadow: 0 0 0 1px black; Add a 1px solid black border using box-shadow */
 }
 
 #patterns-table tr {
-    box-shadow: 0 0 0 1px black; /* Add a 1px solid black border using box-shadow */
+    box-shadow: 0 0 0 1px black;
+    /* Add a 1px solid black border using box-shadow */
 }
 
 /* Style for the header row */
 #pattern-table thead {
-    background-color: #007bff !important; /* Always use blue background */
-    border-bottom: 2px solid var(--input-border, #000); /* Use theme border color */
-    color: #fff; /* White text */
-    z-index: 1; /* Ensure the header stays above the body rows */
+    background-color: #007bff !important;
+    /* Always use blue background */
+    border-bottom: 2px solid var(--input-border, #000);
+    /* Use theme border color */
+    color: #fff;
+    /* White text */
+    z-index: 1;
+    /* Ensure the header stays above the body rows */
 }
 
 /* Default font weight for all table cells */
-#pattern-table th, #pattern-table td {
+#pattern-table th,
+#pattern-table td {
     font-weight: normal;
     border: none;
     padding: 2px 3px;
@@ -353,12 +378,16 @@ h1 {
 }
 
 /* Style for input fields within the table */
-.search-input, .title-input {
+.search-input,
+.title-input {
     font-family: 'Consolas', 'Menlo', 'Source Code Pro', 'Fira Code', 'Courier New', Courier, 'Lucida Console', 'Monaco', monospace;
     font-size: 14px;
-    width: 100%; /* Set a fixed width for the input fields within the table */
-    box-sizing: border-box; /* Ensure padding is included in the width */
-    height: 30px; /* Set a fixed height for the input fields */
+    width: 100%;
+    /* Set a fixed width for the input fields within the table */
+    box-sizing: border-box;
+    /* Ensure padding is included in the width */
+    height: 30px;
+    /* Set a fixed height for the input fields */
 }
 
 /* Column widths */
@@ -368,29 +397,39 @@ h1 {
 }
 
 #pattern-table td:nth-child(1) {
-    text-align: center; /* Center the type values */
+    text-align: center;
+    /* Center the type values */
     /* background-color: #f9f9f9; Light grey background */
 }
 
 #pattern-table td:nth-child(1) button {
-    display: inline-block; /* Keep buttons side by side */
-    margin: 0 2px; /* Add some space between the buttons */
-    text-align: center; /* Center align text */
-    background-color: #dc3545; /* Red background */
-    color: #fff; /* White text */
-    border-radius: 5px; /* Rounded corners */
+    display: inline-block;
+    /* Keep buttons side by side */
+    margin: 0 2px;
+    /* Add some space between the buttons */
+    text-align: center;
+    /* Center align text */
+    background-color: #dc3545;
+    /* Red background */
+    color: #fff;
+    /* White text */
+    border-radius: 5px;
+    /* Rounded corners */
 }
 
 #pattern-table td:nth-child(1) button:hover {
-    background-color: #c82333; /* Darker red on hover */
+    background-color: #c82333;
+    /* Darker red on hover */
 }
 
 #pattern-table tr:nth-child(even) td {
-    background-color: #f1f1f1; /* Slightly darker grey for even rows */
+    background-color: #f1f1f1;
+    /* Slightly darker grey for even rows */
 }
 
 #pattern-table th:nth-child(2) {
-    width: auto; /* Width for Info column */
+    width: auto;
+    /* Width for Info column */
 }
 
 #pattern-table td:nth-child(2) {
@@ -405,7 +444,8 @@ h1 {
 
 #pattern-table th:nth-child(1),
 #pattern-table td:nth-child(1) {
-    width: 90px; /* handle (18px) + 60px button + margins */
+    width: 90px;
+    /* handle (18px) + 60px button + margins */
 }
 
 .header-cell {
@@ -413,7 +453,8 @@ h1 {
     flex-direction: column;
     justify-content: center;
     height: 100%;
-    align-items: flex-start; /* Left justify the text */
+    align-items: flex-start;
+    /* Left justify the text */
 }
 
 .normal-text {
@@ -427,9 +468,11 @@ h1 {
 }
 
 .form-group label {
-    width: 150px; /* Adjust the width as needed */
+    width: 150px;
+    /* Adjust the width as needed */
     margin-right: 10px;
-    text-align: right; /* Right align the labels */
+    text-align: right;
+    /* Right align the labels */
 }
 
 .form-group select,
@@ -464,27 +507,39 @@ h1 {
 .add-pattern-button:hover,
 .notes-link:hover {
     background-color: #0056b3;
-    transform: translateY(-2px); /* Slight lift on hover */
+    transform: translateY(-2px);
+    /* Slight lift on hover */
 }
 
 .add-pattern-button.disabled {
-    background-color: #ccc; /* Grey background */
-    cursor: not-allowed; /* Change cursor to not-allowed */
+    background-color: #ccc;
+    /* Grey background */
+    cursor: not-allowed;
+    /* Change cursor to not-allowed */
 }
 
 button:disabled {
-    background-color: #ccc; /* Grey background */
-    cursor: not-allowed; /* Change cursor to not-allowed */
-    opacity: 0.5; /* Optional: reduce opacity to indicate disabled state */
+    background-color: #ccc;
+    /* Grey background */
+    cursor: not-allowed;
+    /* Change cursor to not-allowed */
+    opacity: 0.5;
+    /* Optional: reduce opacity to indicate disabled state */
 }
 
 .notes-link img.open-icon {
-    margin-left: 8px; /* Space between text and icon */
-    margin-top: -3px; /* Adjust vertical alignment */
-    vertical-align: middle; /* Align icon with text */
-    width: 16px; /* Adjust icon size */
-    height: 16px; /* Adjust icon size */
-    filter: invert(1); /* Invert colors */
+    margin-left: 8px;
+    /* Space between text and icon */
+    margin-top: -3px;
+    /* Adjust vertical alignment */
+    vertical-align: middle;
+    /* Align icon with text */
+    width: 16px;
+    /* Adjust icon size */
+    height: 16px;
+    /* Adjust icon size */
+    filter: invert(1);
+    /* Invert colors */
 }
 
 #import-export-button {
@@ -494,14 +549,19 @@ button:disabled {
 }
 
 #import-export-button img.open-icon {
-    width: 16px; /* Adjust icon size */
-    height: 16px; /* Adjust icon size */
-    margin-left: 8px; /* Adjust the spacing between the text and the icon if needed */
-    filter: invert(1); /* Invert colors */
+    width: 16px;
+    /* Adjust icon size */
+    height: 16px;
+    /* Adjust icon size */
+    margin-left: 8px;
+    /* Adjust the spacing between the text and the icon if needed */
+    filter: invert(1);
+    /* Invert colors */
 }
 
 .notes-link {
-    margin-left: 5px; /* Add space between buttons */
+    margin-left: 5px;
+    /* Add space between buttons */
 }
 
 /* Remove top and bottom margins for cells in edit mode */
@@ -546,7 +606,8 @@ button:disabled {
     cursor: pointer;
     display: flex;
     align-items: center;
-    color: #007bff; /* Blue text color */
+    color: #007bff;
+    /* Blue text color */
     width: 99%;
     height: 20px;
 }
@@ -586,13 +647,17 @@ button:disabled {
 
 .monospace-font {
     font-family: 'Consolas', 'Menlo', 'Source Code Pro', 'Fira Code', 'Courier New', Courier, 'Lucida Console', 'Monaco', monospace;
-    border: 1px solid #ccc; /* Light grey border */
-    border-radius: 5px; /* Rounded corners */
-    padding: 10px; /* Add padding */
+    border: 1px solid #ccc;
+    /* Light grey border */
+    border-radius: 5px;
+    /* Rounded corners */
+    padding: 10px;
+    /* Add padding */
 }
 
 .action-button {
-    width: 60px; /* Set a fixed width */
+    width: 60px;
+    /* Set a fixed width */
 }
 
 .group-header.group-drop-target td {
@@ -876,22 +941,26 @@ dialog#delete-group-dialog .delete-modal-buttons {
 */
 
 .toggle-arrow::before {
-    content: '\25B6'; /* Right-pointing arrow */
+    content: '\25B6';
+    /* Right-pointing arrow */
     width: 20px;
     height: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transform: rotate(0deg); /* Default rotation */
+    transform: rotate(0deg);
+    /* Default rotation */
 }
 
 .toggle-arrow.collapsed::before {
-    transform: rotate(0deg); /* Right-pointing arrow */
+    transform: rotate(0deg);
+    /* Right-pointing arrow */
     margin-bottom: 2px;
 }
 
 .toggle-arrow.expanded::before {
-    transform: rotate(90deg); /* Down-pointing arrow */
+    transform: rotate(90deg);
+    /* Down-pointing arrow */
 }
 
 .custom-alert {
@@ -903,19 +972,23 @@ dialog#delete-group-dialog .delete-modal-buttons {
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0, 0, 0, 0.6); /* Darker background for better contrast */
+    background-color: rgba(0, 0, 0, 0.6);
+    /* Darker background for better contrast */
 }
 
 .custom-alert-content {
     background-color: #fff;
     margin: 10% auto;
     padding: 30px;
-    border-radius: 8px; /* Rounded corners */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+    border-radius: 8px;
+    /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    /* Subtle shadow for depth */
     width: 80%;
     max-width: 500px;
     text-align: left;
-    font-family: Arial, sans-serif; /* Modern font */
+    font-family: Arial, sans-serif;
+    /* Modern font */
 }
 
 .custom-alert-close {
@@ -945,46 +1018,52 @@ dialog#delete-group-dialog .delete-modal-buttons {
     margin: 10px 0;
     line-height: 1.5;
 }
+
 /*
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
   }
-*/  
+*/
 
-  .patterns-table-container {
-    height: 300px; /* Fixed height for the container */
-    overflow-y: auto; /* Enable vertical scrolling */
-    margin-top: 10px; /* Add 20px of space above the table */
-    border-radius: 10px; /* Rounded corners */
-  }
-  
-  table {
+.patterns-table-container {
+    height: 300px;
+    /* Fixed height for the container */
+    overflow-y: auto;
+    /* Enable vertical scrolling */
+    margin-top: 10px;
+    /* Add 20px of space above the table */
+    border-radius: 10px;
+    /* Rounded corners */
+}
+
+table {
     width: 100%;
     border-collapse: collapse;
-  }
-  
-  thead {
+}
+
+thead {
     position: sticky;
-    top: 0; /* Sticks the header to the top of the container */
+    top: 0;
+    /* Sticks the header to the top of the container */
     /* background-color: #f9f9f9;  Background color for better visibility */
     /* z-index: 1;  Ensures the header stays above the body rows */
-  }
-  
-  thead th {
+}
+
+thead th {
     /* border: 1px solid #ddd; */
     padding: 8px;
     text-align: left;
-  }
-  
-  .header-cell {
+}
+
+.header-cell {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-  }
-  
-  /*
+}
+
+/*
   tbody td {
     border: 1px solid #ddd;
     padding: 8px;
@@ -992,9 +1071,9 @@ body {
   }
 */
 
-  #no-values-message {
+#no-values-message {
     text-align: center;
     font-style: italic;
-    color: #666; /* Optional styling for the "No values stored" row */
-  }
-  
+    color: #666;
+    /* Optional styling for the "No values stored" row */
+}
