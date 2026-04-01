@@ -1039,6 +1039,7 @@ body {
     /* Enable vertical scrolling */
     margin-top: 10px;
     /* Add 20px of space above the table */
+    margin-bottom: 5px;
     border-radius: 10px;
     /* Rounded corners */
 }
