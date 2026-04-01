@@ -331,8 +331,9 @@ h1 {
     /* Ensure fixed table layout */
     width: 100%;
     /* Ensure the table takes the full width */
-    border-collapse: collapse;
-    /* Ensure borders are collapsed */
+    border-collapse: separate;
+    border-spacing: 0;
+    /* Ensure border rendering avoids Webkit clipping glitches */
     background-color: #fff;
     /* White background */
     border-radius: 10px;
@@ -357,6 +358,14 @@ h1 {
     /* White text */
     z-index: 1;
     /* Ensure the header stays above the body rows */
+}
+
+#pattern-table thead th:first-child {
+    border-top-left-radius: 10px;
+}
+
+#pattern-table thead th:last-child {
+    border-top-right-radius: 10px;
 }
 
 /* Default font weight for all table cells */
@@ -1037,16 +1046,21 @@ body {
     /* Fixed height for the container */
     overflow-y: auto;
     /* Enable vertical scrolling */
+    overflow-x: hidden;
+    /* Prevent horizontal spillage */
     margin-top: 10px;
     /* Add 20px of space above the table */
     margin-bottom: 5px;
     border-radius: 10px;
     /* Rounded corners */
+    transform: translateZ(0);
+    /* Force new stacking context to clip absolute/sticky children */
 }
 
 table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
 }
 
 thead {
