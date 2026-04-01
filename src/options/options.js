@@ -127,15 +127,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const table = document.getElementById('pattern-table');
     table.addEventListener('click', (event) => {
         event.preventDefault();
-        if (event.target.classList.contains('move-up-button')) {
-            moveRow(event.target.closest('tr'), 'up');
-        } else if (event.target.classList.contains('move-down-button')) {
-            moveRow(event.target.closest('tr'), 'down');
-        } else {
-            const headerRow = event.target.closest('tr.group-header');
-            if (headerRow && !event.target.closest('button')) {
-                toggleGroupCollapse(headerRow);
-            }
+        const headerRow = event.target.closest('tr.group-header');
+        if (headerRow && !event.target.closest('button')) {
+            toggleGroupCollapse(headerRow);
         }
     });
 
@@ -347,10 +341,6 @@ function createPatternRow(pattern, index, groupName) {
                 <input class="new-group-input-row" type="text" placeholder="New group name" style="display:none;">
             </div>
         </td>
-        <td>
-            <button class="move-up-button move-button">&#x25B2;</button>
-            <button class="move-down-button move-button">&#x25BC;</button>
-        </td>
     `;
     return row;
 }
@@ -389,7 +379,7 @@ async function restoreOptions() {
         if (patterns.length === 0) {
             const noValuesMessage = document.createElement('tr');
             noValuesMessage.id = 'no-values-message';
-            noValuesMessage.innerHTML = '<td colspan="3">No values stored</td>';
+            noValuesMessage.innerHTML = '<td colspan="2">No values stored</td>';
             patternTableBody.appendChild(noValuesMessage);
         } else {
             // Separate ungrouped patterns from named groups, preserving flat-array order
@@ -425,7 +415,7 @@ async function restoreOptions() {
                 headerRow.setAttribute('data-group', groupName);
                 headerRow.setAttribute('draggable', 'true');
                 headerRow.innerHTML = `
-                    <td colspan="3">
+                    <td colspan="2">
                         <div class="group-header-inner">
                             <span class="group-header-left">
                                 <span class="drag-handle" title="Drag to reorder">&#x28FF;</span>
@@ -869,32 +859,4 @@ async function updateTabTitle(tabId, changeInfo, tab) {
 function openNotes() {
     console.log('openNotes');
     window.open('../notes/note.html', '_blank');
-}
-
-async function moveRow(row, direction) {
-    const index = parseInt(row.getAttribute('data-index'), 10);
-    const group = row.getAttribute('data-group') || '';
-    const result = await browser.storage.local.get('patterns');
-    const patterns = result.patterns || [];
-
-    // Find all rendered rows in the same group to determine neighbors
-    const tbody = document.getElementById('pattern-table').getElementsByTagName('tbody')[0];
-    const sameGroupRows = Array.from(tbody.querySelectorAll('tr[data-index]')).filter(
-        r => (r.getAttribute('data-group') || '') === group
-    );
-    const posInGroup = sameGroupRows.findIndex(r => parseInt(r.getAttribute('data-index'), 10) === index);
-
-    if (direction === 'up' && posInGroup > 0) {
-        const otherIndex = parseInt(sameGroupRows[posInGroup - 1].getAttribute('data-index'), 10);
-        [patterns[index], patterns[otherIndex]] = [patterns[otherIndex], patterns[index]];
-    } else if (direction === 'down' && posInGroup < sameGroupRows.length - 1) {
-        const otherIndex = parseInt(sameGroupRows[posInGroup + 1].getAttribute('data-index'), 10);
-        [patterns[index], patterns[otherIndex]] = [patterns[otherIndex], patterns[index]];
-    } else {
-        return; // Already at the group boundary
-    }
-
-    await browser.storage.local.set({ patterns });
-    restoreOptions();
-    browser.runtime.sendMessage({ action: 'rerunPatterns' });
 }
