@@ -149,7 +149,6 @@ body {
     display: flex;
     flex-direction: column;
     font-family: Arial, sans-serif;
-    margin-right: 8px;
     background-color: var(--background-color, #f0f2f5);
     color: var(--text-color, #333);
     transition: background-color 0.3s, color 0.3s;
@@ -321,9 +320,7 @@ h1 {
     min-height: 0;
     overflow: clip;
     padding-top: 2px;
-    padding-right: 4px;
     padding-bottom: 0px;
-    margin-right: 10px;
 }
 
 #pattern-table {
