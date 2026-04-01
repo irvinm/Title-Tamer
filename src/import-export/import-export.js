@@ -22,10 +22,17 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             // Fetch the patterns and titles from storage (assuming browser.storage.local)
             const result = await browser.storage.local.get('patterns');
-            const patterns = result.patterns || [];
-            if (patterns.length === 0) {
+            const rawPatterns = result.patterns || [];
+            if (rawPatterns.length === 0) {
                 showCustomAlert(['No patterns to export.']);
                 return;
+            }
+
+            // Sort patterns dynamically to match UI visual rendering before export
+            const groupOrder = [...new Set(rawPatterns.map(p => p.group).filter(Boolean))];
+            const patterns = [...rawPatterns.filter(p => !p.group)];
+            for (const g of groupOrder) {
+                patterns.push(...rawPatterns.filter(p => p.group === g));
             }
 
             // Generate filename with current date and time
@@ -67,10 +74,23 @@ document.addEventListener('DOMContentLoaded', () => {
     
             try {
                 const text = await file.text();
-                const patterns = JSON.parse(text);
+                const rawPatterns = JSON.parse(text);
+    
+                // Strictly sort incoming patterns to maintain logical structural integrity
+                const activeGroups = [...new Set(rawPatterns.map(p => p.group).filter(Boolean))];
+                const patterns = [...rawPatterns.filter(p => !p.group)];
+                for (const g of activeGroups) {
+                    patterns.push(...rawPatterns.filter(p => p.group === g));
+                }
+
+                // Clean up any stale collapsed configuration from old groups that no longer exist
+                const storedValues = await browser.storage.local.get('collapsedGroups');
+                let collapsedGroups = storedValues.collapsedGroups || [];
+                const activeSet = new Set(activeGroups);
+                collapsedGroups = collapsedGroups.filter(g => activeSet.has(g));
     
                 // Assuming browser.storage.local is used to store the patterns
-                await browser.storage.local.set({ patterns });
+                await browser.storage.local.set({ patterns, collapsedGroups });
     
                 showCustomAlert([
                     `${patterns.length} patterns imported successfully!`,
