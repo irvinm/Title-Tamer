@@ -1,3 +1,6 @@
+const collapsedGroups = new Set();
+let draggedGroupName = null;
+
 document.addEventListener('DOMContentLoaded', async () => {
     // Theme handling
     const themeRadios = [
@@ -128,7 +131,29 @@ document.addEventListener('DOMContentLoaded', async () => {
             moveRow(event.target.closest('tr'), 'up');
         } else if (event.target.classList.contains('move-down-button')) {
             moveRow(event.target.closest('tr'), 'down');
+        } else {
+            const headerRow = event.target.closest('tr.group-header');
+            if (headerRow && !event.target.closest('button')) {
+                toggleGroupCollapse(headerRow);
+            }
         }
+    });
+
+    table.addEventListener('change', (event) => {
+        if (event.target.classList.contains('group-select-input')) {
+            const row = event.target.closest('tr');
+            const newGroupInput = row.querySelector('.new-group-input-row');
+            if (newGroupInput) {
+                newGroupInput.style.display = event.target.value === '__new__' ? 'inline-block' : 'none';
+                if (event.target.value === '__new__') newGroupInput.focus();
+            }
+        }
+    });
+
+    document.getElementById('group-select').addEventListener('change', function () {
+        const newGroupInput = document.getElementById('new-group-input');
+        newGroupInput.style.display = this.value === '__new__' ? 'inline-block' : 'none';
+        if (this.value === '__new__') newGroupInput.focus();
     });
 
     document.getElementById('import-export-button').addEventListener('click', () => {
@@ -138,22 +163,31 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function savePattern(event) {
     console.log('savePattern');
-    const search = document.getElementById('search').value; // Updated ID
+    const search = document.getElementById('search').value;
     const title = document.getElementById('title').value;
+    const groupValue = getGroupSelectValue(
+        document.getElementById('group-select'),
+        document.getElementById('new-group-input')
+    );
 
     try {
         const result = await browser.storage.local.get('patterns');
         const patterns = result.patterns || [];
-        patterns.push({ search, title }); // Include the dropdown value
+        const pattern = { search, title };
+        if (groupValue) pattern.group = groupValue;
+        patterns.push(pattern);
         await browser.storage.local.set({ patterns });
-        await restoreOptions(); // Load and display all existing search-title-type pairs
+        await restoreOptions();
 
         // Clear the input fields
         document.getElementById('search').value = '';
         document.getElementById('title').value = '';
+        document.getElementById('group-select').value = '';
+        document.getElementById('new-group-input').style.display = 'none';
+        document.getElementById('new-group-input').value = '';
 
         // Send a message to the background script to update the tabs
-        browser.runtime.sendMessage({ action: 'newPattern', pattern: { search, title } });
+        browser.runtime.sendMessage({ action: 'newPattern', pattern });
     } catch (error) {
         console.error('Error saving pattern:', error);
     }
@@ -169,11 +203,167 @@ function escapeHTML(str) {
         .replace(/'/g, '&#039;');
 }
 
+// Populate a <select> element with (No group), existing group names, and New group…
+function buildGroupSelect(selectEl, patterns, selectedGroup) {
+    const groupNames = [...new Set(patterns.map(p => p.group).filter(Boolean))].sort();
+    const prevVal = selectEl.value;
+    selectEl.innerHTML = '';
+
+    const noGroupOpt = document.createElement('option');
+    noGroupOpt.value = '';
+    noGroupOpt.textContent = '(No group)';
+    selectEl.appendChild(noGroupOpt);
+
+    for (const name of groupNames) {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        selectEl.appendChild(opt);
+    }
+
+    const newOpt = document.createElement('option');
+    newOpt.value = '__new__';
+    newOpt.textContent = 'New group\u2026';
+    selectEl.appendChild(newOpt);
+
+    if (selectedGroup !== undefined) {
+        selectEl.value = (selectedGroup && groupNames.includes(selectedGroup)) ? selectedGroup : '';
+    } else {
+        selectEl.value = prevVal;
+        if (!selectEl.value) selectEl.value = '';
+    }
+}
+
+// Read resolved group value from a select + companion new-name input
+function getGroupSelectValue(selectEl, newInputEl) {
+    if (!selectEl) return '';
+    if (selectEl.value === '__new__') {
+        return newInputEl ? newInputEl.value.trim() : '';
+    }
+    return selectEl.value;
+}
+
+// Toggle the collapsed/expanded state of a group header row
+function toggleGroupCollapse(headerRow) {
+    const groupName = headerRow.getAttribute('data-group');
+    const toggle = headerRow.querySelector('.group-toggle');
+    const tbody = headerRow.parentElement;
+    // Only select pattern rows (not group header rows) by filtering on .pattern-row class
+    const rows = Array.from(tbody.querySelectorAll('tr.pattern-row')).filter(
+        r => r.getAttribute('data-group') === groupName
+    );
+    if (collapsedGroups.has(groupName)) {
+        collapsedGroups.delete(groupName);
+        rows.forEach(r => { r.style.display = ''; });
+        if (toggle) toggle.textContent = '\u25BC';
+    } else {
+        collapsedGroups.add(groupName);
+        rows.forEach(r => { r.style.display = 'none'; });
+        if (toggle) toggle.textContent = '\u25B6';
+    }
+    // Defensive: always keep the header row itself visible
+    headerRow.style.display = '';
+    // Persist collapse state
+    browser.storage.local.set({ collapsedGroups: [...collapsedGroups] });
+}
+
+// Rename all patterns in a group
+async function renameGroup(oldName) {
+    const newName = prompt(`Rename group "${oldName}" to:`, oldName);
+    if (!newName || newName.trim() === '' || newName.trim() === oldName) return;
+    const trimmed = newName.trim();
+    const result = await browser.storage.local.get('patterns');
+    const patterns = result.patterns || [];
+    patterns.forEach(p => { if (p.group === oldName) p.group = trimmed; });
+    await browser.storage.local.set({ patterns });
+    if (collapsedGroups.has(oldName)) {
+        collapsedGroups.delete(oldName);
+        collapsedGroups.add(trimmed);
+        browser.storage.local.set({ collapsedGroups: [...collapsedGroups] });
+    }
+    await restoreOptions();
+}
+
+// Show the delete-group dialog modal
+function showDeleteGroupDialog(groupName) {
+    const dialog = document.getElementById('delete-group-dialog');
+    document.getElementById('delete-group-dialog-message').textContent =
+        `What would you like to do with the patterns in group "${groupName}"?`;
+
+    document.getElementById('delete-group-ungroup-btn').onclick = async () => {
+        dialog.close();
+        const result = await browser.storage.local.get('patterns');
+        const patterns = result.patterns || [];
+        patterns.forEach(p => { if (p.group === groupName) delete p.group; });
+        await browser.storage.local.set({ patterns });
+        collapsedGroups.delete(groupName);
+        browser.storage.local.set({ collapsedGroups: [...collapsedGroups] });
+        await restoreOptions();
+    };
+
+    document.getElementById('delete-group-deleteall-btn').onclick = async () => {
+        dialog.close();
+        const result = await browser.storage.local.get('patterns');
+        let patterns = result.patterns || [];
+        patterns = patterns.filter(p => p.group !== groupName);
+        await browser.storage.local.set({ patterns });
+        collapsedGroups.delete(groupName);
+        browser.storage.local.set({ collapsedGroups: [...collapsedGroups] });
+        await restoreOptions();
+    };
+
+    document.getElementById('delete-group-cancel-btn').onclick = () => dialog.close();
+    dialog.showModal();
+}
+
+// Build a single pattern <tr> for the table body
+function createPatternRow(pattern, index, groupName) {
+    const escapedSearch = escapeHTML(pattern.search);
+    const escapedTitle = escapeHTML(pattern.title);
+    const row = document.createElement('tr');
+    row.classList.add('pattern-row');
+    row.setAttribute('data-index', index);
+    row.setAttribute('data-group', groupName);
+    row.setAttribute('draggable', 'true');
+    row.innerHTML = `
+        <td>
+            <span class="row-drag-handle" title="Drag to reorder">&#x28FF;</span>
+            <button class="edit-button action-button" data-index="${index}">Edit</button>
+            <button class="save-button action-button" data-index="${index}" style="display:none;">Save</button>
+            <button class="discard-button action-button" data-index="${index}" style="display:none;">Discard</button>
+            <button class="delete-button action-button" data-index="${index}">Delete</button>
+        </td>
+        <td>
+            <div>
+                <span class="search-text">${escapedSearch}</span>
+                <input class="search-input" type="text" value="${escapedSearch}" style="display:none;">
+            </div>
+            <div>
+                <span class="title-text">${escapedTitle}</span>
+                <input class="title-input" type="text" value="${escapedTitle}" style="display:none;">
+            </div>
+            <div class="group-row" style="display:none;">
+                <select class="group-select-input"></select>
+                <input class="new-group-input-row" type="text" placeholder="New group name" style="display:none;">
+            </div>
+        </td>
+        <td>
+            <button class="move-up-button move-button">&#x25B2;</button>
+            <button class="move-down-button move-button">&#x25BC;</button>
+        </td>
+    `;
+    return row;
+}
+
 async function restoreOptions() {
     console.log('restoreOptions');
     try {
-        // Check if the loadDiscardedTabs, reDiscardTabs, and discardDelay values are stored
         let { loadDiscardedTabs, reDiscardTabs, discardDelay } = await browser.storage.local.get(['loadDiscardedTabs', 'reDiscardTabs', 'discardDelay']);
+
+        // Restore persisted collapsed group state
+        const { collapsedGroups: storedCollapsed } = await browser.storage.local.get('collapsedGroups');
+        collapsedGroups.clear();
+        if (Array.isArray(storedCollapsed)) storedCollapsed.forEach(g => collapsedGroups.add(g));
 
         if (loadDiscardedTabs === undefined) {
             loadDiscardedTabs = true;
@@ -193,43 +383,72 @@ async function restoreOptions() {
         const patternTableBody = document.getElementById('pattern-table').getElementsByTagName('tbody')[0];
         patternTableBody.innerHTML = '';
 
+        // Rebuild the Group dropdown in the Add Pattern form
+        buildGroupSelect(document.getElementById('group-select'), patterns);
+
         if (patterns.length === 0) {
             const noValuesMessage = document.createElement('tr');
             noValuesMessage.id = 'no-values-message';
-            noValuesMessage.innerHTML = '<td colspan="4">No values stored</td>'; // Update colspan to 4
+            noValuesMessage.innerHTML = '<td colspan="3">No values stored</td>';
             patternTableBody.appendChild(noValuesMessage);
         } else {
+            // Separate ungrouped patterns from named groups, preserving flat-array order
+            const ungrouped = [];
+            const groups = new Map();  // groupName -> [{pattern, index}]
+            const groupOrder = [];
+
             patterns.forEach((pattern, index) => {
-                const escapedSearch = escapeHTML(pattern.search);
-                const escapedTitle = escapeHTML(pattern.title);
-                const row = document.createElement('tr');
-                row.setAttribute('data-index', index);
-                row.innerHTML = `
-                    <td>
-                        <button class="edit-button action-button" data-index="${index}">Edit</button>
-                        <button class="save-button action-button" data-index="${index}" style="display:none;">Save</button>
-                        <button class="discard-button action-button" data-index="${index}" style="display:none;">Discard</button>
-                        <button class="delete-button action-button" data-index="${index}">Delete</button>
-                    </td>    
-                    <td>
-                        <div>
-                            <span class="search-text">${escapedSearch}</span>
-                            <input class="search-input" type="text" value="${escapedSearch}" style="display:none;">
-                        </div>
-                        <div>
-                            <span class="title-text">${escapedTitle}</span>
-                            <input class="title-input" type="text" value="${escapedTitle}" style="display:none;">
-                        </div>
-                    </td>
-                    <td>
-                        <button class="move-up-button move-button">&#x25B2</button>
-                        <button class="move-down-button move-button">&#x25BC</button>
-                    </td>
-                `;
-                patternTableBody.appendChild(row);
+                if (pattern.group) {
+                    if (!groups.has(pattern.group)) {
+                        groups.set(pattern.group, []);
+                        groupOrder.push(pattern.group);
+                    }
+                    groups.get(pattern.group).push({ pattern, index });
+                } else {
+                    ungrouped.push({ pattern, index });
+                }
             });
 
-            // Add event listeners for edit, save, discard, and delete buttons
+            // Render ungrouped patterns first (no header row)
+            ungrouped.forEach(({ pattern, index }) => {
+                patternTableBody.appendChild(createPatternRow(pattern, index, ''));
+            });
+
+            // Render each named group with a collapsible header
+            for (const groupName of groupOrder) {
+                const members = groups.get(groupName);
+                const escapedName = escapeHTML(groupName);
+                const isCollapsed = collapsedGroups.has(groupName);
+
+                const headerRow = document.createElement('tr');
+                headerRow.className = 'group-header';
+                headerRow.setAttribute('data-group', groupName);
+                headerRow.setAttribute('draggable', 'true');
+                headerRow.innerHTML = `
+                    <td colspan="3">
+                        <div class="group-header-inner">
+                            <span class="group-header-left">
+                                <span class="drag-handle" title="Drag to reorder">&#x28FF;</span>
+                                <span class="group-toggle">${isCollapsed ? '&#x25B6;' : '&#x25BC;'}</span>
+                                <span class="group-name-text">${escapedName}</span>
+                            </span>
+                            <span class="group-header-right">
+                                <button type="button" class="rename-group-button action-button" data-group="${escapedName}">Rename</button>
+                                <button type="button" class="delete-group-button action-button" data-group="${escapedName}">Delete Group</button>
+                            </span>
+                        </div>
+                    </td>
+                `;
+                patternTableBody.appendChild(headerRow);
+
+                members.forEach(({ pattern, index }) => {
+                    const row = createPatternRow(pattern, index, groupName);
+                    if (isCollapsed) row.style.display = 'none';
+                    patternTableBody.appendChild(row);
+                });
+            }
+
+            // Event listeners for pattern row buttons
             document.querySelectorAll('.edit-button').forEach(button => {
                 button.addEventListener('click', (event) => {
                     event.preventDefault();
@@ -263,6 +482,211 @@ async function restoreOptions() {
                     const index = event.target.getAttribute('data-index');
                     await deletePattern(index);
                 });
+            });
+
+            // Event listeners for group header buttons
+            document.querySelectorAll('.rename-group-button').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    renameGroup(event.target.getAttribute('data-group')).catch(console.error);
+                });
+            });
+
+            document.querySelectorAll('.delete-group-button').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    showDeleteGroupDialog(event.target.getAttribute('data-group'));
+                });
+            });
+
+            // Drag-and-drop reordering of group header rows
+            // Attach dragover+drop directly to the <td> (the actual hit-test target)
+            // to avoid relying on bubbling to <tbody> which is unreliable in extension popups.
+            document.querySelectorAll('.group-header').forEach(headerRow => {
+                const td = headerRow.querySelector('td');
+
+                headerRow.addEventListener('dragstart', (e) => {
+                    if (e.target.closest('button')) { e.preventDefault(); return; }
+                    draggedGroupName = headerRow.getAttribute('data-group');
+                    setTimeout(() => headerRow.classList.add('group-dragging'), 0);
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', draggedGroupName);
+                });
+
+                headerRow.addEventListener('dragend', () => {
+                    draggedGroupName = null;
+                    document.querySelectorAll('.group-header').forEach(r =>
+                        r.classList.remove('group-dragging', 'drag-over-top', 'drag-over-bottom')
+                    );
+                });
+
+                td.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (!draggedGroupName) return;
+                    const targetGroup = headerRow.getAttribute('data-group');
+                    if (targetGroup === draggedGroupName) return;
+                    e.dataTransfer.dropEffect = 'move';
+                    const rect = td.getBoundingClientRect();
+                    document.querySelectorAll('.group-header').forEach(r =>
+                        r.classList.remove('drag-over-top', 'drag-over-bottom')
+                    );
+                    headerRow.classList.add(
+                        e.clientY < rect.top + rect.height / 2 ? 'drag-over-top' : 'drag-over-bottom'
+                    );
+                });
+
+                td.addEventListener('dragleave', (e) => {
+                    if (!td.contains(e.relatedTarget)) {
+                        headerRow.classList.remove('drag-over-top', 'drag-over-bottom');
+                    }
+                });
+
+                td.addEventListener('drop', async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const sourceGroup = draggedGroupName;
+                    const targetGroupName = headerRow.getAttribute('data-group');
+                    if (!sourceGroup || targetGroupName === sourceGroup) return;
+
+                    const rect = td.getBoundingClientRect();
+                    const dropBefore = e.clientY < rect.top + rect.height / 2;
+
+                    const result = await browser.storage.local.get('patterns');
+                    const patterns = result.patterns || [];
+
+                    const groupOrder = [...new Set(patterns.map(p => p.group).filter(Boolean))];
+                    const ungrouped = patterns.filter(p => !p.group);
+
+                    const newOrder = groupOrder.filter(g => g !== sourceGroup);
+                    const targetIdx = newOrder.indexOf(targetGroupName);
+                    newOrder.splice(dropBefore ? targetIdx : targetIdx + 1, 0, sourceGroup);
+
+                    const newPatterns = [...ungrouped];
+                    for (const g of newOrder) {
+                        newPatterns.push(...patterns.filter(p => p.group === g));
+                    }
+
+                    await browser.storage.local.set({ patterns: newPatterns });
+                    await restoreOptions();
+                    browser.runtime.sendMessage({ action: 'rerunPatterns' });
+                });
+            });
+
+            // Drag-and-drop for individual pattern rows
+            let draggedPatternIndex = null;
+            document.querySelectorAll('.pattern-row').forEach(patternRow => {
+                const contentTd = patternRow.querySelectorAll('td')[1];
+
+                patternRow.addEventListener('dragstart', (e) => {
+                    if (e.target.closest('button')) { e.preventDefault(); return; }
+                    draggedPatternIndex = parseInt(patternRow.getAttribute('data-index'), 10);
+                    setTimeout(() => patternRow.classList.add('row-dragging'), 0);
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', String(draggedPatternIndex));
+                });
+
+                patternRow.addEventListener('dragend', () => {
+                    draggedPatternIndex = null;
+                    document.querySelectorAll('.pattern-row').forEach(r =>
+                        r.classList.remove('row-dragging', 'row-drag-over-top', 'row-drag-over-bottom')
+                    );
+                    document.querySelectorAll('.group-header').forEach(r =>
+                        r.classList.remove('group-drop-target')
+                    );
+                });
+
+                contentTd.addEventListener('dragover', (e) => {
+                    if (draggedPatternIndex === null) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const targetIndex = parseInt(patternRow.getAttribute('data-index'), 10);
+                    if (targetIndex === draggedPatternIndex) return;
+                    e.dataTransfer.dropEffect = 'move';
+                    const rect = contentTd.getBoundingClientRect();
+                    document.querySelectorAll('.pattern-row').forEach(r =>
+                        r.classList.remove('row-drag-over-top', 'row-drag-over-bottom')
+                    );
+                    patternRow.classList.add(
+                        e.clientY < rect.top + rect.height / 2 ? 'row-drag-over-top' : 'row-drag-over-bottom'
+                    );
+                });
+
+                contentTd.addEventListener('dragleave', (e) => {
+                    if (!contentTd.contains(e.relatedTarget)) {
+                        patternRow.classList.remove('row-drag-over-top', 'row-drag-over-bottom');
+                    }
+                });
+
+                contentTd.addEventListener('drop', async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const sourceIndex = draggedPatternIndex;
+                    if (sourceIndex === null) return;
+                    const targetIndex = parseInt(patternRow.getAttribute('data-index'), 10);
+                    if (targetIndex === sourceIndex) return;
+
+                    const rect = contentTd.getBoundingClientRect();
+                    const dropBefore = e.clientY < rect.top + rect.height / 2;
+                    const insertAt = dropBefore ? targetIndex : targetIndex + 1;
+
+                    const result = await browser.storage.local.get('patterns');
+                    const patterns = result.patterns || [];
+                    const targetGroup = patternRow.getAttribute('data-group') || undefined;
+
+                    // Remove dragged pattern, update its group to match drop target
+                    const [moved] = patterns.splice(sourceIndex, 1);
+                    if (targetGroup) moved.group = targetGroup;
+                    else delete moved.group;
+
+                    // Adjust insertAt if source was before the target
+                    const adjustedInsert = sourceIndex < insertAt ? insertAt - 1 : insertAt;
+                    patterns.splice(adjustedInsert, 0, moved);
+
+                    await browser.storage.local.set({ patterns });
+                    await restoreOptions();
+                    browser.runtime.sendMessage({ action: 'rerunPatterns' });
+                });
+            });
+
+            // Allow dropping a pattern row onto a group header (moves it into that group, appended)
+            document.querySelectorAll('.group-header').forEach(headerRow => {
+                const td = headerRow.querySelector('td');
+                td.addEventListener('dragover', (e) => {
+                    if (draggedPatternIndex === null) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.dataTransfer.dropEffect = 'move';
+                    document.querySelectorAll('.group-header').forEach(r => r.classList.remove('group-drop-target'));
+                    headerRow.classList.add('group-drop-target');
+                }, true);
+
+                td.addEventListener('dragleave', (e) => {
+                    if (!td.contains(e.relatedTarget)) {
+                        headerRow.classList.remove('group-drop-target');
+                    }
+                }, true);
+
+                td.addEventListener('drop', async (e) => {
+                    if (draggedPatternIndex === null) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const sourceIndex = draggedPatternIndex;
+                    const targetGroupName = headerRow.getAttribute('data-group');
+
+                    const result = await browser.storage.local.get('patterns');
+                    const patterns = result.patterns || [];
+                    const [moved] = patterns.splice(sourceIndex, 1);
+                    moved.group = targetGroupName;
+                    // Find last member of target group in post-splice array and insert after it.
+                    // If the group has no other members, append to end of array.
+                    const lastInGroup = patterns.reduce((last, p, i) => p.group === targetGroupName ? i : last, -1);
+                    patterns.splice(lastInGroup === -1 ? patterns.length : lastInGroup + 1, 0, moved);
+
+                    await browser.storage.local.set({ patterns });
+                    await restoreOptions();
+                    browser.runtime.sendMessage({ action: 'rerunPatterns' });
+                }, true);
             });
         }
     } catch (error) {
@@ -308,6 +732,8 @@ function toggleEditRow(index, isEditing) {
     const searchInput = row.querySelector('.search-input');
     const titleText = row.querySelector('.title-text');
     const titleInput = row.querySelector('.title-input');
+    const groupRow = row.querySelector('.group-row');
+    const groupSelectInput = row.querySelector('.group-select-input');
     const searchCell = searchInput.closest('td'); // Select the cell containing searchInput
     const titleCell = titleInput.closest('td'); // Select the cell containing titleInput
     const editButton = row.querySelector('.edit-button');
@@ -325,6 +751,13 @@ function toggleEditRow(index, isEditing) {
         titleInput.style.display = 'inline';
         titleInput.style.height = '1.5em'; // Set the height of the input
         titleCell.classList.add('no-margin'); // Add no-margin class to the title cell
+        // Show group selector row and populate it
+        groupRow.style.display = 'flex';
+        browser.storage.local.get('patterns').then(result => {
+            const patterns = result.patterns || [];
+            const currentGroup = row.getAttribute('data-group') || '';
+            buildGroupSelect(groupSelectInput, patterns, currentGroup);
+        });
         editButton.style.display = 'none';
         saveButton.style.display = 'inline';
         discardButton.style.display = 'inline';
@@ -337,6 +770,9 @@ function toggleEditRow(index, isEditing) {
         titleText.style.display = 'inline';
         titleInput.style.display = 'none';
         titleCell.classList.remove('no-margin'); // Remove no-margin class from the title cell
+        // Hide group selector row
+        groupRow.style.display = 'none';
+        row.querySelector('.new-group-input-row').style.display = 'none';
         editButton.style.display = 'inline';
         saveButton.style.display = 'none';
         discardButton.style.display = 'none';
@@ -353,24 +789,20 @@ async function saveRow(index) {
     }
     const searchInput = row.querySelector('.search-input').value;
     const titleInput = row.querySelector('.title-input').value;
+    const groupValue = getGroupSelectValue(
+        row.querySelector('.group-select-input'),
+        row.querySelector('.new-group-input-row')
+    );
 
     try {
         const result = await browser.storage.local.get('patterns');
         const patterns = result.patterns || [];
-        patterns[index] = { search: searchInput, title: titleInput };
+        const pattern = { search: searchInput, title: titleInput };
+        if (groupValue) pattern.group = groupValue;
+        patterns[index] = pattern;
         await browser.storage.local.set({ patterns });
         await restoreOptions(); // Refresh the list after saving
 
-        // Reapply search rules to all open tabs
-        /*
-        const tabs = await browser.tabs.query({});
-        for (const tab of tabs) {
-            updateTabTitle(tab.id, { title: tab.title, url: tab.url }, tab);
-        }
-        */
-
-        // Send a message to the background script with the new search/title/type pair
-        /* browser.runtime.sendMessage({ action: 'newPattern', pattern: { search, title, type } }); */
         browser.runtime.sendMessage({ action: 'newPattern', pattern: patterns[index] });
     } catch (error) {
         console.error('Error saving row:', error);
@@ -441,23 +873,28 @@ function openNotes() {
 
 async function moveRow(row, direction) {
     const index = parseInt(row.getAttribute('data-index'), 10);
+    const group = row.getAttribute('data-group') || '';
     const result = await browser.storage.local.get('patterns');
     const patterns = result.patterns || [];
 
-    if (direction === 'up' && index > 0) {
-        // Swap patterns in the array
-        [patterns[index - 1], patterns[index]] = [patterns[index], patterns[index - 1]];
-    } else if (direction === 'down' && index < patterns.length - 1) {
-        // Swap patterns in the array
-        [patterns[index + 1], patterns[index]] = [patterns[index], patterns[index + 1]];
+    // Find all rendered rows in the same group to determine neighbors
+    const tbody = document.getElementById('pattern-table').getElementsByTagName('tbody')[0];
+    const sameGroupRows = Array.from(tbody.querySelectorAll('tr[data-index]')).filter(
+        r => (r.getAttribute('data-group') || '') === group
+    );
+    const posInGroup = sameGroupRows.findIndex(r => parseInt(r.getAttribute('data-index'), 10) === index);
+
+    if (direction === 'up' && posInGroup > 0) {
+        const otherIndex = parseInt(sameGroupRows[posInGroup - 1].getAttribute('data-index'), 10);
+        [patterns[index], patterns[otherIndex]] = [patterns[otherIndex], patterns[index]];
+    } else if (direction === 'down' && posInGroup < sameGroupRows.length - 1) {
+        const otherIndex = parseInt(sameGroupRows[posInGroup + 1].getAttribute('data-index'), 10);
+        [patterns[index], patterns[otherIndex]] = [patterns[otherIndex], patterns[index]];
+    } else {
+        return; // Already at the group boundary
     }
 
-    // Store the updated patterns array
     await browser.storage.local.set({ patterns });
-
-    // Refresh the UI
     restoreOptions();
-
-    // Send a message to background.js to rerun the patterns
     browser.runtime.sendMessage({ action: 'rerunPatterns' });
 }

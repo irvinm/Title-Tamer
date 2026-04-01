@@ -1,13 +1,13 @@
 .theme-preferences-fieldset {
     display: flex;
     flex-direction: column;
-    gap: 0.5em;
+    gap: 0.2em;
 }
 
 .theme-preferences-fieldset .theme-options-row {
     display: flex;
     flex-direction: row;
-    gap: 2em;
+    gap: 1.5em;
     align-items: center;
 }
 
@@ -38,20 +38,41 @@
 
 /* Container for fieldsets and theme section */
 .form-group2 {
-    margin-bottom: 10px;
+    margin-bottom: 5px;
     background: var(--secondary-bg);
     border-radius: 6px;
     color: var(--text-color);
 }
 
 .patterns-table-container {
-    height: 300px;
+    flex: 1;
+    min-height: 0;
     overflow-y: auto;
-    margin-top: 10px;
+    overflow-x: hidden;
+    margin-top: 4px;
     border-radius: 10px;
     background: var(--secondary-bg);
     border: 1px solid var(--input-border);
     color: var(--text-color);
+    scrollbar-width: thin;
+    scrollbar-color: var(--input-border) transparent;
+    scrollbar-gutter: stable;
+}
+
+.patterns-table-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.patterns-table-container::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.patterns-table-container::-webkit-scrollbar-thumb {
+    background-color: var(--input-border);
+    border-radius: 10px;
 }
 
 table {
@@ -70,7 +91,7 @@ thead {
 }
 
 thead th {
-    padding: 8px;
+    padding: 4px 8px;
     text-align: left;
     background-color: var(--table-header-bg);
     color: var(--table-header-color);
@@ -78,7 +99,7 @@ thead th {
 /* Replaces inline style="display:block; margin-bottom:8px;" */
 .block-label {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 3px;
 }
 
 /* Replaces inline style="display: block;" for nested options */
@@ -105,8 +126,17 @@ thead th {
     text-align: right;
 }
 
+html {
+    height: 100%;
+    overflow: hidden;
+}
+
 body {
-    min-width: 790px;
+    height: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
     font-family: Arial, sans-serif;
     margin-right: 8px;
     background-color: var(--background-color, #f0f2f5);
@@ -129,6 +159,8 @@ body {
     --input-bg: #fff;
     --input-border: #ccc;
     --row-even-bg: #f1f1f1;
+    --group-header-bg: #cfe2ff;
+    --group-header-color: #084298;
 }
 
 /* Dark Theme Variables */
@@ -145,6 +177,8 @@ body {
     --input-bg: #23272a;
     --input-border: #888;
     --row-even-bg: #222426;
+    --group-header-bg: #1d3557;
+    --group-header-color: #a8d8ea;
 }
 
 
@@ -224,69 +258,59 @@ legend,
     font-weight: bold;
     color: var(--primary-color);
     background: transparent;
-    font-size: 1.1em;
-    letter-spacing: 0.5px;
+    font-size: 0.95em;
+    letter-spacing: 0.3px;
 }
 
 /* Theme section styling */
 .theme-preferences-fieldset {
     border-radius: 6px;
-    margin-bottom: 10px;
+    margin-bottom: 4px;
 }
 
 h1 {
-    font-size: 2.5em; /* Increase font size */
-    font-weight: bold; /* Make the text bold */
-    color: #007bff; /* Blue text color */
-    text-align: left; /* Center align the text */
-    margin-top: 15px; /* Add some space above the title */
-    margin-bottom: 15px; /* Add some space below the title */
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); /* Add a subtle text shadow */
-    font-family: 'Arial', sans-serif; /* Use a clean, sans-serif font */
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #007bff;
+    text-align: left;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    font-family: 'Arial', sans-serif;
 }
 
-/*
-label {
-    display: inline-block;
-    width: 150px; 
-    color: #555; 
-}
-*/
-
-.fixed-width-label {
-    width: 150px;
-    display: inline-block; /* Ensure the width is applied */
-    color: var(--text-color, #555); /* Use theme text color */
-}
-
-.nested-options {
-    margin-left: 20px; /* Indent the nested options */
-    margin-top: 3px;
-}
-
-.inline-input {
-    width: 40px; /* Set a fixed width for the input */
-    display: inline-block; /* Ensure the input stays on the same line */
-    border-radius: 3px; /* Rounded corners */
+/* Container for fieldsets and theme section */
+.form-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
 }
 
 #search, #title {
-    width: calc(99% - 210px); /* Adjust the width of the input fields to account for the label width and some padding */
-    border: 1px solid #ccc; /* Light grey border */
-    border-radius: 5px; /* Rounded corners */
-    padding: 10px; /* Add padding */
+    width: calc(100% - 170px);
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 4px 8px;
+    box-sizing: border-box;
 }
 
 .button-link-container {
     display: flex;
-    align-items: center; /* Center align items vertically */
-    /* margin-bottom: 10px; */
-    text-align: center; /* Center the link */
-    margin-top: 10px; /* Add space above buttons */
+    align-items: center;
+    text-align: center;
+    margin-top: 4px;
 }
 
 #pattern-form {
-    margin-right: 10px; /* Add some space on the right side */
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: clip;
+    padding-top: 2px;
+    padding-right: 4px;
+    padding-bottom: 6px;
+    margin-right: 10px;
 }
 
 #pattern-table {
@@ -313,17 +337,19 @@ label {
 
 /* Default font weight for all table cells */
 #pattern-table th, #pattern-table td {
-    font-weight: normal; /* Set font weight to normal */
-    border: none; /* Remove borders */
-    padding: 3px; /* Add padding to table cells */
-    height: 3.25em; /* Set the desired height */
-    box-sizing: border-box; /* Include padding in height calculation */
+    font-weight: normal;
+    border: none;
+    padding: 2px 3px;
+    height: 2em;
+    box-sizing: border-box;
 }
 
 /* Font weight for the header row */
 #pattern-table th {
-    font-weight: bold; /* Make the header text bold */
-    text-transform: uppercase; /* Uppercase text */
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 11px;
+    height: 2.5em;
 }
 
 /* Style for input fields within the table */
@@ -337,7 +363,8 @@ label {
 
 /* Column widths */
 #pattern-table th:nth-child(1) {
-    text-align: center; /* Center the buttons horizontally */
+    text-align: center;
+    vertical-align: middle;
 }
 
 #pattern-table th:nth-child(3) {
@@ -394,6 +421,7 @@ label {
 
 #pattern-table td:nth-child(2) {
     font-family: 'Consolas', 'Menlo', 'Source Code Pro', 'Fira Code', 'Courier New', Courier, 'Lucida Console', 'Monaco', monospace;
+    padding-left: 6px;
 }
 
 #pattern-table th:nth-child(2),
@@ -403,7 +431,7 @@ label {
 
 #pattern-table th:nth-child(1),
 #pattern-table td:nth-child(1) {
-    width: 10ch; /* Fixed width for the first column */
+    width: 90px; /* handle (18px) + 60px button + margins */
 }
 
 #pattern-table th:nth-child(3),
@@ -426,8 +454,7 @@ label {
 .form-group {
     display: flex;
     align-items: center;
-    margin-bottom: 10px;
-    /* width: 99%; */
+    margin-bottom: 4px;
 }
 
 .form-group label {
@@ -449,20 +476,20 @@ label {
 
 .notes-link,
 .add-pattern-button {
-    height: 100%;
+    height: auto;
     display: inline-block;
-    padding: 10px 20px;
-    background-color: #007bff; /* Blue background */
-    color: white; /* White text */
-    text-decoration: none; /* Remove underline */
-    border-radius: 5px; /* Rounded corners */
-    font-size: 16px;
+    padding: 5px 14px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 13px;
     font-family: Arial, sans-serif;
-    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow */
-    cursor: pointer; /* Change cursor to pointer */
-    border: none; /* Remove border */
-    font-weight: bold; /* Bold text */
+    transition: background-color 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    border: none;
+    font-weight: bold;
 }
 
 .add-pattern-button:hover,
@@ -518,17 +545,17 @@ button:disabled {
 
 .open-options-link {
     position: absolute;
-    top: 10px;
+    top: 4px;
     right: 20px;
-    background-color: #007bff; /* Blue background */
-    color: white; /* White text */
-    text-decoration: none; /* Remove underline */
-    padding: 5px 10px;
-    border-radius: 5px; /* Rounded corners */
-    font-size: 14px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-size: 12px;
     font-family: Arial, sans-serif;
-    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow */
+    transition: background-color 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .open-options-link:hover {
@@ -585,7 +612,7 @@ button:disabled {
 }
 
 #toggle-options {
-    margin-top: 10px;
+    margin-top: 4px;
 }
 
 .monospace-font {
@@ -597,6 +624,278 @@ button:disabled {
 
 .action-button {
     width: 60px; /* Set a fixed width */
+}
+
+.group-header.group-drop-target td {
+    outline: 2px dashed var(--primary-color) !important;
+    outline-offset: -2px;
+}
+
+/* ── Pattern row drag-and-drop ───────────────────────────────── */
+
+/* Action cell needs relative positioning for the absolute handle */
+.pattern-row td:nth-child(1) {
+    position: relative;
+    padding-left: 18px;
+}
+
+.pattern-row[draggable="true"] .row-drag-handle {
+    position: absolute;
+    left: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1em;
+    color: var(--text-color);
+    opacity: 0.35;
+    cursor: grab;
+    user-select: none;
+    letter-spacing: -1px;
+    line-height: 1;
+}
+
+.pattern-row[draggable="true"] .row-drag-handle:hover {
+    opacity: 0.75;
+}
+
+.pattern-row.row-dragging {
+    opacity: 0.4;
+}
+
+.pattern-row.row-drag-over-top td {
+    border-top: 2px solid var(--primary-color) !important;
+}
+
+.pattern-row.row-drag-over-bottom td {
+    border-bottom: 2px solid var(--primary-color) !important;
+}
+
+/* ── Group drag-and-drop ──────────────────────────────────────── */
+
+.group-header[draggable="true"] {
+    cursor: grab;
+}
+
+.group-header[draggable="true"]:active {
+    cursor: grabbing;
+}
+
+.drag-handle {
+    font-size: 1em;
+    color: var(--group-header-color);
+    opacity: 0.5;
+    margin-right: 4px;
+    cursor: grab;
+    user-select: none;
+    vertical-align: middle;
+    letter-spacing: -1px;
+}
+
+.group-header.group-dragging {
+    opacity: 0.4;
+}
+
+.group-header.drag-over-top td {
+    border-top: 2px solid var(--primary-color) !important;
+}
+
+.group-header.drag-over-bottom td {
+    border-bottom: 2px solid var(--primary-color) !important;
+}
+
+/* ── Group header row ────────────────────────────────────────── */
+
+.group-header td,
+#pattern-table .group-header td:nth-child(1),
+#pattern-table .group-header td:nth-child(2),
+#pattern-table .group-header td:nth-child(3) {
+    background-color: var(--group-header-bg) !important;
+    color: var(--group-header-color) !important;
+    font-weight: bold;
+    text-align: left !important;
+    padding: 4px 8px;
+    height: auto;
+    min-height: 2em;
+    cursor: pointer;
+}
+
+.group-header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.group-header-left {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.group-header-right {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.group-toggle {
+    display: inline-block;
+    margin-right: 6px;
+    font-size: 0.75em;
+    cursor: pointer;
+    user-select: none;
+    vertical-align: middle;
+}
+
+.group-name-text {
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+.rename-group-button {
+    background-color: var(--button-bg) !important;
+    color: var(--button-text) !important;
+    font-size: 12px !important;
+    padding: 2px 8px !important;
+    height: auto !important;
+    width: auto !important;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-weight: normal !important;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+.rename-group-button:hover {
+    background-color: var(--button-hover-bg) !important;
+}
+
+.delete-group-button {
+    background-color: #dc3545 !important;
+    color: #fff !important;
+    font-size: 12px !important;
+    padding: 2px 8px !important;
+    height: auto !important;
+    width: auto !important;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-weight: normal !important;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
+.delete-group-button:hover {
+    background-color: #c82333 !important;
+}
+
+/* ── Group selector row in edit mode ────────────────────────── */
+
+.group-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 0;
+}
+
+.group-row .group-select-input {
+    min-width: 140px;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    border: 1px solid var(--input-border);
+    border-radius: 3px;
+    padding: 2px 4px;
+}
+
+.group-row .new-group-input-row {
+    flex: 1;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    border: 1px solid var(--input-border);
+}
+
+/* Align content to top during edit mode so group row has no gap */
+#pattern-table.edit-mode .pattern-row td:nth-child(2) {
+    vertical-align: top;
+    padding-top: 4px;
+}
+
+/* ── Delete-group dialog ────────────────────────────────────── */
+
+dialog#delete-group-dialog {
+    background: var(--secondary-bg);
+    color: var(--text-color);
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    padding: 20px;
+    min-width: 320px;
+}
+
+dialog#delete-group-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+dialog#delete-group-dialog p {
+    margin-top: 0;
+    margin-bottom: 16px;
+}
+
+dialog#delete-group-dialog .delete-modal-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.delete-group-deleteall-btn {
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.delete-group-deleteall-btn:hover {
+    background-color: #c82333;
+}
+
+.delete-group-cancel-btn {
+    background-color: #6c757d;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.delete-group-cancel-btn:hover {
+    background-color: #5a6268;
+}
+
+/* ── Group select in Add Pattern form ───────────────────────── */
+
+#group-select {
+    min-width: 160px;
+    padding: 4px 8px;
+    box-sizing: border-box;
+    border-radius: 5px;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23666' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    padding-right: 24px;
+}
+
+#new-group-input {
+    flex: 1;
 }
 
 /*
