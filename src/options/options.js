@@ -787,13 +787,34 @@ async function saveRow(index) {
     try {
         const result = await browser.storage.local.get('patterns');
         const patterns = result.patterns || [];
+        const oldGroup = patterns[index].group || '';
+        const newGroup = groupValue;
         const pattern = { search: searchInput, title: titleInput };
-        if (groupValue) pattern.group = groupValue;
-        patterns[index] = pattern;
+        if (newGroup) pattern.group = newGroup;
+
+        if (newGroup !== oldGroup) {
+            // Remove pattern from its current position, then re-insert it
+            // adjacent to other members of the new group so the group order
+            // in the flat array (and thus the rendered order) is preserved.
+            patterns.splice(index, 1);
+            let insertAt = -1;
+            for (let i = 0; i < patterns.length; i++) {
+                if ((patterns[i].group || '') === newGroup) insertAt = i;
+            }
+            if (insertAt === -1) {
+                // New group name — append at end
+                patterns.push(pattern);
+            } else {
+                patterns.splice(insertAt + 1, 0, pattern);
+            }
+        } else {
+            patterns[index] = pattern;
+        }
+
         await browser.storage.local.set({ patterns });
         await restoreOptions(); // Refresh the list after saving
 
-        browser.runtime.sendMessage({ action: 'newPattern', pattern: patterns[index] });
+        browser.runtime.sendMessage({ action: 'newPattern', pattern });
     } catch (error) {
         console.error('Error saving row:', error);
     }
