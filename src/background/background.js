@@ -95,7 +95,15 @@ async function updateTabTitle(tabId, changeInfo, tab, pattern) {
             console.log('Checking all patterns for single tab: changeInfo ->', changeInfo);
             try {
                 const result = await browser.storage.local.get('patterns');
-                const patterns = result.patterns || [];
+                const rawPatterns = result.patterns || [];
+                
+                // Sort patterns to match the UI's top-to-bottom visual rendering exactly
+                const groupOrder = [...new Set(rawPatterns.map(p => p.group).filter(Boolean))];
+                const patterns = [...rawPatterns.filter(p => !p.group)];
+                for (const g of groupOrder) {
+                    patterns.push(...rawPatterns.filter(p => p.group === g));
+                }
+
                 for (const pattern of patterns) {
                     console.log('tabId', tabId, 'Pattern:', pattern);
                     try {
