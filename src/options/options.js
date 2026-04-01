@@ -516,13 +516,25 @@ async function restoreOptions() {
                     if (!draggedGroupName) return;
                     const targetGroup = headerRow.getAttribute('data-group');
                     if (targetGroup === draggedGroupName) return;
-                    e.dataTransfer.dropEffect = 'move';
+                    
                     const rect = td.getBoundingClientRect();
+                    const isTopHalf = e.clientY < rect.top + rect.height / 2;
+                    const isCollapsed = collapsedGroups.has(targetGroup);
+
+                    if (!isTopHalf && !isCollapsed) {
+                        e.dataTransfer.dropEffect = 'none';
+                        document.querySelectorAll('.group-header').forEach(r =>
+                            r.classList.remove('drag-over-top', 'drag-over-bottom')
+                        );
+                        return;
+                    }
+
+                    e.dataTransfer.dropEffect = 'move';
                     document.querySelectorAll('.group-header').forEach(r =>
                         r.classList.remove('drag-over-top', 'drag-over-bottom')
                     );
                     headerRow.classList.add(
-                        e.clientY < rect.top + rect.height / 2 ? 'drag-over-top' : 'drag-over-bottom'
+                        isTopHalf ? 'drag-over-top' : 'drag-over-bottom'
                     );
                 });
 
@@ -541,6 +553,9 @@ async function restoreOptions() {
 
                     const rect = td.getBoundingClientRect();
                     const dropBefore = e.clientY < rect.top + rect.height / 2;
+                    const isCollapsed = collapsedGroups.has(targetGroupName);
+
+                    if (!dropBefore && !isCollapsed) return;
 
                     const result = await browser.storage.local.get('patterns');
                     const patterns = result.patterns || [];
@@ -587,19 +602,41 @@ async function restoreOptions() {
                 });
 
                 contentTd.addEventListener('dragover', (e) => {
-                    if (draggedPatternIndex === null) return;
+                    if (draggedPatternIndex === null && draggedGroupName === null) return;
                     e.preventDefault();
                     e.stopPropagation();
-                    const targetIndex = parseInt(patternRow.getAttribute('data-index'), 10);
-                    if (targetIndex === draggedPatternIndex) return;
-                    e.dataTransfer.dropEffect = 'move';
                     const rect = contentTd.getBoundingClientRect();
-                    document.querySelectorAll('.pattern-row').forEach(r =>
-                        r.classList.remove('row-drag-over-top', 'row-drag-over-bottom')
-                    );
-                    patternRow.classList.add(
-                        e.clientY < rect.top + rect.height / 2 ? 'row-drag-over-top' : 'row-drag-over-bottom'
-                    );
+                    const isTopHalf = e.clientY < rect.top + rect.height / 2;
+
+                    if (draggedPatternIndex !== null) {
+                        const targetIndex = parseInt(patternRow.getAttribute('data-index'), 10);
+                        if (targetIndex === draggedPatternIndex) return;
+                        e.dataTransfer.dropEffect = 'move';
+                        document.querySelectorAll('.pattern-row').forEach(r =>
+                            r.classList.remove('row-drag-over-top', 'row-drag-over-bottom')
+                        );
+                        patternRow.classList.add(isTopHalf ? 'row-drag-over-top' : 'row-drag-over-bottom');
+                    } else if (draggedGroupName !== null) {
+                        const targetGroup = patternRow.getAttribute('data-group');
+                        if (!targetGroup || targetGroup === draggedGroupName) return;
+                        
+                        const nextRow = patternRow.nextElementSibling;
+                        const isLastInGroup = !nextRow || nextRow.getAttribute('data-group') !== targetGroup || nextRow.classList.contains('group-header');
+
+                        if (!isLastInGroup || isTopHalf) {
+                            e.dataTransfer.dropEffect = 'none';
+                            document.querySelectorAll('.pattern-row, .group-header').forEach(r =>
+                                r.classList.remove('row-drag-over-top', 'row-drag-over-bottom', 'drag-over-top', 'drag-over-bottom')
+                            );
+                            return;
+                        }
+
+                        e.dataTransfer.dropEffect = 'move';
+                        document.querySelectorAll('.pattern-row, .group-header').forEach(r =>
+                            r.classList.remove('row-drag-over-top', 'row-drag-over-bottom', 'drag-over-top', 'drag-over-bottom')
+                        );
+                        patternRow.classList.add('row-drag-over-bottom');
+                    }
                 });
 
                 contentTd.addEventListener('dragleave', (e) => {
@@ -611,31 +648,60 @@ async function restoreOptions() {
                 contentTd.addEventListener('drop', async (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    const sourceIndex = draggedPatternIndex;
-                    if (sourceIndex === null) return;
-                    const targetIndex = parseInt(patternRow.getAttribute('data-index'), 10);
-                    if (targetIndex === sourceIndex) return;
+                    if (draggedPatternIndex === null && draggedGroupName === null) return;
 
                     const rect = contentTd.getBoundingClientRect();
                     const dropBefore = e.clientY < rect.top + rect.height / 2;
-                    const insertAt = dropBefore ? targetIndex : targetIndex + 1;
 
-                    const result = await browser.storage.local.get('patterns');
-                    const patterns = result.patterns || [];
-                    const targetGroup = patternRow.getAttribute('data-group') || undefined;
+                    if (draggedPatternIndex !== null) {
+                        const sourceIndex = draggedPatternIndex;
+                        const targetIndex = parseInt(patternRow.getAttribute('data-index'), 10);
+                        if (targetIndex === sourceIndex) return;
+                        const insertAt = dropBefore ? targetIndex : targetIndex + 1;
 
-                    // Remove dragged pattern, update its group to match drop target
-                    const [moved] = patterns.splice(sourceIndex, 1);
-                    if (targetGroup) moved.group = targetGroup;
-                    else delete moved.group;
+                        const result = await browser.storage.local.get('patterns');
+                        const patterns = result.patterns || [];
+                        const targetGroup = patternRow.getAttribute('data-group') || undefined;
 
-                    // Adjust insertAt if source was before the target
-                    const adjustedInsert = sourceIndex < insertAt ? insertAt - 1 : insertAt;
-                    patterns.splice(adjustedInsert, 0, moved);
+                        const [moved] = patterns.splice(sourceIndex, 1);
+                        if (targetGroup) moved.group = targetGroup;
+                        else delete moved.group;
 
-                    await browser.storage.local.set({ patterns });
-                    await restoreOptions();
-                    browser.runtime.sendMessage({ action: 'rerunPatterns' });
+                        const adjustedInsert = sourceIndex < insertAt ? insertAt - 1 : insertAt;
+                        patterns.splice(adjustedInsert, 0, moved);
+
+                        await browser.storage.local.set({ patterns });
+                        await restoreOptions();
+                        browser.runtime.sendMessage({ action: 'rerunPatterns' });
+                    } else if (draggedGroupName !== null) {
+                        const sourceGroup = draggedGroupName;
+                        const targetGroupName = patternRow.getAttribute('data-group');
+                        if (!sourceGroup || targetGroupName === sourceGroup || !targetGroupName) return;
+
+                        const nextRow = patternRow.nextElementSibling;
+                        const isLastInGroup = !nextRow || nextRow.getAttribute('data-group') !== targetGroupName || nextRow.classList.contains('group-header');
+
+                        if (!isLastInGroup || dropBefore) return;
+
+                        const result = await browser.storage.local.get('patterns');
+                        const patterns = result.patterns || [];
+
+                        const groupOrder = [...new Set(patterns.map(p => p.group).filter(Boolean))];
+                        const ungrouped = patterns.filter(p => !p.group);
+
+                        const newOrder = groupOrder.filter(g => g !== sourceGroup);
+                        const targetIdx = newOrder.indexOf(targetGroupName);
+                        newOrder.splice(dropBefore ? targetIdx : targetIdx + 1, 0, sourceGroup);
+
+                        const newPatterns = [...ungrouped];
+                        for (const g of newOrder) {
+                            newPatterns.push(...patterns.filter(p => p.group === g));
+                        }
+
+                        await browser.storage.local.set({ patterns: newPatterns });
+                        await restoreOptions();
+                        browser.runtime.sendMessage({ action: 'rerunPatterns' });
+                    }
                 });
             });
 
