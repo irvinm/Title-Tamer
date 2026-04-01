@@ -322,7 +322,7 @@ h1 {
     overflow: clip;
     padding-top: 2px;
     padding-right: 4px;
-    padding-bottom: 6px;
+    padding-bottom: 0px;
     margin-right: 10px;
 }
 
@@ -757,7 +757,7 @@ button:disabled {
     color: var(--group-header-color) !important;
     font-weight: bold;
     text-align: left !important;
-    padding: 4px 8px;
+    padding: 2px 8px;
     height: auto;
     min-height: 2em;
     cursor: pointer;
@@ -1042,15 +1042,15 @@ body {
 */
 
 .patterns-table-container {
-    height: 300px;
-    /* Fixed height for the container */
+    max-height: 300px;
+    /* Max height for the container to shrink when few rows */
     overflow-y: auto;
     /* Enable vertical scrolling */
     overflow-x: hidden;
     /* Prevent horizontal spillage */
     margin-top: 10px;
     /* Add 20px of space above the table */
-    margin-bottom: 5px;
+    margin-bottom: 3px;
     border-radius: 10px;
     /* Rounded corners */
     transform: translateZ(0);
