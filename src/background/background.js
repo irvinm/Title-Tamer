@@ -96,7 +96,7 @@ async function updateTabTitle(tabId, changeInfo, tab, pattern) {
             try {
                 const result = await browser.storage.local.get('patterns');
                 const rawPatterns = result.patterns || [];
-                
+
                 // Sort patterns to match the UI's top-to-bottom visual rendering exactly
                 const groupOrder = [...new Set(rawPatterns.map(p => p.group).filter(Boolean))];
                 const patterns = [...rawPatterns.filter(p => !p.group)];
@@ -104,7 +104,12 @@ async function updateTabTitle(tabId, changeInfo, tab, pattern) {
                     patterns.push(...rawPatterns.filter(p => p.group === g));
                 }
 
+                const { disabledGroups = [] } = await browser.storage.local.get('disabledGroups');
+
                 for (const pattern of patterns) {
+                    if (pattern.enabled === false) continue;
+                    if (pattern.group && disabledGroups.includes(pattern.group)) continue;
+                    
                     console.log('tabId', tabId, 'Pattern:', pattern);
                     try {
                         const matches = matchUrl(tab.url, pattern.search);

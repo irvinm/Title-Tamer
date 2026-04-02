@@ -1,4 +1,5 @@
 const collapsedGroups = new Set();
+const disabledGroups = new Set();
 let draggedGroupName = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -126,6 +127,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const table = document.getElementById('pattern-table');
     table.addEventListener('click', (event) => {
+        // Allow native checkbox behaviors directly
+        if (event.target.closest('.switch')) return;
+
         event.preventDefault();
         const headerRow = event.target.closest('tr.group-header');
         if (headerRow && !event.target.closest('button')) {
@@ -315,11 +319,15 @@ async function showDeleteGroupDialog(groupName) {
 }
 
 // Build a single pattern <tr> for the table body
-function createPatternRow(pattern, index, groupName) {
+function createPatternRow(pattern, index, groupName, isGroupDisabled = false) {
     const escapedSearch = escapeHTML(pattern.search);
     const escapedTitle = escapeHTML(pattern.title);
+    const isEnabled = pattern.enabled !== false;
     const row = document.createElement('tr');
     row.classList.add('pattern-row');
+    if (!isEnabled || isGroupDisabled) {
+        row.classList.add('disabled-visual');
+    }
     row.setAttribute('data-index', index);
     row.setAttribute('data-group', groupName);
     row.setAttribute('draggable', 'true');
@@ -345,6 +353,12 @@ function createPatternRow(pattern, index, groupName) {
                 <input class="new-group-input-row" type="text" placeholder="New group name" style="display:none;">
             </div>
         </td>
+        <td style="text-align: center;">
+            <label class="switch">
+                <input type="checkbox" class="pattern-enabled-toggle" ${(isEnabled && !isGroupDisabled) ? 'checked' : ''} ${isGroupDisabled ? 'disabled' : ''} data-index="${index}">
+                <span class="slider"></span>
+            </label>
+        </td>
     `;
     return row;
 }
@@ -354,10 +368,14 @@ async function restoreOptions() {
     try {
         let { loadDiscardedTabs, reDiscardTabs, discardDelay } = await browser.storage.local.get(['loadDiscardedTabs', 'reDiscardTabs', 'discardDelay']);
 
-        // Restore persisted collapsed group state
-        const { collapsedGroups: storedCollapsed } = await browser.storage.local.get('collapsedGroups');
+        // Restore persisted UI states
+        const { collapsedGroups: storedCollapsed, disabledGroups: storedDisabled } = await browser.storage.local.get(['collapsedGroups', 'disabledGroups']);
+        
         collapsedGroups.clear();
         if (Array.isArray(storedCollapsed)) storedCollapsed.forEach(g => collapsedGroups.add(g));
+        
+        disabledGroups.clear();
+        if (Array.isArray(storedDisabled)) storedDisabled.forEach(g => disabledGroups.add(g));
 
         if (loadDiscardedTabs === undefined) {
             loadDiscardedTabs = true;
@@ -383,7 +401,7 @@ async function restoreOptions() {
         if (patterns.length === 0) {
             const noValuesMessage = document.createElement('tr');
             noValuesMessage.id = 'no-values-message';
-            noValuesMessage.innerHTML = '<td colspan="2">No values stored</td>';
+            noValuesMessage.innerHTML = '<td colspan="3">No values stored</td>';
             patternTableBody.appendChild(noValuesMessage);
         } else {
             // Separate ungrouped patterns from named groups, preserving flat-array order
@@ -413,9 +431,11 @@ async function restoreOptions() {
                 const members = groups.get(groupName);
                 const escapedName = escapeHTML(groupName);
                 const isCollapsed = collapsedGroups.has(groupName);
+                const isGroupDisabled = disabledGroups.has(groupName);
 
                 const headerRow = document.createElement('tr');
                 headerRow.className = 'group-header';
+                if (isGroupDisabled) headerRow.classList.add('disabled-visual');
                 headerRow.setAttribute('data-group', groupName);
                 headerRow.setAttribute('draggable', 'true');
                 headerRow.innerHTML = `
@@ -432,11 +452,17 @@ async function restoreOptions() {
                             </span>
                         </div>
                     </td>
+                    <td style="text-align: center;">
+                        <label class="switch" title="Enable/Disable Group">
+                            <input type="checkbox" class="group-enabled-toggle" ${!isGroupDisabled ? 'checked' : ''} data-group="${escapedName}">
+                            <span class="slider"></span>
+                        </label>
+                    </td>
                 `;
                 patternTableBody.appendChild(headerRow);
 
                 members.forEach(({ pattern, index }) => {
-                    const row = createPatternRow(pattern, index, groupName);
+                    const row = createPatternRow(pattern, index, groupName, isGroupDisabled);
                     if (isCollapsed) row.style.display = 'none';
                     patternTableBody.appendChild(row);
                 });
@@ -475,6 +501,22 @@ async function restoreOptions() {
                     event.preventDefault();
                     const index = event.target.getAttribute('data-index');
                     await deletePattern(index);
+                });
+            });
+
+            document.querySelectorAll('.pattern-enabled-toggle').forEach(checkbox => {
+                checkbox.addEventListener('change', async (event) => {
+                    const index = event.target.getAttribute('data-index');
+                    const isEnabled = event.target.checked;
+                    await updatePatternEnabled(index, isEnabled);
+                });
+            });
+
+            document.querySelectorAll('.group-enabled-toggle').forEach(checkbox => {
+                checkbox.addEventListener('change', async (event) => {
+                    const groupName = event.target.getAttribute('data-group');
+                    const isEnabled = event.target.checked;
+                    await updateGroupDisabled(groupName, !isEnabled);
                 });
             });
 
@@ -520,7 +562,7 @@ async function restoreOptions() {
                     if (!draggedGroupName) return;
                     const targetGroup = headerRow.getAttribute('data-group');
                     if (targetGroup === draggedGroupName) return;
-                    
+
                     const rect = td.getBoundingClientRect();
                     const isTopHalf = e.clientY < rect.top + rect.height / 2;
                     const isCollapsed = collapsedGroups.has(targetGroup);
@@ -623,7 +665,7 @@ async function restoreOptions() {
                     } else if (draggedGroupName !== null) {
                         const targetGroup = patternRow.getAttribute('data-group');
                         if (!targetGroup || targetGroup === draggedGroupName) return;
-                        
+
                         const nextRow = patternRow.nextElementSibling;
                         const isLastInGroup = !nextRow || nextRow.getAttribute('data-group') !== targetGroup || nextRow.classList.contains('group-header');
 
@@ -859,7 +901,11 @@ async function saveRow(index) {
         const patterns = result.patterns || [];
         const oldGroup = patterns[index].group || '';
         const newGroup = groupValue;
-        const pattern = { search: searchInput, title: titleInput };
+        const pattern = { 
+            search: searchInput, 
+            title: titleInput,
+            enabled: patterns[index].enabled !== false // Preserve existing status
+        };
         if (newGroup) pattern.group = newGroup;
 
         if (newGroup !== oldGroup) {
@@ -946,6 +992,66 @@ async function updateTabTitle(tabId, changeInfo, tab) {
     }
 }
 */
+
+async function updatePatternEnabled(index, isEnabled) {
+    const result = await browser.storage.local.get('patterns');
+    const patterns = result.patterns || [];
+    if (patterns[index]) {
+        patterns[index].enabled = isEnabled;
+        await browser.storage.local.set({ patterns });
+        
+        // Update visual state of the row
+        const row = document.querySelector(`.pattern-row[data-index="${index}"]`);
+        if (row) {
+            const groupName = row.getAttribute('data-group');
+            const isGroupDisabled = disabledGroups.has(groupName);
+            if (!isEnabled || isGroupDisabled) {
+                row.classList.add('disabled-visual');
+            } else {
+                row.classList.remove('disabled-visual');
+            }
+        }
+    }
+}
+
+async function updateGroupDisabled(groupName, isDisabled) {
+    if (isDisabled) {
+        disabledGroups.add(groupName);
+    } else {
+        disabledGroups.delete(groupName);
+    }
+    await browser.storage.local.set({ disabledGroups: Array.from(disabledGroups) });
+    
+    // Update visual state of the group header and its child rows
+    const headerRow = document.querySelector(`.group-header[data-group="${groupName}"]`);
+    if (headerRow) {
+        if (isDisabled) {
+            headerRow.classList.add('disabled-visual');
+        } else {
+            headerRow.classList.remove('disabled-visual');
+        }
+    }
+    
+    // Update all pattern rows in this group
+    const rows = document.querySelectorAll(`.pattern-row[data-group="${groupName}"]`);
+    const { patterns } = await browser.storage.local.get('patterns');
+    for (const row of rows) {
+        const index = row.getAttribute('data-index');
+        const isPatternEnabled = patterns[index] ? patterns[index].enabled !== false : true;
+        
+        const checkbox = row.querySelector('.pattern-enabled-toggle');
+        if (isDisabled || !isPatternEnabled) {
+            row.classList.add('disabled-visual');
+        } else {
+            row.classList.remove('disabled-visual');
+        }
+        
+        if (checkbox) {
+            checkbox.checked = isPatternEnabled && !isDisabled;
+            checkbox.disabled = isDisabled;
+        }
+    }
+}
 
 function openNotes() {
     console.log('openNotes');

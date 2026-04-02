@@ -485,7 +485,14 @@ h1 {
 
 #pattern-table th:nth-child(2),
 #pattern-table td:nth-child(2) {
-    width: 100%;
+    width: auto;
+}
+
+#pattern-table th:nth-child(3),
+#pattern-table td:nth-child(3) {
+    width: 60px;
+    text-align: right;
+    padding-right: 15px;
 }
 
 #pattern-table th:nth-child(1),
@@ -771,8 +778,7 @@ button:disabled {
 
 .group-header td,
 #pattern-table .group-header td:nth-child(1),
-#pattern-table .group-header td:nth-child(2),
-#pattern-table .group-header td:nth-child(3) {
+#pattern-table .group-header td:nth-child(2) {
     background-color: var(--group-header-bg) !important;
     color: var(--group-header-color) !important;
     font-weight: bold;
@@ -781,6 +787,17 @@ button:disabled {
     height: auto;
     min-height: 2em;
     cursor: pointer;
+}
+
+#pattern-table .group-header td:nth-child(3) {
+    background-color: var(--group-header-bg) !important;
+    color: var(--group-header-color) !important;
+    padding: 2px 15px 2px 3px !important; /* Force padding-right: 15px to match standard rows */
+    height: auto;
+    min-height: 2em;
+    cursor: pointer;
+    vertical-align: middle;
+    text-align: right !important;
 }
 
 .group-header-inner {
@@ -1116,4 +1133,73 @@ thead th {
     font-style: italic;
     color: #666;
     /* Optional styling for the "No values stored" row */
+}
+
+/* ── Sliding Toggle Switch ─────────────────────────────────── */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 32px;
+    height: 18px;
+    margin-bottom: 0;
+    vertical-align: middle;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .3s;
+    border-radius: 18px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 12px;
+    width: 12px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--primary-color);
+}
+
+input:checked + .slider:before {
+    transform: translateX(14px);
+}
+
+/* ── Disabled states (grayscale text) ─────────────────────── */
+.disabled-visual {
+    color: #888 !important;
+    opacity: 0.7;
+    filter: grayscale(100%);
+}
+
+.theme-dark .disabled-visual {
+    color: #666 !important;
+}
+
+/* Ensure buttons and drag handles keep their color even in disabled rows */
+.disabled-visual .action-button,
+.disabled-visual .rename-group-button,
+.disabled-visual .delete-group-button,
+.disabled-visual .row-drag-handle,
+.disabled-visual .drag-handle {
+    filter: none;
+    opacity: 1;
 }

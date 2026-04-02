@@ -40,8 +40,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const dateTime = now.toISOString().replace(/[:.]/g, '-'); // Replace colons and dots to make it a valid filename
             const filename = `patterns(${dateTime}).json`;
 
+            const { collapsedGroups = [], disabledGroups = [] } = await browser.storage.local.get(['collapsedGroups', 'disabledGroups']);
+
+            const exportData = {
+                metadata: {
+                    version: "1.0",
+                    collapsedGroups,
+                    disabledGroups
+                },
+                patterns
+            };
+
             // Create a blob with the patterns data
-            const blob = new Blob([JSON.stringify(patterns, null, 2)], { type: 'application/json' });
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
 
             // Create a link element and trigger the download
             const link = document.createElement('a');
@@ -74,7 +85,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
             try {
                 const text = await file.text();
-                const rawPatterns = JSON.parse(text);
+                const parsedData = JSON.parse(text);
+                const rawPatterns = Array.isArray(parsedData) ? parsedData : parsedData.patterns || [];
+                const importedCollapsedGroups = parsedData.metadata?.collapsedGroups || [];
+                const importedDisabledGroups = parsedData.metadata?.disabledGroups || [];
     
                 // Strictly sort incoming patterns to maintain logical structural integrity
                 const activeGroups = [...new Set(rawPatterns.map(p => p.group).filter(Boolean))];
@@ -83,14 +97,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     patterns.push(...rawPatterns.filter(p => p.group === g));
                 }
 
-                // Clean up any stale collapsed configuration from old groups that no longer exist
-                const storedValues = await browser.storage.local.get('collapsedGroups');
-                let collapsedGroups = storedValues.collapsedGroups || [];
+                // Clean up any stale configuration from old groups that no longer exist
                 const activeSet = new Set(activeGroups);
-                collapsedGroups = collapsedGroups.filter(g => activeSet.has(g));
+                const collapsedGroups = importedCollapsedGroups.filter(g => activeSet.has(g));
+                const disabledGroups = importedDisabledGroups.filter(g => activeSet.has(g));
     
-                // Assuming browser.storage.local is used to store the patterns
-                await browser.storage.local.set({ patterns, collapsedGroups });
+                // Save patterns and UI active states to storage
+                await browser.storage.local.set({ patterns, collapsedGroups, disabledGroups });
     
                 showCustomAlert([
                     `${patterns.length} patterns imported successfully!`,
