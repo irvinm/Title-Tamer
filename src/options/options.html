@@ -9,7 +9,13 @@
 
 <body>
     <a href="options.html" target="_blank" class="open-options-link">Open options in new (wider) tab</a>
-    <h1>Title Tamer Options</h1>
+    <header class="app-header">
+        <div class="header-logo">
+            <img src="../icons/icon-dark.svg" class="icon-for-light" alt="Title Tamer Icon">
+            <img src="../icons/icon-light.svg" class="icon-for-dark" alt="Title Tamer Icon">
+        </div>
+        <h1>Title Tamer Options</h1>
+    </header>
     <form id="pattern-form">
         <div class="form-group">
             <label for="search" class="fixed-width-label">Search term:</label>
@@ -25,7 +31,8 @@
                 <option value="">(No group)</option>
                 <option value="__new__">New group&hellip;</option>
             </select>
-            <input type="text" id="new-group-input" class="monospace-font" placeholder="New group name" style="display:none; margin-left:8px;">
+            <input type="text" id="new-group-input" class="monospace-font" placeholder="New group name"
+                style="display:none; margin-left:8px;">
         </div>
         <div class="form-group">
             <div class="button-link-container">
@@ -50,7 +57,8 @@
                         <label class="discard-delay-label">
                             <input type="checkbox" id="discard-delay-enabled" checked />
                             Discard these tabs after
-                            <input type="number" id="discard-delay" class="inline-input" placeholder="Enter seconds" min="0" value="1" />
+                            <input type="number" id="discard-delay" class="inline-input" placeholder="Enter seconds"
+                                min="0" value="1" />
                             seconds
                         </label>
                     </div>
@@ -79,7 +87,8 @@
             <!-- Export and Import Options -->
             <div class="form-group2">
                 <button type="button" id="import-export-button" class="add-pattern-button">
-                    Import/Export Options <img class="open-icon" src="../icons/open.png" alt="Open in new tab" class="open-icon">
+                    Import/Export Options <img class="open-icon" src="../icons/open.png" alt="Open in new tab"
+                        class="open-icon">
                 </button>
             </div>
         </div>
@@ -108,7 +117,8 @@
         <p id="delete-group-dialog-message"></p>
         <div class="delete-modal-buttons">
             <button type="button" id="delete-group-ungroup-btn" class="add-pattern-button">Ungroup patterns</button>
-            <button type="button" id="delete-group-deleteall-btn" class="delete-group-deleteall-btn">Delete all patterns</button>
+            <button type="button" id="delete-group-deleteall-btn" class="delete-group-deleteall-btn">Delete all
+                patterns</button>
             <button type="button" id="delete-group-cancel-btn" class="delete-group-cancel-btn">Cancel</button>
         </div>
     </dialog>

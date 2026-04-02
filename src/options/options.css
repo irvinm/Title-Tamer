@@ -193,9 +193,42 @@ body {
 
 
 /* Theme-specific styles using variables */
+/* Header and Title Styling */
+.app-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--input-border);
+}
+
+.header-logo {
+    display: flex;
+    align-items: center;
+}
+
+.header-logo img {
+    width: 32px;
+    height: 32px;
+}
+
+/* Theme-aware icon toggling */
+.icon-for-dark,
+.theme-dark .icon-for-light {
+    display: none;
+}
+
+.theme-dark .icon-for-dark {
+    display: block;
+}
+
 h1 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
     color: var(--primary-color);
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 #pattern-table {
