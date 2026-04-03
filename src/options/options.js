@@ -67,23 +67,34 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById('notes-button').addEventListener('click', openNotes);
 
-    const toggleButton = document.getElementById('toggle-options');
-    const collapsibleContent = document.getElementById('additional-options');
+    // Setup collapsible sections
+    function setupToggle(buttonId, contentId, startExpanded = false) {
+        const button = document.getElementById(buttonId);
+        const content = document.getElementById(contentId);
+        if (!button || !content) return;
 
-    toggleButton.addEventListener('click', () => {
-        if (collapsibleContent.style.display === 'none' || collapsibleContent.style.display === '') {
-            collapsibleContent.style.display = 'block';
-            toggleButton.classList.remove('collapsed');
-            toggleButton.classList.add('expanded');
-        } else {
-            collapsibleContent.style.display = 'none';
-            toggleButton.classList.remove('expanded');
-            toggleButton.classList.add('collapsed');
-        }
-    });
+        const setExpanded = (isExpanded) => {
+            if (isExpanded) {
+                content.style.display = 'block';
+                button.classList.remove('collapsed');
+                button.classList.add('expanded');
+            } else {
+                content.style.display = 'none';
+                button.classList.remove('expanded');
+                button.classList.add('collapsed');
+            }
+        };
 
-    // Initialize the arrow direction
-    toggleButton.classList.add('collapsed');
+        button.addEventListener('click', () => {
+            const isExpanding = content.style.display === 'none' || content.style.display === '';
+            setExpanded(isExpanding);
+        });
+
+        setExpanded(startExpanded);
+    }
+
+    setupToggle('toggle-add-rule', 'add-rule-content', true);
+    setupToggle('toggle-options', 'additional-options', false);
 
     // Load the loadDiscardedTabs value from storage and set the checkbox state
     // const { loadDiscardedTabs = true, reDiscardTabs = true, discardDelay = 1 } = await browser.storage.local.get(['loadDiscardedTabs', 'reDiscardTabs', 'discardDelay']);

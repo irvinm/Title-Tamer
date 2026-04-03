@@ -198,7 +198,7 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 12px;
+    margin-bottom: 6px;
     padding-bottom: 8px;
     border-bottom: 1px solid var(--input-border);
 }
@@ -638,7 +638,7 @@ button:disabled {
 
 .collapsible-content {
     display: none;
-    margin-top: 10px;
+    margin-top: 5px;
     border: 1px solid var(--input-border);
     padding: 10px;
     width: calc(100% - 20px);
@@ -651,10 +651,35 @@ button:disabled {
     cursor: pointer;
     display: flex;
     align-items: center;
-    color: #007bff;
-    /* Blue text color */
-    width: 99%;
-    height: 20px;
+    color: var(--primary-color);
+    font-weight: bold;
+    margin: 12px 0 4px 0;
+    user-select: none;
+    height: 24px;
+}
+
+.toggle-arrow::before {
+    content: '';
+    margin-right: 8px;
+    font-size: 0.8em;
+    width: 14px;
+    display: inline-block;
+}
+
+.toggle-arrow.collapsed::before {
+    content: '\25B6'; /* ▶ */
+}
+
+.toggle-arrow.expanded::before {
+    content: '\25BC'; /* ▼ */
+}
+
+#toggle-add-rule {
+    margin-top: 0; /* First one don't need top margin */
+}
+
+#toggle-options {
+    margin-top: 16px;
 }
 
 /*

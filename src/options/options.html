@@ -18,30 +18,33 @@
         <a href="options.html" target="_blank" class="open-options-link">Open options in new (wider) tab</a>
     </header>
     <form id="pattern-form">
-        <div class="form-group">
-            <label for="search" class="fixed-width-label">Search term:</label>
-            <input type="text" id="search" class="monospace-font" placeholder="Enter Search" required>
-        </div>
-        <div class="form-group">
-            <label for="title" class="fixed-width-label">Title to use if found:</label>
-            <input type="text" id="title" class="monospace-font" placeholder="Enter Title" required>
-        </div>
-        <div class="form-group">
-            <label for="group-select" class="fixed-width-label">Group:</label>
-            <select id="group-select">
-                <option value="">(No group)</option>
-                <option value="__new__">New group&hellip;</option>
-            </select>
-            <input type="text" id="new-group-input" class="monospace-font" placeholder="New group name"
-                style="display:none; margin-left:8px;">
-        </div>
-        <div class="form-group">
-            <div class="button-link-container">
-                <label></label>
-                <button type="submit" class="add-pattern-button" id="add-pattern-button">Add Pattern</button>
-                <button type="button" class="notes-link" id="notes-button">
-                    Notes & Examples <img src="../icons/open.png" alt="Open in new tab" class="open-icon">
-                </button>
+        <div id="toggle-add-rule" class="toggle-arrow">Add New Rule</div>
+        <div id="add-rule-content" class="collapsible-content">
+            <div class="form-group">
+                <label for="search" class="fixed-width-label">Search term:</label>
+                <input type="text" id="search" class="monospace-font" placeholder="Enter Search" required>
+            </div>
+            <div class="form-group">
+                <label for="title" class="fixed-width-label">Title to use if found:</label>
+                <input type="text" id="title" class="monospace-font" placeholder="Enter Title" required>
+            </div>
+            <div class="form-group">
+                <label for="group-select" class="fixed-width-label">Group:</label>
+                <select id="group-select">
+                    <option value="">(No group)</option>
+                    <option value="__new__">New group&hellip;</option>
+                </select>
+                <input type="text" id="new-group-input" class="monospace-font" placeholder="New group name"
+                    style="display:none; margin-left:8px;">
+            </div>
+            <div class="form-group">
+                <div class="button-link-container">
+                    <label></label>
+                    <button type="submit" class="add-pattern-button" id="add-pattern-button">Add Pattern</button>
+                    <button type="button" class="notes-link" id="notes-button">
+                        Notes & Examples <img src="../icons/open.png" alt="Open in new tab" class="open-icon">
+                    </button>
+                </div>
             </div>
         </div>
         <div id="toggle-options" class="toggle-arrow">Additional Options</div>
