@@ -346,6 +346,8 @@ async function savePattern(event) {
     }
 }
 
+// Note: escapeHTML, getOrderedGroupNames and computeScrollThumb are mirrored in
+// src/lib/group-utils.js for unit-test coverage. Keep them in sync.
 function escapeHTML(str) {
     if (!str) return '';
     return String(str)
