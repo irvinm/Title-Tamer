@@ -643,7 +643,6 @@ async function restoreOptions() {
             // Drag-and-drop for individual pattern rows
             let draggedPatternIndex = null;
             document.querySelectorAll('.pattern-row').forEach(patternRow => {
-                const contentTd = patternRow.querySelectorAll('td')[1];
 
                 patternRow.addEventListener('dragstart', (e) => {
                     if (e.target.closest('button, input, select, textarea')) { e.preventDefault(); return; }
@@ -663,11 +662,11 @@ async function restoreOptions() {
                     );
                 });
 
-                contentTd.addEventListener('dragover', (e) => {
+                patternRow.addEventListener('dragover', (e) => {
                     if (draggedPatternIndex === null && draggedGroupName === null) return;
                     e.preventDefault();
                     e.stopPropagation();
-                    const rect = contentTd.getBoundingClientRect();
+                    const rect = patternRow.getBoundingClientRect();
                     const isTopHalf = e.clientY < rect.top + rect.height / 2;
 
                     if (draggedPatternIndex !== null) {
@@ -701,18 +700,18 @@ async function restoreOptions() {
                     }
                 });
 
-                contentTd.addEventListener('dragleave', (e) => {
-                    if (!contentTd.contains(e.relatedTarget)) {
+                patternRow.addEventListener('dragleave', (e) => {
+                    if (!patternRow.contains(e.relatedTarget)) {
                         patternRow.classList.remove('row-drag-over-top', 'row-drag-over-bottom');
                     }
                 });
 
-                contentTd.addEventListener('drop', async (e) => {
+                patternRow.addEventListener('drop', async (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     if (draggedPatternIndex === null && draggedGroupName === null) return;
 
-                    const rect = contentTd.getBoundingClientRect();
+                    const rect = patternRow.getBoundingClientRect();
                     const dropBefore = e.clientY < rect.top + rect.height / 2;
 
                     if (draggedPatternIndex !== null) {
