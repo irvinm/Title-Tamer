@@ -117,8 +117,8 @@
     right: 0;
     width: 100%;
     border-radius: 999px;
-    background: rgba(0, 0, 0, 0.95);
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18);
+    background: var(--overlay-scrollbar-thumb);
+    box-shadow: 0 0 0 1px var(--overlay-scrollbar-outline);
 }
 
 table {
@@ -213,6 +213,8 @@ body {
     --row-even-bg: #f1f1f1;
     --group-header-bg: #cfe2ff;
     --group-header-color: #084298;
+    --overlay-scrollbar-thumb: rgba(0, 0, 0, 0.85);
+    --overlay-scrollbar-outline: rgba(255, 255, 255, 0.18);
 }
 
 /* Dark Theme Variables */
@@ -231,6 +233,8 @@ body {
     --row-even-bg: #222426;
     --group-header-bg: #1d3557;
     --group-header-color: #a8d8ea;
+    --overlay-scrollbar-thumb: rgba(255, 255, 255, 0.92);
+    --overlay-scrollbar-outline: rgba(0, 0, 0, 0.28);
 }
 
 
