@@ -444,15 +444,12 @@ h1 {
 
 #pattern-table td:nth-child(1) {
     text-align: center;
-    /* Center the type values */
-    /* background-color: #f9f9f9; Light grey background */
+    vertical-align: middle;
 }
 
 #pattern-table td:nth-child(1) button {
-    display: inline-block;
-    /* Keep buttons side by side */
-    margin: 0 2px;
-    /* Add some space between the buttons */
+    display: block;
+    margin: 1px auto;
     text-align: center;
     /* Center align text */
     background-color: #dc3545;
@@ -461,6 +458,8 @@ h1 {
     /* White text */
     border-radius: 5px;
     /* Rounded corners */
+    height: 24px;
+    box-sizing: border-box;
 }
 
 #pattern-table td:nth-child(1) button:hover {
@@ -481,6 +480,16 @@ h1 {
 #pattern-table td:nth-child(2) {
     font-family: 'Consolas', 'Menlo', 'Source Code Pro', 'Fira Code', 'Courier New', Courier, 'Lucida Console', 'Monaco', monospace;
     padding-left: 6px;
+    vertical-align: middle;
+}
+
+#pattern-table td:nth-child(2) > div {
+    height: 24px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    margin: 1px 0;
+    padding-top: 1px;
 }
 
 #pattern-table th:nth-child(2),
@@ -497,7 +506,7 @@ h1 {
 
 #pattern-table th:nth-child(1),
 #pattern-table td:nth-child(1) {
-    width: 90px;
+    width: 110px;
     /* handle (18px) + 60px button + margins */
 }
 
@@ -706,14 +715,14 @@ button:disabled {
 /* Action cell needs relative positioning for the absolute handle */
 .pattern-row td:nth-child(1) {
     position: relative;
-    padding-left: 18px;
+    padding-left: 20px;
 }
 
-.pattern-row[draggable="true"] .row-drag-handle {
+.row-drag-handle {
     position: absolute;
     left: 2px;
     top: 50%;
-    transform: translateY(calc(-50% - 1px));
+    transform: translateY(-50%);
     font-size: 1em;
     color: var(--text-color);
     opacity: 0.35;
@@ -723,7 +732,7 @@ button:disabled {
     line-height: 1;
 }
 
-.pattern-row[draggable="true"] .row-drag-handle:hover {
+.row-drag-handle:hover {
     opacity: 0.75;
 }
 

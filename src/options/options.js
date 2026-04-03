@@ -127,15 +127,31 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const table = document.getElementById('pattern-table');
     table.addEventListener('click', (event) => {
-        // Allow native checkbox behaviors directly
-        if (event.target.closest('.switch')) return;
-
-        event.preventDefault();
         const headerRow = event.target.closest('tr.group-header');
-        if (headerRow && !event.target.closest('button')) {
+        // Only intercept if it's a group header AND not a child button or switch
+        if (headerRow && !event.target.closest('button') && !event.target.closest('.switch')) {
+            event.preventDefault();
             toggleGroupCollapse(headerRow);
         }
     });
+
+    // Dynamically manage draggability to prevent interference with text selection.
+    // Inputs inside draggable rows are known to have selection issues in Chromium.
+    table.addEventListener('mousedown', (event) => {
+        const handle = event.target.closest('.row-drag-handle, .drag-handle');
+        const row = event.target.closest('tr');
+        if (handle && row) {
+            row.setAttribute('draggable', 'true');
+        }
+    });
+
+    const resetDraggable = (event) => {
+        const row = event.target.closest('tr');
+        if (row) row.setAttribute('draggable', 'false');
+    };
+
+    table.addEventListener('mouseup', resetDraggable);
+    table.addEventListener('dragend', resetDraggable);
 
     table.addEventListener('change', (event) => {
         if (event.target.classList.contains('group-select-input')) {
@@ -330,7 +346,7 @@ function createPatternRow(pattern, index, groupName, isGroupDisabled = false) {
     }
     row.setAttribute('data-index', index);
     row.setAttribute('data-group', groupName);
-    row.setAttribute('draggable', 'true');
+    row.setAttribute('draggable', 'false');
     row.innerHTML = `
         <td>
             <span class="row-drag-handle" title="Drag to reorder">&#x28FF;</span>
@@ -370,10 +386,10 @@ async function restoreOptions() {
 
         // Restore persisted UI states
         const { collapsedGroups: storedCollapsed, disabledGroups: storedDisabled } = await browser.storage.local.get(['collapsedGroups', 'disabledGroups']);
-        
+
         collapsedGroups.clear();
         if (Array.isArray(storedCollapsed)) storedCollapsed.forEach(g => collapsedGroups.add(g));
-        
+
         disabledGroups.clear();
         if (Array.isArray(storedDisabled)) storedDisabled.forEach(g => disabledGroups.add(g));
 
@@ -437,7 +453,7 @@ async function restoreOptions() {
                 headerRow.className = 'group-header';
                 if (isGroupDisabled) headerRow.classList.add('disabled-visual');
                 headerRow.setAttribute('data-group', groupName);
-                headerRow.setAttribute('draggable', 'true');
+                headerRow.setAttribute('draggable', 'false');
                 headerRow.innerHTML = `
                     <td colspan="2">
                         <div class="group-header-inner">
@@ -542,7 +558,7 @@ async function restoreOptions() {
                 const td = headerRow.querySelector('td');
 
                 headerRow.addEventListener('dragstart', (e) => {
-                    if (e.target.closest('button')) { e.preventDefault(); return; }
+                    if (e.target.closest('button, input, select, textarea')) { e.preventDefault(); return; }
                     draggedGroupName = headerRow.getAttribute('data-group');
                     setTimeout(() => headerRow.classList.add('group-dragging'), 0);
                     e.dataTransfer.effectAllowed = 'move';
@@ -630,7 +646,7 @@ async function restoreOptions() {
                 const contentTd = patternRow.querySelectorAll('td')[1];
 
                 patternRow.addEventListener('dragstart', (e) => {
-                    if (e.target.closest('button')) { e.preventDefault(); return; }
+                    if (e.target.closest('button, input, select, textarea')) { e.preventDefault(); return; }
                     draggedPatternIndex = parseInt(patternRow.getAttribute('data-index'), 10);
                     setTimeout(() => patternRow.classList.add('row-dragging'), 0);
                     e.dataTransfer.effectAllowed = 'move';
@@ -865,6 +881,12 @@ function toggleEditRow(index, isEditing) {
         discardButton.style.display = 'inline';
         deleteButton.style.display = 'none';
     } else {
+        // Revert any unsaved input back to the original text
+        searchInput.value = searchText.textContent;
+        titleInput.value = titleText.textContent;
+        const newGroupInput = row.querySelector('.new-group-input-row');
+        if (newGroupInput) newGroupInput.value = '';
+
         table.classList.remove('edit-mode'); // Remove edit-mode class
         searchText.style.display = 'inline';
         searchInput.style.display = 'none';
@@ -901,8 +923,8 @@ async function saveRow(index) {
         const patterns = result.patterns || [];
         const oldGroup = patterns[index].group || '';
         const newGroup = groupValue;
-        const pattern = { 
-            search: searchInput, 
+        const pattern = {
+            search: searchInput,
             title: titleInput,
             enabled: patterns[index].enabled !== false // Preserve existing status
         };
@@ -999,7 +1021,7 @@ async function updatePatternEnabled(index, isEnabled) {
     if (patterns[index]) {
         patterns[index].enabled = isEnabled;
         await browser.storage.local.set({ patterns });
-        
+
         // Update visual state of the row
         const row = document.querySelector(`.pattern-row[data-index="${index}"]`);
         if (row) {
@@ -1021,7 +1043,7 @@ async function updateGroupDisabled(groupName, isDisabled) {
         disabledGroups.delete(groupName);
     }
     await browser.storage.local.set({ disabledGroups: Array.from(disabledGroups) });
-    
+
     // Update visual state of the group header and its child rows
     const headerRow = document.querySelector(`.group-header[data-group="${groupName}"]`);
     if (headerRow) {
@@ -1031,21 +1053,21 @@ async function updateGroupDisabled(groupName, isDisabled) {
             headerRow.classList.remove('disabled-visual');
         }
     }
-    
+
     // Update all pattern rows in this group
     const rows = document.querySelectorAll(`.pattern-row[data-group="${groupName}"]`);
     const { patterns } = await browser.storage.local.get('patterns');
     for (const row of rows) {
         const index = row.getAttribute('data-index');
         const isPatternEnabled = patterns[index] ? patterns[index].enabled !== false : true;
-        
+
         const checkbox = row.querySelector('.pattern-enabled-toggle');
         if (isDisabled || !isPatternEnabled) {
             row.classList.add('disabled-visual');
         } else {
             row.classList.remove('disabled-visual');
         }
-        
+
         if (checkbox) {
             checkbox.checked = isPatternEnabled && !isDisabled;
             checkbox.disabled = isDisabled;
