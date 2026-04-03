@@ -28,6 +28,7 @@
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
+    margin-bottom: 4px;
 }
 
 .group-sort-order-row label {
@@ -39,7 +40,7 @@
 }
 
 .group-dropdown-preference-label {
-    margin-top: 8px;
+    margin-top: 0;
 }
 
 #pattern-table thead,
