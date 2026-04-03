@@ -97,6 +97,9 @@ async function updateTabTitle(tabId, changeInfo, tab, pattern) {
                 const result = await browser.storage.local.get('patterns');
                 const rawPatterns = result.patterns || [];
 
+                // Note: sortPatternsForDisplay and filterActivePatterns are mirrored in
+                // src/lib/pattern-utils.js for unit-test coverage. Keep them in sync.
+
                 // Sort patterns to match the UI's top-to-bottom visual rendering exactly
                 const groupOrder = [...new Set(rawPatterns.map(p => p.group).filter(Boolean))];
                 const patterns = [...rawPatterns.filter(p => !p.group)];
@@ -106,9 +109,13 @@ async function updateTabTitle(tabId, changeInfo, tab, pattern) {
 
                 const { disabledGroups = [] } = await browser.storage.local.get('disabledGroups');
 
-                for (const pattern of patterns) {
-                    if (pattern.enabled === false) continue;
-                    if (pattern.group && disabledGroups.includes(pattern.group)) continue;
+                const activePatterns = patterns.filter(p => {
+                    if (p.enabled === false) return false;
+                    if (p.group && disabledGroups.includes(p.group)) return false;
+                    return true;
+                });
+
+                for (const pattern of activePatterns) {
                     
                     console.log('tabId', tabId, 'Pattern:', pattern);
                     try {
