@@ -1289,9 +1289,14 @@ input:checked + .slider:before {
 /* ── Responsive Tab View Support ───────────────────────────── */
 /* When the popup is opened in a wider tab (via the link) */
 @media (min-width: 801px) {
-    html, body {
-        height: 100vh !important;
-        width: 100vw !important;
+    html,
+    body {
+        height: 100% !important;
+        width: 100% !important;
+    }
+
+    body {
+        margin: 0;
     }
 }
 
