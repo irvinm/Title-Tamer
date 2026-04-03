@@ -283,19 +283,61 @@ function toggleGroupCollapse(headerRow) {
 
 // Rename all patterns in a group
 async function renameGroup(oldName) {
-    const newName = prompt(`Rename group "${oldName}" to:`, oldName);
-    if (!newName || newName.trim() === '' || newName.trim() === oldName) return;
-    const trimmed = newName.trim();
-    const result = await browser.storage.local.get('patterns');
-    const patterns = result.patterns || [];
-    patterns.forEach(p => { if (p.group === oldName) p.group = trimmed; });
-    await browser.storage.local.set({ patterns });
-    if (collapsedGroups.has(oldName)) {
-        collapsedGroups.delete(oldName);
-        collapsedGroups.add(trimmed);
-        browser.storage.local.set({ collapsedGroups: [...collapsedGroups] });
-    }
-    await restoreOptions();
+    const dialog = document.getElementById('rename-group-dialog');
+    const input = document.getElementById('rename-group-input');
+    const msg = document.getElementById('rename-group-dialog-message');
+    const okBtn = document.getElementById('rename-group-ok-btn');
+    const cancelBtn = document.getElementById('rename-group-cancel-btn');
+
+    msg.innerText = `Rename group "${oldName}" to:`;
+    input.value = oldName;
+
+    return new Promise((resolve) => {
+        const onOk = async () => {
+            const newName = input.value.trim();
+            if (newName && newName !== oldName) {
+                const result = await browser.storage.local.get('patterns');
+                const patterns = result.patterns || [];
+                patterns.forEach(p => { if (p.group === oldName) p.group = newName; });
+                await browser.storage.local.set({ patterns });
+                if (collapsedGroups.has(oldName)) {
+                    collapsedGroups.delete(oldName);
+                    collapsedGroups.add(newName);
+                    await browser.storage.local.set({ collapsedGroups: [...collapsedGroups] });
+                }
+                await restoreOptions();
+            }
+            cleanup();
+            resolve();
+        };
+
+        const onCancel = () => {
+            cleanup();
+            resolve();
+        };
+
+        const onKey = (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                onOk();
+            }
+        };
+
+        const cleanup = () => {
+            okBtn.removeEventListener('click', onOk);
+            cancelBtn.removeEventListener('click', onCancel);
+            input.removeEventListener('keydown', onKey);
+            dialog.close();
+        };
+
+        okBtn.addEventListener('click', onOk);
+        cancelBtn.addEventListener('click', onCancel);
+        input.addEventListener('keydown', onKey);
+
+        dialog.showModal();
+        input.select();
+        input.focus();
+    });
 }
 
 // Show the delete-group dialog modal

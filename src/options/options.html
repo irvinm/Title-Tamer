@@ -3,6 +3,7 @@
 
 <head>
     <title>Title Tamer Options</title>
+    <link rel="icon" type="image/svg+xml" href="../icons/icon-dark.svg">
     <script type="module" src="options.js"></script>
     <link rel="stylesheet" type="text/css" href="options.css">
 </head>
@@ -115,12 +116,35 @@
         </div>
     </form>
     <dialog id="delete-group-dialog">
-        <p id="delete-group-dialog-message"></p>
-        <div class="delete-modal-buttons">
-            <button type="button" id="delete-group-ungroup-btn" class="add-pattern-button">Ungroup patterns</button>
-            <button type="button" id="delete-group-deleteall-btn" class="delete-group-deleteall-btn">Delete all
-                patterns</button>
-            <button type="button" id="delete-group-cancel-btn" class="delete-group-cancel-btn">Cancel</button>
+        <div class="dialog-header">
+            <img src="../icons/icon-dark.svg" class="icon-for-light" alt="Icon">
+            <img src="../icons/icon-light.svg" class="icon-for-dark" alt="Icon">
+            <span>Title Tamer</span>
+        </div>
+        <div class="dialog-body">
+            <p id="delete-group-dialog-message"></p>
+            <div class="delete-modal-buttons">
+                <button type="button" id="delete-group-ungroup-btn" class="add-pattern-button">Ungroup patterns</button>
+                <button type="button" id="delete-group-deleteall-btn" class="delete-group-deleteall-btn">Delete all
+                    patterns</button>
+                <button type="button" id="delete-group-cancel-btn" class="delete-group-cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </dialog>
+
+    <dialog id="rename-group-dialog">
+        <div class="dialog-header">
+            <img src="../icons/icon-dark.svg" class="icon-for-light" alt="Icon">
+            <img src="../icons/icon-light.svg" class="icon-for-dark" alt="Icon">
+            <span>Title Tamer</span>
+        </div>
+        <div class="dialog-body">
+            <p id="rename-group-dialog-message"></p>
+            <input type="text" id="rename-group-input" class="monospace-font" style="width: 100%; margin-bottom: 16px;">
+            <div class="delete-modal-buttons">
+                <button type="button" id="rename-group-ok-btn" class="add-pattern-button">OK</button>
+                <button type="button" id="rename-group-cancel-btn" class="delete-group-cancel-btn">Cancel</button>
+            </div>
         </div>
     </dialog>
 </body>
