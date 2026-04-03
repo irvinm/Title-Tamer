@@ -137,6 +137,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     const table = document.getElementById('pattern-table');
+    const tableContainer = document.querySelector('.patterns-table-container');
+    setupFirefoxOverlayScrollbar(tableContainer);
+
     table.addEventListener('click', (event) => {
         const headerRow = event.target.closest('tr.group-header');
         // Only intercept if it's a group header AND not a child button or switch
@@ -185,6 +188,81 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.open('../import-export/import-export.html', '_blank');
     });
 });
+
+function setupFirefoxOverlayScrollbar(container) {
+    if (!container || !navigator.userAgent.includes('Firefox')) return;
+
+    container.classList.add('firefox-overlay-scroll');
+
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay-scrollbar';
+    const thumb = document.createElement('div');
+    thumb.className = 'overlay-scrollbar-thumb';
+    overlay.appendChild(thumb);
+    container.appendChild(overlay);
+
+    let hideTimer = null;
+    const minThumbHeight = 18;
+    let lastScrollTop = -1;
+    let lastClientHeight = -1;
+    let lastScrollHeight = -1;
+
+    const updateThumb = () => {
+        const scrollTop = container.scrollTop;
+        const viewportHeight = container.clientHeight;
+        const totalContentHeight = container.scrollHeight;
+        const maxScrollTop = Math.max(0, totalContentHeight - viewportHeight);
+
+        // The overlay element lives inside the scroll container; counter-scroll it so
+        // the track stays visually fixed while table rows move underneath.
+        overlay.style.transform = `translateY(${scrollTop}px)`;
+
+        if (maxScrollTop <= 0) {
+            overlay.classList.remove('visible');
+            thumb.style.height = '0px';
+            thumb.style.transform = 'translateY(0px)';
+            return;
+        }
+
+        const trackHeight = Math.max(0, overlay.clientHeight);
+        const thumbHeight = Math.max(minThumbHeight, (viewportHeight / totalContentHeight) * trackHeight);
+        const maxTravel = Math.max(0, trackHeight - thumbHeight);
+        const ratio = maxScrollTop > 0 ? Math.min(1, Math.max(0, scrollTop / maxScrollTop)) : 0;
+        const offsetY = ratio * maxTravel;
+
+        thumb.style.height = `${thumbHeight}px`;
+        thumb.style.transform = `translateY(${offsetY}px)`;
+    };
+
+    const syncThumb = () => {
+        if (
+            container.scrollTop !== lastScrollTop
+            || container.clientHeight !== lastClientHeight
+            || container.scrollHeight !== lastScrollHeight
+        ) {
+            lastScrollTop = container.scrollTop;
+            lastClientHeight = container.clientHeight;
+            lastScrollHeight = container.scrollHeight;
+            updateThumb();
+        }
+
+        requestAnimationFrame(syncThumb);
+    };
+
+    const showWhileScrolling = () => {
+        updateThumb();
+        overlay.classList.add('visible');
+        if (hideTimer) clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => {
+            overlay.classList.remove('visible');
+        }, 450);
+    };
+
+    container.addEventListener('scroll', showWhileScrolling, { passive: true });
+    window.addEventListener('resize', updateThumb);
+    requestAnimationFrame(updateThumb);
+    requestAnimationFrame(syncThumb);
+}
 
 async function savePattern(event) {
     console.log('savePattern');
