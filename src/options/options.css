@@ -23,6 +23,21 @@
     line-height: 1.1;
 }
 
+.group-sort-order-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.group-sort-order-row label {
+    margin-bottom: 0;
+}
+
+.group-sort-order-row select {
+    min-width: 150px;
+}
+
 #pattern-table thead,
 #pattern-table thead th {
     background-color: #007bff !important;

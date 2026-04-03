@@ -1,6 +1,7 @@
 const collapsedGroups = new Set();
 const disabledGroups = new Set();
 let draggedGroupName = null;
+let groupSortOrderPreference = 'alphabetic';
 
 document.addEventListener('DOMContentLoaded', async () => {
     // Theme handling
@@ -98,7 +99,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Load the loadDiscardedTabs value from storage and set the checkbox state
     // const { loadDiscardedTabs = true, reDiscardTabs = true, discardDelay = 1 } = await browser.storage.local.get(['loadDiscardedTabs', 'reDiscardTabs', 'discardDelay']);
-    const { loadDiscardedTabs, reDiscardTabs, discardDelay } = await browser.storage.local.get(['loadDiscardedTabs', 'reDiscardTabs', 'discardDelay']);
+    const { loadDiscardedTabs, reDiscardTabs, discardDelay, groupSortOrder } = await browser.storage.local.get(['loadDiscardedTabs', 'reDiscardTabs', 'discardDelay', 'groupSortOrder']);
+
+    groupSortOrderPreference = groupSortOrder || 'alphabetic';
+    const groupSortOrderSelect = document.getElementById('group-sort-order');
+    if (groupSortOrderSelect) {
+        groupSortOrderSelect.value = groupSortOrderPreference;
+        groupSortOrderSelect.addEventListener('change', async function () {
+            groupSortOrderPreference = this.value || 'alphabetic';
+            await browser.storage.local.set({ groupSortOrder: groupSortOrderPreference });
+            await restoreOptions();
+        });
+    }
 
     // Write default values to storage if they are used
     /*
@@ -313,7 +325,7 @@ function escapeHTML(str) {
 
 // Populate a <select> element with (No group), existing group names, and New group…
 function buildGroupSelect(selectEl, patterns, selectedGroup) {
-    const groupNames = [...new Set(patterns.map(p => p.group).filter(Boolean))].sort();
+    const groupNames = getOrderedGroupNames(patterns, groupSortOrderPreference);
     const prevVal = selectEl.value;
     selectEl.innerHTML = '';
 
@@ -340,6 +352,16 @@ function buildGroupSelect(selectEl, patterns, selectedGroup) {
         selectEl.value = prevVal;
         if (!selectEl.value) selectEl.value = '';
     }
+}
+
+function getOrderedGroupNames(patterns, sortOrder) {
+    const groupNames = [...new Set(patterns.map(p => p.group).filter(Boolean))];
+
+    if (sortOrder === 'table') {
+        return groupNames;
+    }
+
+    return groupNames.sort((left, right) => left.localeCompare(right));
 }
 
 // Read resolved group value from a select + companion new-name input
@@ -520,7 +542,9 @@ function createPatternRow(pattern, index, groupName, isGroupDisabled = false) {
 async function restoreOptions() {
     console.log('restoreOptions');
     try {
-        let { loadDiscardedTabs, reDiscardTabs, discardDelay } = await browser.storage.local.get(['loadDiscardedTabs', 'reDiscardTabs', 'discardDelay']);
+        let { loadDiscardedTabs, reDiscardTabs, discardDelay, groupSortOrder } = await browser.storage.local.get(['loadDiscardedTabs', 'reDiscardTabs', 'discardDelay', 'groupSortOrder']);
+
+        groupSortOrderPreference = groupSortOrder || 'alphabetic';
 
         // Restore persisted UI states
         const { collapsedGroups: storedCollapsed, disabledGroups: storedDisabled } = await browser.storage.local.get(['collapsedGroups', 'disabledGroups']);
