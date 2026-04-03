@@ -3,6 +3,7 @@ const disabledGroups = new Set();
 let draggedGroupName = null;
 let groupSortOrderPreference = 'alphabetic';
 let showRecentGroupFirstPreference = false;
+let showGroupRuleCountPreference = false;
 let recentGroupSelection = '';
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -107,6 +108,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         discardDelay,
         groupSortOrder,
         showRecentGroupFirst,
+        showGroupRuleCount,
         recentGroupSelection: storedRecentGroupSelection
     } = await browser.storage.local.get([
         'loadDiscardedTabs',
@@ -114,11 +116,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         'discardDelay',
         'groupSortOrder',
         'showRecentGroupFirst',
+        'showGroupRuleCount',
         'recentGroupSelection'
     ]);
 
     groupSortOrderPreference = groupSortOrder || 'alphabetic';
     showRecentGroupFirstPreference = showRecentGroupFirst === true;
+    showGroupRuleCountPreference = showGroupRuleCount === true;
     recentGroupSelection = storedRecentGroupSelection || '';
     const groupSortOrderSelect = document.getElementById('group-sort-order');
     if (groupSortOrderSelect) {
@@ -136,6 +140,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         showRecentGroupFirstCheckbox.addEventListener('change', async function () {
             showRecentGroupFirstPreference = this.checked;
             await browser.storage.local.set({ showRecentGroupFirst: showRecentGroupFirstPreference });
+            await restoreOptions();
+        });
+    }
+
+    const showGroupRuleCountCheckbox = document.getElementById('group-show-rule-count');
+    if (showGroupRuleCountCheckbox) {
+        showGroupRuleCountCheckbox.checked = showGroupRuleCountPreference;
+        showGroupRuleCountCheckbox.addEventListener('change', async function () {
+            showGroupRuleCountPreference = this.checked;
+            await browser.storage.local.set({ showGroupRuleCount: showGroupRuleCountPreference });
             await restoreOptions();
         });
     }
@@ -608,6 +622,7 @@ async function restoreOptions() {
             discardDelay,
             groupSortOrder,
             showRecentGroupFirst,
+            showGroupRuleCount,
             recentGroupSelection: storedRecentGroupSelection
         } = await browser.storage.local.get([
             'loadDiscardedTabs',
@@ -615,11 +630,13 @@ async function restoreOptions() {
             'discardDelay',
             'groupSortOrder',
             'showRecentGroupFirst',
+            'showGroupRuleCount',
             'recentGroupSelection'
         ]);
 
         groupSortOrderPreference = groupSortOrder || 'alphabetic';
         showRecentGroupFirstPreference = showRecentGroupFirst === true;
+        showGroupRuleCountPreference = showGroupRuleCount === true;
         recentGroupSelection = storedRecentGroupSelection || '';
 
         // Restore persisted UI states
@@ -684,6 +701,9 @@ async function restoreOptions() {
             for (const groupName of groupOrder) {
                 const members = groups.get(groupName);
                 const escapedName = escapeHTML(groupName);
+                const displayedGroupName = showGroupRuleCountPreference
+                    ? `${escapedName} (${members.length})`
+                    : escapedName;
                 const isCollapsed = collapsedGroups.has(groupName);
                 const isGroupDisabled = disabledGroups.has(groupName);
 
@@ -698,7 +718,7 @@ async function restoreOptions() {
                             <span class="group-header-left">
                                 <span class="drag-handle" title="Drag to reorder">&#x28FF;</span>
                                 <span class="group-toggle ${isCollapsed ? 'collapsed' : 'expanded'}"></span>
-                                <span class="group-name-text">${escapedName}</span>
+                                <span class="group-name-text">${displayedGroupName}</span>
                             </span>
                             <span class="group-header-right">
                                 <button type="button" class="rename-group-button action-button" data-group="${escapedName}">Rename</button>
