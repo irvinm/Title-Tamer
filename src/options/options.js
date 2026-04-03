@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setExpanded(startExpanded);
     }
 
-    setupToggle('toggle-add-rule', 'add-rule-content', true);
+    setupToggle('toggle-add-rule', 'add-rule-content', false);
     setupToggle('toggle-options', 'additional-options', false);
 
     // Load the loadDiscardedTabs value from storage and set the checkbox state
@@ -280,11 +280,13 @@ function toggleGroupCollapse(headerRow) {
     if (collapsedGroups.has(groupName)) {
         collapsedGroups.delete(groupName);
         rows.forEach(r => { r.style.display = ''; });
-        if (toggle) toggle.textContent = '\u25BC';
+        if (toggle) toggle.classList.remove('collapsed');
+        if (toggle) toggle.classList.add('expanded');
     } else {
         collapsedGroups.add(groupName);
         rows.forEach(r => { r.style.display = 'none'; });
-        if (toggle) toggle.textContent = '\u25B6';
+        if (toggle) toggle.classList.remove('expanded');
+        if (toggle) toggle.classList.add('collapsed');
     }
     // Defensive: always keep the header row itself visible
     headerRow.style.display = '';
@@ -512,7 +514,7 @@ async function restoreOptions() {
                         <div class="group-header-inner">
                             <span class="group-header-left">
                                 <span class="drag-handle" title="Drag to reorder">&#x28FF;</span>
-                                <span class="group-toggle">${isCollapsed ? '&#x25B6;' : '&#x25BC;'}</span>
+                                <span class="group-toggle ${isCollapsed ? 'collapsed' : 'expanded'}"></span>
                                 <span class="group-name-text">${escapedName}</span>
                             </span>
                             <span class="group-header-right">
