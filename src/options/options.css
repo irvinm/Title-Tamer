@@ -701,6 +701,11 @@ button:disabled {
     /* Add space between buttons */
 }
 
+.toggle-arrow {
+    cursor: pointer;
+    user-select: none;
+}
+
 /* Remove top and bottom margins for cells in edit mode */
 .no-margin {
     padding-top: 0 !important;
