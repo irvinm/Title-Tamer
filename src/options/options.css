@@ -38,6 +38,10 @@
     min-width: 150px;
 }
 
+.group-dropdown-preference-label {
+    margin-top: 8px;
+}
+
 #pattern-table thead,
 #pattern-table thead th {
     background-color: #007bff !important;
@@ -438,8 +442,8 @@ h1 {
     border-collapse: separate;
     border-spacing: 0;
     /* Ensure border rendering avoids Webkit clipping glitches */
-    background-color: #fff;
-    /* White background */
+    background-color: var(--secondary-bg);
+    /* Theme-aware background to avoid white corner bleed in dark mode */
     border-radius: 10px;
     /* Rounded corners */
     overflow: hidden;
@@ -515,7 +519,9 @@ h1 {
 }
 
 #pattern-table td:nth-child(1) button {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin: 1px auto;
     text-align: center;
     /* Center align text */
@@ -526,6 +532,8 @@ h1 {
     border-radius: 5px;
     /* Rounded corners */
     height: 24px;
+    padding: 0;
+    line-height: 1;
     box-sizing: border-box;
 }
 

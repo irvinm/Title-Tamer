@@ -2,6 +2,8 @@ const collapsedGroups = new Set();
 const disabledGroups = new Set();
 let draggedGroupName = null;
 let groupSortOrderPreference = 'alphabetic';
+let showRecentGroupFirstPreference = false;
+let recentGroupSelection = '';
 
 document.addEventListener('DOMContentLoaded', async () => {
     // Theme handling
@@ -99,15 +101,41 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Load the loadDiscardedTabs value from storage and set the checkbox state
     // const { loadDiscardedTabs = true, reDiscardTabs = true, discardDelay = 1 } = await browser.storage.local.get(['loadDiscardedTabs', 'reDiscardTabs', 'discardDelay']);
-    const { loadDiscardedTabs, reDiscardTabs, discardDelay, groupSortOrder } = await browser.storage.local.get(['loadDiscardedTabs', 'reDiscardTabs', 'discardDelay', 'groupSortOrder']);
+    const {
+        loadDiscardedTabs,
+        reDiscardTabs,
+        discardDelay,
+        groupSortOrder,
+        showRecentGroupFirst,
+        recentGroupSelection: storedRecentGroupSelection
+    } = await browser.storage.local.get([
+        'loadDiscardedTabs',
+        'reDiscardTabs',
+        'discardDelay',
+        'groupSortOrder',
+        'showRecentGroupFirst',
+        'recentGroupSelection'
+    ]);
 
     groupSortOrderPreference = groupSortOrder || 'alphabetic';
+    showRecentGroupFirstPreference = showRecentGroupFirst === true;
+    recentGroupSelection = storedRecentGroupSelection || '';
     const groupSortOrderSelect = document.getElementById('group-sort-order');
     if (groupSortOrderSelect) {
         groupSortOrderSelect.value = groupSortOrderPreference;
         groupSortOrderSelect.addEventListener('change', async function () {
             groupSortOrderPreference = this.value || 'alphabetic';
             await browser.storage.local.set({ groupSortOrder: groupSortOrderPreference });
+            await restoreOptions();
+        });
+    }
+
+    const showRecentGroupFirstCheckbox = document.getElementById('group-show-recent-first');
+    if (showRecentGroupFirstCheckbox) {
+        showRecentGroupFirstCheckbox.checked = showRecentGroupFirstPreference;
+        showRecentGroupFirstCheckbox.addEventListener('change', async function () {
+            showRecentGroupFirstPreference = this.checked;
+            await browser.storage.local.set({ showRecentGroupFirst: showRecentGroupFirstPreference });
             await restoreOptions();
         });
     }
@@ -296,7 +324,12 @@ async function savePattern(event) {
         const pattern = { search, title };
         if (groupValue) pattern.group = groupValue;
         patterns.push(pattern);
-        await browser.storage.local.set({ patterns });
+        const storageUpdate = { patterns };
+        if (groupValue) {
+            recentGroupSelection = groupValue;
+            storageUpdate.recentGroupSelection = groupValue;
+        }
+        await browser.storage.local.set(storageUpdate);
         await restoreOptions();
 
         // Clear the input fields
@@ -329,6 +362,25 @@ function buildGroupSelect(selectEl, patterns, selectedGroup) {
     const prevVal = selectEl.value;
     selectEl.innerHTML = '';
 
+    const selectableGroupNames = [...groupNames];
+
+    if (showRecentGroupFirstPreference && recentGroupSelection && groupNames.includes(recentGroupSelection)) {
+        const recentOpt = document.createElement('option');
+        recentOpt.value = recentGroupSelection;
+        recentOpt.textContent = recentGroupSelection;
+        selectEl.appendChild(recentOpt);
+
+        const separatorOpt = document.createElement('option');
+        separatorOpt.value = '__separator__';
+        separatorOpt.textContent = '──────────';
+        separatorOpt.disabled = true;
+        selectEl.appendChild(separatorOpt);
+
+        selectableGroupNames.splice(selectableGroupNames.indexOf(recentGroupSelection), 1);
+        selectableGroupNames.unshift(recentGroupSelection);
+        groupNames.splice(groupNames.indexOf(recentGroupSelection), 1);
+    }
+
     const noGroupOpt = document.createElement('option');
     noGroupOpt.value = '';
     noGroupOpt.textContent = '(No group)';
@@ -341,13 +393,19 @@ function buildGroupSelect(selectEl, patterns, selectedGroup) {
         selectEl.appendChild(opt);
     }
 
+    const preNewGroupSeparatorOpt = document.createElement('option');
+    preNewGroupSeparatorOpt.value = '__separator_new_group__';
+    preNewGroupSeparatorOpt.textContent = '──────────';
+    preNewGroupSeparatorOpt.disabled = true;
+    selectEl.appendChild(preNewGroupSeparatorOpt);
+
     const newOpt = document.createElement('option');
     newOpt.value = '__new__';
     newOpt.textContent = 'New group\u2026';
     selectEl.appendChild(newOpt);
 
     if (selectedGroup !== undefined) {
-        selectEl.value = (selectedGroup && groupNames.includes(selectedGroup)) ? selectedGroup : '';
+        selectEl.value = (selectedGroup && selectableGroupNames.includes(selectedGroup)) ? selectedGroup : '';
     } else {
         selectEl.value = prevVal;
         if (!selectEl.value) selectEl.value = '';
@@ -542,9 +600,25 @@ function createPatternRow(pattern, index, groupName, isGroupDisabled = false) {
 async function restoreOptions() {
     console.log('restoreOptions');
     try {
-        let { loadDiscardedTabs, reDiscardTabs, discardDelay, groupSortOrder } = await browser.storage.local.get(['loadDiscardedTabs', 'reDiscardTabs', 'discardDelay', 'groupSortOrder']);
+        let {
+            loadDiscardedTabs,
+            reDiscardTabs,
+            discardDelay,
+            groupSortOrder,
+            showRecentGroupFirst,
+            recentGroupSelection: storedRecentGroupSelection
+        } = await browser.storage.local.get([
+            'loadDiscardedTabs',
+            'reDiscardTabs',
+            'discardDelay',
+            'groupSortOrder',
+            'showRecentGroupFirst',
+            'recentGroupSelection'
+        ]);
 
         groupSortOrderPreference = groupSortOrder || 'alphabetic';
+        showRecentGroupFirstPreference = showRecentGroupFirst === true;
+        recentGroupSelection = storedRecentGroupSelection || '';
 
         // Restore persisted UI states
         const { collapsedGroups: storedCollapsed, disabledGroups: storedDisabled } = await browser.storage.local.get(['collapsedGroups', 'disabledGroups']);
@@ -1110,7 +1184,12 @@ async function saveRow(index) {
             patterns[index] = pattern;
         }
 
-        await browser.storage.local.set({ patterns });
+        const storageUpdate = { patterns };
+        if (newGroup) {
+            recentGroupSelection = newGroup;
+            storageUpdate.recentGroupSelection = newGroup;
+        }
+        await browser.storage.local.set(storageUpdate);
         await restoreOptions(); // Refresh the list after saving
 
         browser.runtime.sendMessage({ action: 'newPattern', pattern });
