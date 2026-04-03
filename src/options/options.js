@@ -212,6 +212,11 @@ function setupFirefoxOverlayScrollbar(container) {
         const viewportHeight = container.clientHeight;
         const totalContentHeight = container.scrollHeight;
         const maxScrollTop = Math.max(0, totalContentHeight - viewportHeight);
+        const header = container.querySelector('thead');
+        const headerHeight = header ? header.getBoundingClientRect().height : 0;
+
+        // Start the custom track at the first data row (below sticky header).
+        overlay.style.top = `${Math.round(headerHeight)}px`;
 
         // The overlay element lives inside the scroll container; counter-scroll it so
         // the track stays visually fixed while table rows move underneath.
