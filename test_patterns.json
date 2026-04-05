@@ -1,0 +1,29 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "collapsedGroups": [],
+    "disabledGroups": []
+  },
+  "patterns": [
+    { "search": "github\\.com/.*/([^/]+)$", "title": "Repo: $1", "enabled": true, "group": "Development" },
+    { "search": "codesandbox\\.io/s/(.*)", "title": "CSB: $1", "enabled": true, "group": "Development" },
+    { "search": "circleci\\.com/developer/([^/]+)", "title": "CircleCI: $1", "enabled": true, "group": "Development" },
+    { "search": "twitter\\.com", "title": "𝕏 | Home", "enabled": true, "group": "Social" },
+    { "search": "reddit\\.com/r/([^/]+)", "title": "Reddit: $1", "enabled": true, "group": "Social" },
+    { "search": "twitch\\.tv/(.*)", "title": "Twitch: $1", "enabled": true, "group": "Social" },
+    { "search": "developer\\.mozilla\\.org/.*/([^/]+)$", "title": "MDN: $1", "enabled": true, "group": "Reference" },
+    { "search": "stackoverflow\\.com/questions/.*/([^/]+)$", "title": "SO: $1", "enabled": true, "group": "Reference" },
+    { "search": "wikipedia\\.org/wiki/(.*)", "title": "Wiki - $1", "enabled": true, "group": "Reference" },
+    { "search": "mail\\.google\\.com", "title": "Inbox (Gmail)", "enabled": true, "group": "Productivity" },
+    { "search": "calendar\\.google\\.com", "title": "My Calendar", "enabled": true, "group": "Productivity" },
+    { "search": "imdb\\.com/title/([^/]+)", "title": "IMDb: $1", "enabled": true, "group": "Entertainment" },
+    { "search": "news\\.ycombinator\\.com/item\\?id=([^&]+)", "title": "HN: $1", "enabled": true, "group": "News" },
+    { "search": "bbc\\.com/news", "title": "BBC News", "enabled": true, "group": "News" },
+    { "search": "nytimes\\.com/.*/([^/]+)$", "title": "NYT - $1", "enabled": true, "group": "News" },
+    { "search": "google\\.com/search\\?q=([^&]+)", "title": "G: $1", "enabled": true, "group": "Search" },
+    { "search": "bing\\.com/search\\?q=([^&]+)", "title": "B: $1", "enabled": true, "group": "Search" },
+    { "search": "youtube\\.com/watch\\?v=([^&]+)", "title": "YT: $1", "enabled": true, "group": "Media" },
+    { "search": "amazon\\.com/dp/([^/]+)", "title": "Amazon: $1", "enabled": true, "group": "Shopping" },
+    { "search": "ebay\\.com/itm/([^/]+)", "title": "eBay: $1", "enabled": true, "group": "Shopping" }
+  ]
+}
