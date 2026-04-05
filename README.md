@@ -2,8 +2,8 @@
 
 ![CI/CD](https://github.com/irvinm/Title-Tamer/workflows/CI/CD/badge.svg) ![Mozilla Add-on](https://img.shields.io/amo/users/Title-Tamer.svg?style=flat-square) ![](https://img.shields.io/amo/v/Title-Tamer.svg?style=flat-square)
 
-![Light Mode](https://github.com/user-attachments/assets/78f5973c-f9d5-4dff-8d72-113df255fe10)
-![Dark Mode](https://github.com/user-attachments/assets/4ba17621-4a1b-4849-9042-5b24499ae298)
+<img src="https://github.com/user-attachments/assets/78f5973c-f9d5-4dff-8d72-113df255fe10" alt="Light Mode" width="800" height="600">
+<img src="https://github.com/user-attachments/assets/4ba17621-4a1b-4849-9042-5b24499ae298" alt="Dark Mode" width="800" height="600">
 
 ## Features
 - Monitor tab URLs and change their titles based on user-defined search patterns.
