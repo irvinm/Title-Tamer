@@ -1371,6 +1371,12 @@ function toggleEditRow(index, isEditing) {
         saveButton.style.display = 'inline';
         discardButton.style.display = 'inline';
         deleteButton.style.display = 'none';
+
+        // Smoothly scroll the row into view to ensure the newly revealed 
+        // group dropdown is visible, especially for rows near the bottom.
+        setTimeout(() => {
+            row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 50);
     } else {
         // Revert any unsaved input back to the original text
         searchInput.value = searchText.textContent;
