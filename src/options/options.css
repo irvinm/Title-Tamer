@@ -190,6 +190,15 @@ thead th {
     display: block;
 }
 
+#discard-delay {
+    width: 80px;
+    padding: 3px 6px;
+    border: 1px solid var(--input-border);
+    border-radius: 5px;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+}
+
 .delete-modal-reload-label {
     display: block;
     margin: 10px 0;
