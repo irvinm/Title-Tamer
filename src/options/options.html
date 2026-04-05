@@ -179,6 +179,21 @@
             </div>
         </div>
     </dialog>
+    <dialog id="delete-rule-dialog">
+        <div class="dialog-header">
+            <img src="../icons/icon-dark.svg" class="icon-for-light" alt="Icon">
+            <img src="../icons/icon-light.svg" class="icon-for-dark" alt="Icon">
+            <span>Title Tamer</span>
+        </div>
+        <div class="dialog-body">
+            <p>Are you sure you want to delete this rule?</p>
+            <div id="delete-rule-preview" style="font-style: italic; color: var(--text-color); opacity: 0.8; margin-bottom: 16px; word-break: break-all;"></div>
+            <div class="delete-modal-buttons">
+                <button type="button" id="confirm-delete-rule-btn" class="delete-group-deleteall-btn">Delete</button>
+                <button type="button" id="cancel-delete-rule-btn" class="delete-group-cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </dialog>
 </body>
 
 </html>

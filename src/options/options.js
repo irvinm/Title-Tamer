@@ -1009,7 +1009,24 @@ async function restoreOptions() {
                 button.addEventListener('click', async (event) => {
                     event.preventDefault();
                     const index = event.target.getAttribute('data-index');
-                    await deletePattern(index);
+                    const row = event.target.closest('tr');
+                    const searchTerm = row.querySelector('.search-text').textContent;
+                    
+                    const dialog = document.getElementById('delete-rule-dialog');
+                    const preview = document.getElementById('delete-rule-preview');
+                    const confirmBtn = document.getElementById('confirm-delete-rule-btn');
+                    const cancelBtn = document.getElementById('cancel-delete-rule-btn');
+
+                    if (preview) preview.innerText = `"${searchTerm}"`;
+                    
+                    confirmBtn.onclick = async () => {
+                        await deletePattern(index);
+                        dialog.close();
+                    };
+
+                    cancelBtn.onclick = () => dialog.close();
+                    
+                    dialog.showModal();
                 });
             });
 

@@ -16,13 +16,19 @@
         <input type="file" id="import-file" style="display: none;" />
         <button type="button" id="import-button" class="add-pattern-button">Import Patterns</button>
     </div>
-    <div id="custom-alert" class="custom-alert">
-        <div class="custom-alert-content">
-            <span class="custom-alert-close">&times;</span>
-            <img src="../icons/icon-dark.svg" alt="Custom Icon" class="custom-alert-icon">
-            <p id="custom-alert-message"></p>
+    <dialog id="custom-alert">
+        <div class="dialog-header">
+            <img src="../icons/icon-dark.svg" class="icon-for-light" alt="Icon">
+            <img src="../icons/icon-light.svg" class="icon-for-dark" alt="Icon">
+            <span>Title Tamer</span>
         </div>
-    </div>
+        <div class="dialog-body">
+            <div id="custom-alert-message"></div>
+            <div class="delete-modal-buttons">
+                <button type="button" id="custom-alert-ok" class="add-pattern-button">OK</button>
+            </div>
+        </div>
+    </dialog>
     <script type="module" src="import-export.js"></script> <!-- Link to your new JS file -->
 </body>
 

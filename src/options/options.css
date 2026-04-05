@@ -1138,61 +1138,7 @@ dialog::backdrop {
 
 /* Conflict-prone arrow logic removed to favor unified rotation system at bottom of file */
 
-.custom-alert {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.6);
-    /* Darker background for better contrast */
-}
-
-.custom-alert-content {
-    background-color: #fff;
-    margin: 10% auto;
-    padding: 30px;
-    border-radius: 8px;
-    /* Rounded corners */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    /* Subtle shadow for depth */
-    width: 80%;
-    max-width: 500px;
-    text-align: left;
-    font-family: Arial, sans-serif;
-    /* Modern font */
-}
-
-.custom-alert-close {
-    color: #aaa;
-    float: right;
-    font-size: 24px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.custom-alert-close:hover,
-.custom-alert-close:focus {
-    color: #000;
-    text-decoration: none;
-}
-
-.custom-alert-icon {
-    width: 40px;
-    height: 40px;
-    margin-bottom: 20px;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.custom-alert p {
-    margin: 10px 0;
-    line-height: 1.5;
-}
+/* Shared Dialog styling is handled by the 'dialog' and '.dialog-*' classes above */
 
 /*
 body {

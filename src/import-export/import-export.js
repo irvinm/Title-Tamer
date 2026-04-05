@@ -1,18 +1,37 @@
 function showCustomAlert(lines) {
     const customAlert = document.getElementById('custom-alert');
     const customAlertMessage = document.getElementById('custom-alert-message');
-    const customAlertClose = document.querySelector('.custom-alert-close');
+    const customAlertOk = document.getElementById('custom-alert-ok');
+
+    if (!customAlert || !customAlertMessage || !customAlertOk) {
+        console.error('Custom alert elements not found');
+        return;
+    }
 
     customAlertMessage.innerHTML = lines.map(line => `<p>${line}</p>`).join('');
-    customAlert.style.display = 'block';
+    
+    if (typeof customAlert.showModal === 'function') {
+        customAlert.showModal();
+    } else {
+        customAlert.style.display = 'block';
+    }
 
-    customAlertClose.onclick = function() {
-        customAlert.style.display = 'none';
+    customAlertOk.onclick = function() {
+        if (typeof customAlert.close === 'function') {
+            customAlert.close();
+        } else {
+            customAlert.style.display = 'none';
+        }
     };
 
-    window.onclick = function(event) {
+    // Optional: Close on backdrop click
+    customAlert.onclick = function(event) {
         if (event.target === customAlert) {
-            customAlert.style.display = 'none';
+            if (typeof customAlert.close === 'function') {
+                customAlert.close();
+            } else {
+                customAlert.style.display = 'none';
+            }
         }
     };
 }
