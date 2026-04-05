@@ -331,7 +331,7 @@ h1 {
 .open-options-link {
     background-color: var(--button-bg);
     color: var(--button-text);
-    transition: background-color 0.3s, color 0.3s;
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
     border: none;
     text-decoration: none;
     padding: 3px 8px;
@@ -340,6 +340,7 @@ h1 {
     font-family: Arial, sans-serif;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     margin-left: auto;
+    cursor: pointer;
 }
 
 .add-pattern-button:hover,
@@ -347,6 +348,16 @@ h1 {
 #import-export-button:hover,
 .open-options-link:hover {
     background-color: var(--button-hover-bg);
+    transform: scale(1.03);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.add-pattern-button:active,
+.notes-link:active,
+#import-export-button:active,
+.open-options-link:active {
+    transform: scale(0.96);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 input,
@@ -629,24 +640,15 @@ h1 {
     height: auto;
     display: inline-block;
     padding: 5px 14px;
-    background-color: #007bff;
-    color: white;
     text-decoration: none;
     border-radius: 5px;
     font-size: 13px;
     font-family: Arial, sans-serif;
-    transition: background-color 0.3s ease;
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     cursor: pointer;
     border: none;
     font-weight: bold;
-}
-
-.add-pattern-button:hover,
-.notes-link:hover {
-    background-color: #0056b3;
-    transform: translateY(-2px);
-    /* Slight lift on hover */
 }
 
 .add-pattern-button.disabled {
