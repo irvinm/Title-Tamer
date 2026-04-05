@@ -1346,8 +1346,8 @@ input:checked+.slider:before {
     position: relative;
     display: inline-block;
     min-width: 140px;
-    font-size: 14px;
-    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-family: 'Consolas', 'Menlo', 'Source Code Pro', 'Fira Code', 'Courier New', Courier, 'Lucida Console', 'Monaco', monospace;
     user-select: none;
 }
 
@@ -1410,6 +1410,8 @@ input:checked+.slider:before {
     border-radius: 0 0 5px 5px;
     background-color: var(--input-bg);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    font-family: 'Consolas', 'Menlo', 'Source Code Pro', 'Fira Code', 'Courier New', Courier, 'Lucida Console', 'Monaco', monospace;
+    font-size: 13px !important;
 }
 
 /* Dropup variant — opens upward when near the bottom of the viewport */
@@ -1436,7 +1438,7 @@ input:checked+.slider:before {
 }
 
 .custom-select-option {
-    padding: 5px 8px;
+    padding: 3px 8px;
     cursor: pointer;
     color: var(--text-color);
     transition: background-color 0.1s;
@@ -1494,7 +1496,7 @@ input:checked+.slider:before {
 }
 
 .group-row .custom-select-option {
-    padding: 3px 6px;
+    padding: 2px 6px;
     font-size: 13px;
 }
 
