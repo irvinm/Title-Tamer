@@ -386,8 +386,7 @@ async function savePattern(event) {
         document.getElementById('new-group-input').style.display = 'none';
         document.getElementById('new-group-input').value = '';
 
-        // Send a message to the background script to update the tabs
-        browser.runtime.sendMessage({ action: 'newPattern', pattern });
+        // The background script automatically syncs tabs via storage listener
     } catch (error) {
         console.error('Error saving pattern:', error);
     }
@@ -1471,7 +1470,7 @@ async function saveRow(index) {
         await browser.storage.local.set(storageUpdate);
         await restoreOptions(); // Refresh the list after saving
 
-        browser.runtime.sendMessage({ action: 'newPattern', pattern });
+        // The background script automatically syncs tabs via storage listener
     } catch (error) {
         console.error('Error saving row:', error);
     }

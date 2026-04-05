@@ -129,8 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     `Filename: ${file.name}`
                 ]);
 
-                // Send a message to background.js to rerun the patterns
-                browser.runtime.sendMessage({ action: 'rerunPatterns' });
+                // The background script automatically syncs tabs via storage listener
             } catch (error) {
                 console.error('Error parsing JSON:', error);
                 showCustomAlert(['Failed to import patterns.', 'Invalid JSON format.']);
