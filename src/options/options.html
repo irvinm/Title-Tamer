@@ -30,10 +30,13 @@
             </div>
             <div class="form-group">
                 <label for="group-select" class="fixed-width-label">Group:</label>
-                <select id="group-select">
-                    <option value="">(No group)</option>
-                    <option value="__new__">New group&hellip;</option>
-                </select>
+                <div class="custom-select" id="group-select-wrapper">
+                    <input type="hidden" id="group-select" value="">
+                    <div class="custom-select-trigger" tabindex="0">
+                        <span class="custom-select-text">(No group)</span>
+                    </div>
+                    <div class="custom-select-options"></div>
+                </div>
                 <input type="text" id="new-group-input" class="monospace-font" placeholder="New group name"
                     style="display:none; margin-left:8px;">
             </div>
@@ -93,10 +96,16 @@
                     <legend class="group-sort-order-legend">Group Options</legend>
                     <div class="group-sort-order-row">
                         <label for="group-sort-order">Show groups in the Add Rule dropdown as:</label>
-                        <select id="group-sort-order">
-                            <option value="alphabetic">Alphabetic</option>
-                            <option value="table">Table order</option>
-                        </select>
+                        <div class="custom-select" id="group-sort-order-wrapper">
+                            <input type="hidden" id="group-sort-order" value="alphabetic">
+                            <div class="custom-select-trigger" tabindex="0">
+                                <span class="custom-select-text">Alphabetic</span>
+                            </div>
+                            <div class="custom-select-options">
+                                <div class="custom-select-option selected" data-value="alphabetic">Alphabetic</div>
+                                <div class="custom-select-option" data-value="table">Table order</div>
+                            </div>
+                        </div>
                     </div>
                     <label class="block-label group-dropdown-preference-label">
                         <input type="checkbox" id="group-show-recent-first" />

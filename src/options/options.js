@@ -124,11 +124,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     showRecentGroupFirstPreference = showRecentGroupFirst === true;
     showGroupRuleCountPreference = showGroupRuleCount === true;
     recentGroupSelection = storedRecentGroupSelection || '';
-    const groupSortOrderSelect = document.getElementById('group-sort-order');
-    if (groupSortOrderSelect) {
-        groupSortOrderSelect.value = groupSortOrderPreference;
-        groupSortOrderSelect.addEventListener('change', async function () {
-            groupSortOrderPreference = this.value || 'alphabetic';
+    const groupSortOrderWrapper = document.getElementById('group-sort-order-wrapper');
+    const groupSortOrderHidden = document.getElementById('group-sort-order');
+    if (groupSortOrderWrapper) {
+        initCustomSelect(groupSortOrderWrapper);
+        setCustomSelectValue(groupSortOrderWrapper, groupSortOrderPreference,
+            groupSortOrderPreference === 'table' ? 'Table order' : 'Alphabetic');
+        groupSortOrderWrapper.addEventListener('customselect', async function () {
+            groupSortOrderPreference = groupSortOrderHidden.value || 'alphabetic';
             await browser.storage.local.set({ groupSortOrder: groupSortOrderPreference });
             await restoreOptions();
         });
@@ -221,22 +224,52 @@ document.addEventListener('DOMContentLoaded', async () => {
     table.addEventListener('mouseup', resetDraggable);
     table.addEventListener('dragend', resetDraggable);
 
-    table.addEventListener('change', (event) => {
-        if (event.target.classList.contains('group-select-input')) {
-            const row = event.target.closest('tr');
-            const newGroupInput = row.querySelector('.new-group-input-row');
-            if (newGroupInput) {
-                newGroupInput.style.display = event.target.value === '__new__' ? 'inline-block' : 'none';
-                if (event.target.value === '__new__') newGroupInput.focus();
-            }
+    // In-table custom dropdowns: listen for custom 'customselect' events via delegation
+    table.addEventListener('customselect', (event) => {
+        const wrapper = event.target.closest('.custom-select');
+        if (!wrapper) return;
+        const row = wrapper.closest('tr');
+        if (!row) return;
+        const newGroupInput = row.querySelector('.new-group-input-row');
+        if (newGroupInput) {
+            const val = wrapper.querySelector('input[type="hidden"]').value;
+            newGroupInput.style.display = val === '__new__' ? 'inline-block' : 'none';
+            if (val === '__new__') newGroupInput.focus();
         }
     });
 
-    document.getElementById('group-select').addEventListener('change', function () {
+    // Add-rule form custom dropdown: listen for value changes
+    const groupSelectWrapper = document.getElementById('group-select-wrapper');
+    initCustomSelect(groupSelectWrapper);
+    groupSelectWrapper.addEventListener('customselect', function () {
+        const val = document.getElementById('group-select').value;
         const newGroupInput = document.getElementById('new-group-input');
-        newGroupInput.style.display = this.value === '__new__' ? 'inline-block' : 'none';
-        if (this.value === '__new__') newGroupInput.focus();
+        newGroupInput.style.display = val === '__new__' ? 'inline-block' : 'none';
+        if (val === '__new__') newGroupInput.focus();
     });
+
+    // Close all custom dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+        document.querySelectorAll('.custom-select.open').forEach(cs => {
+            // Also ensure we don't close if they clicked INSIDE the detached options panel
+            if (!cs.contains(e.target) && !e.target.closest('.custom-select-options')) {
+                if (cs.closeSelect) cs.closeSelect();
+                else cs.classList.remove('open');
+            }
+        });
+    });
+
+    // Close custom dropdowns when the table container scrolls (position:fixed panels
+    // don't track with scroll, so we close them to avoid visual detachment).
+    const scrollContainer = document.querySelector('.patterns-table-container');
+    if (scrollContainer) {
+        scrollContainer.addEventListener('scroll', () => {
+            document.querySelectorAll('.custom-select.open').forEach(cs => {
+                if (cs.closeSelect) cs.closeSelect();
+                else cs.classList.remove('open');
+            });
+        }, { passive: true });
+    }
 
     document.getElementById('import-export-button').addEventListener('click', () => {
         window.open('../import-export/import-export.html', '_blank');
@@ -328,7 +361,7 @@ async function savePattern(event) {
     const search = document.getElementById('search').value;
     const title = document.getElementById('title').value;
     const groupValue = getGroupSelectValue(
-        document.getElementById('group-select'),
+        document.getElementById('group-select-wrapper'),
         document.getElementById('new-group-input')
     );
 
@@ -349,7 +382,7 @@ async function savePattern(event) {
         // Clear the input fields
         document.getElementById('search').value = '';
         document.getElementById('title').value = '';
-        document.getElementById('group-select').value = '';
+        setCustomSelectValue(document.getElementById('group-select-wrapper'), '', '(No group)');
         document.getElementById('new-group-input').style.display = 'none';
         document.getElementById('new-group-input').value = '';
 
@@ -372,60 +405,247 @@ function escapeHTML(str) {
         .replace(/'/g, '&#039;');
 }
 
-// Populate a <select> element with (No group), existing group names, and New group…
-function buildGroupSelect(selectEl, patterns, selectedGroup) {
-    const groupNames = getOrderedGroupNames(patterns, groupSortOrderPreference);
-    const prevVal = selectEl.value;
-    selectEl.innerHTML = '';
+// ── Custom dropdown helpers ─────────────────────────────────────────
 
+// Initialize click/keyboard behaviour on a .custom-select wrapper.
+// This must be called once per wrapper element (idempotent via data flag).
+function initCustomSelect(wrapper) {
+    if (!wrapper || wrapper.dataset.csInit) return;
+    wrapper.dataset.csInit = '1';
+
+    const trigger = wrapper.querySelector('.custom-select-trigger');
+    const optionsContainer = wrapper.querySelector('.custom-select-options');
+
+    wrapper.closeSelect = () => {
+        wrapper.classList.remove('open');
+        wrapper.classList.remove('dropup');
+        optionsContainer.classList.remove('visible');
+        optionsContainer.classList.remove('dropup');
+        // Return optionsContainer to its rightful place inside the wrapper
+        if (optionsContainer.parentNode === document.body) {
+            wrapper.appendChild(optionsContainer);
+        }
+    };
+
+    trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        // Close any other open custom selects first
+        document.querySelectorAll('.custom-select.open').forEach(cs => {
+            if (cs !== wrapper) {
+                if (cs.closeSelect) cs.closeSelect();
+                else cs.classList.remove('open');
+            }
+        });
+
+        // If closing, just toggle and return
+        if (wrapper.classList.contains('open')) {
+            wrapper.closeSelect();
+            return;
+        }
+
+        // Move to document.body to escape any parent "transform: translateZ" which
+        // would break position:fixed coordinate correctness.
+        document.body.appendChild(optionsContainer);
+        optionsContainer.classList.add('visible');
+
+        // Position the fixed options panel relative to the trigger's screen coords
+        const triggerRect = trigger.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - triggerRect.bottom;
+        const optionsMaxH = 200; // matches CSS max-height
+
+        optionsContainer.style.left = triggerRect.left + 'px';
+        optionsContainer.style.width = triggerRect.width + 'px';
+
+        if (spaceBelow < optionsMaxH && triggerRect.top > optionsMaxH) {
+            // Open upward
+            wrapper.classList.add('dropup');
+            optionsContainer.classList.add('dropup');
+            optionsContainer.style.top = 'auto';
+            optionsContainer.style.bottom = (window.innerHeight - triggerRect.top) + 'px';
+        } else {
+            // Open downward
+            wrapper.classList.remove('dropup');
+            optionsContainer.classList.remove('dropup');
+            optionsContainer.style.top = triggerRect.bottom + 'px';
+            optionsContainer.style.bottom = 'auto';
+        }
+
+        wrapper.classList.add('open');
+    });
+
+    // Keyboard navigation
+    trigger.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            trigger.click();
+        } else if (e.key === 'Escape') {
+            wrapper.closeSelect();
+        } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (!wrapper.classList.contains('open')) {
+                trigger.click();
+                return;
+            }
+            const items = Array.from(optionsContainer.querySelectorAll('.custom-select-option:not(.disabled):not(.separator)'));
+            const highlighted = optionsContainer.querySelector('.custom-select-option.highlighted');
+            let idx = highlighted ? items.indexOf(highlighted) : -1;
+            items.forEach(i => i.classList.remove('highlighted'));
+            if (e.key === 'ArrowDown') idx = Math.min(idx + 1, items.length - 1);
+            else idx = Math.max(idx - 1, 0);
+            if (items[idx]) {
+                items[idx].classList.add('highlighted');
+                items[idx].scrollIntoView({ block: 'nearest' });
+            }
+        } else if (e.key === 'Enter' && wrapper.classList.contains('open')) {
+            const highlighted = optionsContainer.querySelector('.custom-select-option.highlighted');
+            if (highlighted) highlighted.click();
+        }
+    });
+
+    // Handle option clicks via delegation
+    optionsContainer.addEventListener('click', (e) => {
+        const option = e.target.closest('.custom-select-option');
+        if (!option || option.classList.contains('disabled') || option.classList.contains('separator')) return;
+        e.stopPropagation();
+
+        const value = option.dataset.value;
+        const text = option.textContent;
+        const hiddenInput = wrapper.querySelector('input[type="hidden"]');
+        const textSpan = wrapper.querySelector('.custom-select-text');
+
+        hiddenInput.value = value;
+        textSpan.textContent = text;
+
+        // Update selected styling
+        optionsContainer.querySelectorAll('.custom-select-option').forEach(o => o.classList.remove('selected'));
+        option.classList.add('selected');
+
+        wrapper.closeSelect();
+        wrapper.dispatchEvent(new Event('customselect', { bubbles: true }));
+    });
+}
+
+// Programmatically set a custom-select value.
+function setCustomSelectValue(wrapper, value, displayText) {
+    if (!wrapper) return;
+    const hiddenInput = wrapper.querySelector('input[type="hidden"]');
+    const textSpan = wrapper.querySelector('.custom-select-text');
+    if (hiddenInput) hiddenInput.value = value;
+    if (textSpan) textSpan.textContent = displayText || value || '(No group)';
+    // Update selected styling
+    const optionsContainer = wrapper.querySelector('.custom-select-options');
+    if (optionsContainer) {
+        optionsContainer.querySelectorAll('.custom-select-option').forEach(o => {
+            o.classList.toggle('selected', o.dataset.value === value);
+        });
+    }
+}
+
+// Build a custom-select wrapper element from scratch (for in-table use).
+function createCustomSelectElement() {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'custom-select';
+
+    const hidden = document.createElement('input');
+    hidden.type = 'hidden';
+    hidden.className = 'group-select-input';
+    hidden.value = '';
+    wrapper.appendChild(hidden);
+
+    const trigger = document.createElement('div');
+    trigger.className = 'custom-select-trigger';
+    trigger.tabIndex = 0;
+    const textSpan = document.createElement('span');
+    textSpan.className = 'custom-select-text';
+    textSpan.textContent = '(No group)';
+    trigger.appendChild(textSpan);
+    wrapper.appendChild(trigger);
+
+    const optionsContainer = document.createElement('div');
+    optionsContainer.className = 'custom-select-options';
+    wrapper.appendChild(optionsContainer);
+
+    initCustomSelect(wrapper);
+    return wrapper;
+}
+
+// Populate a custom-select wrapper with group options.
+function buildGroupSelect(wrapperOrHiddenInput, patterns, selectedGroup) {
+    // Accept either the .custom-select wrapper or the hidden input inside it
+    let wrapper = wrapperOrHiddenInput;
+    if (wrapper.tagName === 'INPUT') {
+        wrapper = wrapper.closest('.custom-select');
+    }
+    if (!wrapper) return;
+
+    const hiddenInput = wrapper.querySelector('input[type="hidden"]');
+    const optionsContainer = wrapper.querySelector('.custom-select-options');
+    const textSpan = wrapper.querySelector('.custom-select-text');
+    const prevVal = hiddenInput.value;
+
+    optionsContainer.innerHTML = '';
+    const groupNames = getOrderedGroupNames(patterns, groupSortOrderPreference);
     const selectableGroupNames = [...groupNames];
 
+    // Recent group at top
     if (showRecentGroupFirstPreference && recentGroupSelection && groupNames.includes(recentGroupSelection)) {
-        const recentOpt = document.createElement('option');
-        recentOpt.value = recentGroupSelection;
-        recentOpt.textContent = recentGroupSelection;
-        selectEl.appendChild(recentOpt);
+        const recentDiv = document.createElement('div');
+        recentDiv.className = 'custom-select-option';
+        recentDiv.dataset.value = recentGroupSelection;
+        recentDiv.textContent = recentGroupSelection;
+        optionsContainer.appendChild(recentDiv);
 
-        const separatorOpt = document.createElement('option');
-        separatorOpt.value = '__separator__';
-        separatorOpt.textContent = '──────────';
-        separatorOpt.disabled = true;
-        selectEl.appendChild(separatorOpt);
+        const sep = document.createElement('div');
+        sep.className = 'custom-select-option separator';
+        optionsContainer.appendChild(sep);
 
         selectableGroupNames.splice(selectableGroupNames.indexOf(recentGroupSelection), 1);
         selectableGroupNames.unshift(recentGroupSelection);
         groupNames.splice(groupNames.indexOf(recentGroupSelection), 1);
     }
 
-    const noGroupOpt = document.createElement('option');
-    noGroupOpt.value = '';
-    noGroupOpt.textContent = '(No group)';
-    selectEl.appendChild(noGroupOpt);
+    // (No group)
+    const noGroupDiv = document.createElement('div');
+    noGroupDiv.className = 'custom-select-option';
+    noGroupDiv.dataset.value = '';
+    noGroupDiv.textContent = '(No group)';
+    optionsContainer.appendChild(noGroupDiv);
 
+    // Group names
     for (const name of groupNames) {
-        const opt = document.createElement('option');
-        opt.value = name;
-        opt.textContent = name;
-        selectEl.appendChild(opt);
+        const div = document.createElement('div');
+        div.className = 'custom-select-option';
+        div.dataset.value = name;
+        div.textContent = name;
+        optionsContainer.appendChild(div);
     }
 
-    const preNewGroupSeparatorOpt = document.createElement('option');
-    preNewGroupSeparatorOpt.value = '__separator_new_group__';
-    preNewGroupSeparatorOpt.textContent = '──────────';
-    preNewGroupSeparatorOpt.disabled = true;
-    selectEl.appendChild(preNewGroupSeparatorOpt);
+    // Separator before "New group..."
+    const sepNew = document.createElement('div');
+    sepNew.className = 'custom-select-option separator';
+    optionsContainer.appendChild(sepNew);
 
-    const newOpt = document.createElement('option');
-    newOpt.value = '__new__';
-    newOpt.textContent = 'New group\u2026';
-    selectEl.appendChild(newOpt);
+    // New group...
+    const newDiv = document.createElement('div');
+    newDiv.className = 'custom-select-option';
+    newDiv.dataset.value = '__new__';
+    newDiv.textContent = 'New group\u2026';
+    optionsContainer.appendChild(newDiv);
 
+    // Set selected value
+    let resolvedValue;
     if (selectedGroup !== undefined) {
-        selectEl.value = (selectedGroup && selectableGroupNames.includes(selectedGroup)) ? selectedGroup : '';
+        resolvedValue = (selectedGroup && selectableGroupNames.includes(selectedGroup)) ? selectedGroup : '';
     } else {
-        selectEl.value = prevVal;
-        if (!selectEl.value) selectEl.value = '';
+        resolvedValue = prevVal || '';
     }
+
+    const matchingOption = optionsContainer.querySelector(`.custom-select-option[data-value="${CSS.escape(resolvedValue)}"]`);
+    const displayText = matchingOption ? matchingOption.textContent : '(No group)';
+    setCustomSelectValue(wrapper, resolvedValue, displayText);
+
+    // Ensure this wrapper is initialised
+    initCustomSelect(wrapper);
 }
 
 function getOrderedGroupNames(patterns, sortOrder) {
@@ -438,13 +658,21 @@ function getOrderedGroupNames(patterns, sortOrder) {
     return groupNames.sort((left, right) => left.localeCompare(right));
 }
 
-// Read resolved group value from a select + companion new-name input
-function getGroupSelectValue(selectEl, newInputEl) {
-    if (!selectEl) return '';
-    if (selectEl.value === '__new__') {
+// Read resolved group value from a custom-select wrapper (or hidden input) + companion new-name input
+function getGroupSelectValue(selectElOrWrapper, newInputEl) {
+    if (!selectElOrWrapper) return '';
+    // If it's a custom-select wrapper, read from the hidden input
+    let value;
+    if (selectElOrWrapper.classList && selectElOrWrapper.classList.contains('custom-select')) {
+        value = selectElOrWrapper.querySelector('input[type="hidden"]').value;
+    } else {
+        // Hidden input directly
+        value = selectElOrWrapper.value;
+    }
+    if (value === '__new__') {
         return newInputEl ? newInputEl.value.trim() : '';
     }
-    return selectEl.value;
+    return value;
 }
 
 // Toggle the collapsed/expanded state of a group header row
@@ -598,10 +826,7 @@ function createPatternRow(pattern, index, groupName, isGroupDisabled = false) {
                 <span class="title-text">${escapedTitle}</span>
                 <input class="title-input" type="text" value="${escapedTitle}" style="display:none;">
             </div>
-            <div class="group-row" style="display:none;">
-                <select class="group-select-input"></select>
-                <input class="new-group-input-row" type="text" placeholder="New group name" style="display:none;">
-            </div>
+            <div class="group-row" style="display:none;"></div>
         </td>
         <td style="text-align: center;">
             <label class="switch">
@@ -610,6 +835,16 @@ function createPatternRow(pattern, index, groupName, isGroupDisabled = false) {
             </label>
         </td>
     `;
+    // Build custom dropdown for group selection in the group-row
+    const groupRow = row.querySelector('.group-row');
+    const customSelect = createCustomSelectElement();
+    groupRow.appendChild(customSelect);
+    const newGroupInput = document.createElement('input');
+    newGroupInput.type = 'text';
+    newGroupInput.className = 'new-group-input-row monospace-font';
+    newGroupInput.placeholder = 'New group name';
+    newGroupInput.style.display = 'none';
+    groupRow.appendChild(newGroupInput);
     return row;
 }
 
@@ -667,7 +902,7 @@ async function restoreOptions() {
         patternTableBody.innerHTML = '';
 
         // Rebuild the Group dropdown in the Add Pattern form
-        buildGroupSelect(document.getElementById('group-select'), patterns);
+        buildGroupSelect(document.getElementById('group-select-wrapper'), patterns);
 
         if (patterns.length === 0) {
             const noValuesMessage = document.createElement('tr');
@@ -1108,6 +1343,7 @@ function toggleEditRow(index, isEditing) {
     const titleText = row.querySelector('.title-text');
     const titleInput = row.querySelector('.title-input');
     const groupRow = row.querySelector('.group-row');
+    const groupSelectWrapper = row.querySelector('.custom-select');
     const groupSelectInput = row.querySelector('.group-select-input');
     const searchCell = searchInput.closest('td'); // Select the cell containing searchInput
     const titleCell = titleInput.closest('td'); // Select the cell containing titleInput
@@ -1120,18 +1356,16 @@ function toggleEditRow(index, isEditing) {
         table.classList.add('edit-mode'); // Add edit-mode class
         searchText.style.display = 'none';
         searchInput.style.display = 'inline';
-        searchInput.style.height = '1.5em'; // Set the height of the input
         searchCell.classList.add('no-margin'); // Add no-margin class to the search cell
         titleText.style.display = 'none';
         titleInput.style.display = 'inline';
-        titleInput.style.height = '1.5em'; // Set the height of the input
         titleCell.classList.add('no-margin'); // Add no-margin class to the title cell
         // Show group selector row and populate it
         groupRow.style.display = 'flex';
         browser.storage.local.get('patterns').then(result => {
             const patterns = result.patterns || [];
             const currentGroup = row.getAttribute('data-group') || '';
-            buildGroupSelect(groupSelectInput, patterns, currentGroup);
+            buildGroupSelect(groupSelectWrapper, patterns, currentGroup);
         });
         editButton.style.display = 'none';
         saveButton.style.display = 'inline';
@@ -1171,7 +1405,7 @@ async function saveRow(index) {
     const searchInput = row.querySelector('.search-input').value;
     const titleInput = row.querySelector('.title-input').value;
     const groupValue = getGroupSelectValue(
-        row.querySelector('.group-select-input'),
+        row.querySelector('.custom-select'),
         row.querySelector('.new-group-input-row')
     );
 
