@@ -28,7 +28,6 @@
 - Support for Firefox Sync for pattern synchronization.
 - Keyboard shortcuts for quick title management actions.
 - Add badge option to show the number of active patterns.
-- Option to reload tabs after deleting a rule to restore original titles.
 - Support for Firefox and Tree Style Tab (TST) integration for "Rename this tab" context menu.
 - Case-insensitivity option for non-regex patterns.
 
@@ -58,12 +57,47 @@
 
 ## Changelog
 
-### Version 0.9.4 (Mar 29, 2026)
+<details>
+<summary><b>Version 1.0.0 (April 15, 2026)</b></summary>
+
+- **Rule Grouping System**: 
+    - Introduced logical grouping for patterns with collapsible group headers.
+    - Added "Enable/Disable" toggles for entire groups (states cascade to child rules).
+    - Integrated support for renaming and deleting entire rule groups.
+    - Preserved group states (expanded/collapsed) and included them in JSON Metadata during export.
+- **Advanced Group Options**: 
+    - Added configuration for "Rule Counts" indicators next to group names.
+    - Added configuration for add Group dropdown order (Alphabetical or Table Order).
+    - Added configuration for adding most recently used group to top of dropdown.
+- **Drag-and-Drop Support**: 
+    - Full drag-and-drop support for reordering both individual rules and entire rule groups.
+    - Context-aware snapping that allows moving rules between groups or reordering groups themselves.
+- **Custom UI Framework & Branding**: 
+    - Added a new application header with a dedicated SVG logo and platform-synced theme icons.
+    - Migrated from native browser selects to custom dropdowns to fix high-DPI scaling issues.
+    - Replaced generic Javascript `alert()` popups with fully integrated, theme-aware HTML5 `<dialog>` modals.
+- **Rule State Machine**: 
+    - Completely refactored the background engine to track native vs. modified titles.
+    - Enables seamless, real-time title restoration when rules are deleted, disabled, or groups are toggled—no page reloads required.
+- **Intelligent Discard Management**:
+    - **Custom Discard Delay**: Added support to configure the precise delay time before discarding tabs.
+    - **Anti-Throbber Fix**: Automatically executes `window.stop()` before re-discarding tabs to prevent infinite loading spinners in the browser UI.
+    - **Amnesia Recovery**: Implemented a stateless heuristic that correctly identifies and reverts manipulated titles in discarded tabs even after an extension reload or browser restart.
+- **Scroll & UX Polish**: 
+    - **Scrolling**: Added overlay scrollbar support and `scrollbar-gutter` logic to prevent layout shifting when the rules table grows.
+    - **Auto-Scroll**: Automatically scrolls the active editing row into view to guarantee "last row" visibility during form submission.
+    - Adjusted the entire layout to use 100% width for full-page responsive viewing.
+</details>
+
+<details>
+<summary><b>Version 0.9.4 (Mar 29, 2026)</b></summary>
+
 - **URL Decoding**: Added support for decoding percent-encoded characters in URLs before matching (Issue #7).
 - **Display Improvements**: Implemented HTML escaping to ensure special characters in patterns and titles are rendered correctly instead of being interpreted as HTML code.
 - **Robust Title Sanitization**: Improved `document.title` handling using JSON serialization to prevent special character corruption.
 - **Infrastructure**: Introduced Node.js toolchain, unit testing suite, and GitHub Actions CI/CD.
 - **Organization**: Restructured the project to group source files in the `src/` directory.
+</details>
 
 <details>
 <summary><b>Version 0.9.3 (Jun 15, 2025)</b></summary>
