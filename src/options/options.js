@@ -6,6 +6,47 @@ let showRecentGroupFirstPreference = false;
 let showGroupRuleCountPreference = false;
 let recentGroupSelection = '';
 
+// Auto-scroll during drag
+let lastDragEvent = null;
+let autoScrollRAF = null;
+
+function handleAutoScroll(container) {
+    if (!lastDragEvent) {
+        autoScrollRAF = requestAnimationFrame(() => handleAutoScroll(container));
+        return;
+    }
+
+    const rect = container.getBoundingClientRect();
+    const threshold = 50; // Threshold zone in pixels
+    const topDist = lastDragEvent.clientY - rect.top;
+    const bottomDist = rect.bottom - lastDragEvent.clientY;
+    let scrollAmount = 0;
+
+    if (topDist < threshold && container.scrollTop > 0) {
+        // Clamp topDist at 0 for speed calculation if outside
+        const effectiveDist = Math.max(0, topDist);
+        scrollAmount = -Math.max(2, (threshold - effectiveDist) / 2.5);
+    } else if (bottomDist < threshold && container.scrollTop + container.clientHeight < container.scrollHeight) {
+        // Clamp bottomDist at 0 for speed calculation if outside
+        const effectiveDist = Math.max(0, bottomDist);
+        scrollAmount = Math.max(2, (threshold - effectiveDist) / 2.5);
+    }
+
+    if (scrollAmount !== 0) {
+        container.scrollTop += scrollAmount;
+    }
+
+    autoScrollRAF = requestAnimationFrame(() => handleAutoScroll(container));
+}
+
+function stopAutoScroll() {
+    if (autoScrollRAF) {
+        cancelAnimationFrame(autoScrollRAF);
+        autoScrollRAF = null;
+    }
+    lastDragEvent = null;
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     // Theme handling
     const themeRadios = [
@@ -194,8 +235,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     const table = document.getElementById('pattern-table');
-    const tableContainer = document.querySelector('.patterns-table-container');
-    setupFirefoxOverlayScrollbar(tableContainer);
+    const scrollContainer = document.querySelector('.patterns-table-container');
+    setupFirefoxOverlayScrollbar(scrollContainer);
 
     table.addEventListener('click', (event) => {
         const headerRow = event.target.closest('tr.group-header');
@@ -261,13 +302,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Close custom dropdowns when the table container scrolls (position:fixed panels
     // don't track with scroll, so we close them to avoid visual detachment).
-    const scrollContainer = document.querySelector('.patterns-table-container');
     if (scrollContainer) {
         scrollContainer.addEventListener('scroll', () => {
             document.querySelectorAll('.custom-select.open').forEach(cs => {
                 if (cs.closeSelect) cs.closeSelect();
                 else cs.classList.remove('open');
             });
+        }, { passive: true });
+
+        // Update cursor position for auto-scroll globally during drag
+        window.addEventListener('dragover', (e) => {
+            lastDragEvent = e;
         }, { passive: true });
     }
 
@@ -1072,6 +1117,9 @@ async function restoreOptions() {
                     setTimeout(() => headerRow.classList.add('group-dragging'), 0);
                     e.dataTransfer.effectAllowed = 'move';
                     e.dataTransfer.setData('text/plain', draggedGroupName);
+
+                    const scrollContainer = document.querySelector('.patterns-table-container');
+                    if (scrollContainer) handleAutoScroll(scrollContainer);
                 });
 
                 headerRow.addEventListener('dragend', () => {
@@ -1079,6 +1127,7 @@ async function restoreOptions() {
                     document.querySelectorAll('.group-header').forEach(r =>
                         r.classList.remove('group-dragging', 'drag-over-top', 'drag-over-bottom')
                     );
+                    stopAutoScroll();
                 });
 
                 td.addEventListener('dragover', (e) => {
@@ -1159,6 +1208,9 @@ async function restoreOptions() {
                     setTimeout(() => patternRow.classList.add('row-dragging'), 0);
                     e.dataTransfer.effectAllowed = 'move';
                     e.dataTransfer.setData('text/plain', String(draggedPatternIndex));
+
+                    const scrollContainer = document.querySelector('.patterns-table-container');
+                    if (scrollContainer) handleAutoScroll(scrollContainer);
                 });
 
                 patternRow.addEventListener('dragend', () => {
@@ -1169,6 +1221,7 @@ async function restoreOptions() {
                     document.querySelectorAll('.group-header').forEach(r =>
                         r.classList.remove('group-drop-target')
                     );
+                    stopAutoScroll();
                 });
 
                 patternRow.addEventListener('dragover', (e) => {
