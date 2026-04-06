@@ -1595,5 +1595,6 @@ async function updateGroupDisabled(groupName, isDisabled) {
 
 function openNotes() {
     console.log('openNotes');
-    window.open('../notes/note.html', '_blank');
+    // Point to the GitHub repo as the central hub for Features, Roadmap, and Examples
+    window.open('https://github.com/irvinm/Title-Tamer#features', '_blank');
 }
