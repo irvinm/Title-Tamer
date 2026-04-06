@@ -10,9 +10,12 @@
 - **URL Decoding Support**: Automatically decodes percent-encoded characters (like `%20`, `%22`, etc.) within captured URL segments. This ensures that titles like `Search: My%20Query` are rendered as `Search: My Query` in your tab.
 - **Advanced RegEx Support**: Full support for JavaScript Regular Expressions, including capture groups and anchors.
 - **Special Character Support**: All patterns and titles are escaped to ensure characters like `<`, `>`, and `&` are rendered correctly in the options interface.
-- **Import/Export**: Easily backup or share your pattern collections via JSON files.
-- **Load & Discard**: Automatically manage tab lifecycles when updating rules.
-- **Flexible Management**: Add, delete, update, and reorder patterns in priority order via a dedicated options page.
+- **Rule Grouping System**: Organize patterns into logical groups with collapsible headers, enable/disable toggles that cascade to child rules, and easily rename or delete entire groups.
+- **Drag-and-Drop Support**: Reorder individual rules and entire rule groups with full context-aware snapping that allows moving rules between groups.
+- **Custom UI Framework**: Modern theme-aware interface with custom dropdowns, SVG logo, and HTML5 dialog modals replacing generic alerts.
+- **Intelligent Discard Management**: Configure custom discard delays, prevent infinite loading spinners with anti-throbber fixes, and restore manipulated titles even after extension reloads.
+- **Import/Export**: Easily backup or share your pattern collections via JSON files, including group metadata and states.
+- **Flexible Management**: Add, delete, update, and reorder patterns in priority order via a dedicated options page with responsive scrolling and auto-scroll features.
 
 ## Examples
 - https://github.com/irvinm/Title-Tamer/wiki/Examples
