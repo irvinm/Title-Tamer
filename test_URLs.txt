@@ -3,10 +3,10 @@ https://twitter.com/home
 https://www.reddit.com/r/javascript/
 https://developer.mozilla.org/en-US/docs/Web/API/Document
 https://stackoverflow.com/questions/11227809/why-is-processing-a-sorted-array-faster-than-an-unsorted-array
-https://www.bbc.com/news/world-65824513
+https://www.bbc.com/news/
 https://www.nytimes.com/section/technology
-https://mail.google.com/mail/u/0/#inbox
-https://calendar.google.com/calendar/u/0/r/day
+https://trello.com/b/nC8QJJoZ/trello-development
+https://www.notion.com/product
 https://www.google.com/search?q=open+source
 https://www.bing.com/search?q=antigravity
 https://www.imdb.com/title/tt0111161/
