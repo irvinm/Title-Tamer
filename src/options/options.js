@@ -147,6 +147,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadDiscardedTabs,
         reDiscardTabs,
         discardDelay,
+        limitConcurrentTabsEnabled,
+        maxConcurrentTabs,
         groupSortOrder,
         showRecentGroupFirst,
         showGroupRuleCount,
@@ -155,6 +157,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         'loadDiscardedTabs',
         'reDiscardTabs',
         'discardDelay',
+        'limitConcurrentTabsEnabled',
+        'maxConcurrentTabs',
         'groupSortOrder',
         'showRecentGroupFirst',
         'showGroupRuleCount',
@@ -210,10 +214,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         browser.storage.local.set({ discardDelay });
     }
     */
-
     document.getElementById('discarded-tabs-option').checked = loadDiscardedTabs;
     document.getElementById('discard-delay-enabled').checked = reDiscardTabs;
     document.getElementById('discard-delay').value = discardDelay;
+    
+    // Default limitConcurrentTabsEnabled to true, and maxConcurrentTabs to 10 if not set
+    const isLimitEnabled = limitConcurrentTabsEnabled !== undefined ? limitConcurrentTabsEnabled : true;
+    const maxTabsValue = maxConcurrentTabs !== undefined && maxConcurrentTabs > 0 ? maxConcurrentTabs : 10;
+    
+    document.getElementById('limit-concurrent-tabs-enabled').checked = isLimitEnabled;
+    document.getElementById('max-concurrent-tabs').value = maxTabsValue;
 
     // Show or hide discard delay options based on loadDiscardedTabs state
     document.getElementById('discarded-tabs-options-details').style.display = loadDiscardedTabs ? 'block' : 'none';
@@ -232,6 +242,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('discard-delay').addEventListener('input', function () {
         const discardDelay = parseInt(this.value, 10) || 1;
         browser.storage.local.set({ discardDelay });
+    });
+
+    document.getElementById('limit-concurrent-tabs-enabled').addEventListener('change', function () {
+        const limitConcurrentTabsEnabled = this.checked;
+        browser.storage.local.set({ limitConcurrentTabsEnabled });
+    });
+
+    document.getElementById('max-concurrent-tabs').addEventListener('input', function () {
+        const maxConcurrentTabs = parseInt(this.value, 10) || 10; // Fallback to 10 instead of 0
+        if (maxConcurrentTabs < 1) {
+            this.value = 1;
+            browser.storage.local.set({ maxConcurrentTabs: 1 });
+        } else {
+            browser.storage.local.set({ maxConcurrentTabs });
+        }
     });
 
     const table = document.getElementById('pattern-table');

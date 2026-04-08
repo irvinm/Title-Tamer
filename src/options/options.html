@@ -61,6 +61,12 @@
                         Reload discarded tabs after rules are added, changed, or deleted
                     </label>
                     <div class="nested-options show" id="discarded-tabs-options-details">
+                        <label class="discard-delay-label" style="margin-bottom: 5px;">
+                            <input type="checkbox" id="limit-concurrent-tabs-enabled" checked />
+                            Limit concurrent tabs loaded to
+                            <input type="number" id="max-concurrent-tabs" placeholder="Enter number"
+                                min="1" value="10" />
+                        </label>
                         <label class="discard-delay-label">
                             <input type="checkbox" id="discard-delay-enabled" checked />
                             Discard these tabs after

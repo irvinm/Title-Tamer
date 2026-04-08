@@ -173,6 +173,7 @@ thead th {
 /* Replaces inline style="display: block;" for nested options */
 .nested-options.show {
     display: block;
+    margin-left: 20px;
 }
 
 /* Moved from options.html inline styles */
@@ -190,7 +191,8 @@ thead th {
     display: block;
 }
 
-#discard-delay {
+#discard-delay,
+#max-concurrent-tabs {
     width: 80px;
     padding: 3px 6px;
     border: 1px solid var(--input-border);
