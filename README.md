@@ -14,6 +14,7 @@
 - **Drag-and-Drop Support**: Reorder individual rules and entire rule groups with full context-aware snapping that allows moving rules between groups.
 - **Custom UI Framework**: Modern theme-aware interface with custom dropdowns, SVG logo, and HTML5 dialog modals replacing generic alerts.
 - **Intelligent Discard Management**: Configure custom discard delays, prevent infinite loading spinners with anti-throbber fixes, and restore manipulated titles even after extension reloads.
+- **Throttled Tab Synchronization**: Uses a rolling worker pool to process discarded tabs in controllable batches (default 10), preventing memory exhaustion and system crashes during large-scale sync operations.
 - **Import/Export**: Easily backup or share your pattern collections via JSON files, including group metadata and states.
 - **Flexible Management**: Add, delete, update, and reorder patterns in priority order via a dedicated options page with responsive scrolling and auto-scroll features.
 
@@ -85,6 +86,7 @@
 - **Intelligent Discard Management**:
     - **Custom Discard Delay**: Added support to configure the precise delay time before discarding tabs.
     - **Anti-Throbber Fix**: Automatically executes `window.stop()` before re-discarding tabs to prevent infinite loading spinners in the browser UI.
+    - **Throttled Synchronization**: Implemented a "Rolling Worker Pool" that limits concurrent tab reloads (default 10) to prevent memory exhaustion and browser crashes during large-scale syncs (1000+ tabs).
     - **Amnesia Recovery**: Implemented a stateless heuristic that correctly identifies and reverts manipulated titles in discarded tabs even after an extension reload or browser restart.
 - **Scroll & UX Polish**: 
     - **Scrolling**: Added overlay scrollbar support and `scrollbar-gutter` logic to prevent layout shifting when the rules table grows.
