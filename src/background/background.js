@@ -211,65 +211,17 @@ async function syncAllTabs() {
 
         // Phase 1: Re-evaluate tabs intelligently
         for (const tab of tabs) {
-            
-            // Calculate what the title SHOULD be
-            let matchedTitle = null;
-            let matchingPattern = null;
-            for (const pattern of activePatterns) {
-                const matchTest = applyPattern(tab.url, pattern);
-                if (matchTest && matchTest.matched && matchTest.newTitle) {
-                    matchedTitle = matchTest.newTitle;
-                    matchingPattern = pattern;
-                    break;
-                }
-            }
+            const decision = evaluateTabSyncState(
+                tab, 
+                activePatterns, 
+                sorted, // all patterns for amnesia recovery
+                disabledGroups, 
+                tabModifiedTitles, 
+                tabOriginalTitles
+            );
 
-            let needsUpdate = false;
-            let updateReason = "";
-
-            if (matchedTitle) {
-                // Determine if the string diverges
-                if (tab.title !== matchedTitle) {
-                    needsUpdate = true;
-                    const ruleId = matchingPattern.name || matchingPattern.search;
-                    updateReason = `Title mismatch (Current: "${tab.title?.substring(0, 30)}...", Expected: "${matchedTitle?.substring(0, 30)}...") matching rule "${ruleId}"`;
-                }
-            } else {
-                // If no rules match currently, but we know we previously modified this tab, REVERT it
-                if (tabModifiedTitles.has(tab.id)) {
-                    needsUpdate = true;
-                    updateReason = "Reverting modified title (no active rule match)";
-                } else if (tab.discarded) {
-                    // AMNESIA RECOVERY: If the extension reloaded (wiping memory maps) and the user disabled a rule, 
-                    // we must deduce if this tab happens to hold an orphaned manipulated title.
-                    
-                    // 1. Check persistent memory (Dirty list)
-                    if (tabModifiedTitles.has(tab.id)) {
-                        needsUpdate = true;
-                        updateReason = "Dirty Tab: Exists in persistent modification list but matches no active rule.";
-                    } else if (tab.title.match(/^HTTP\d*!/) || tab.title.match(/^HTTP!/)) {
-                        // 2. SKEPTICAL ENGINE: Catch obvious Title-Tamer markers (like HTTP30 or HTTP!)
-                        needsUpdate = true;
-                        updateReason = `Skeptical Engine: Suspicious title prefix detected ("${tab.title.substring(0, 10)}")`;
-                    } else {
-                        // 3. Pattern Heuristics: Check against inactive rules
-                        for (const oldPattern of sorted) {
-                            if (oldPattern.enabled === false || (oldPattern.group && disabledGroups.includes(oldPattern.group))) {
-                                const oldTest = applyPattern(tab.url, oldPattern);
-                                if (oldTest && oldTest.matched && tab.title === oldTest.newTitle) {
-                                    needsUpdate = true;
-                                    const ruleId = oldPattern.name || oldPattern.search;
-                                    updateReason = `Amnesia Recovery: Orphaned title found matching inactive rule "${ruleId}"`;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (needsUpdate) {
-                console.log(`[PHASE1] Tab ${tab.id} needs update: ${updateReason}`);
+            if (decision.needsUpdate) {
+                console.log(`[PHASE1] Tab ${tab.id} needs update: ${decision.updateReason}`);
                 if (tab.discarded) {
                     if (loadDiscardedTabs) {
                         console.log(`[PHASE1] Tab ${tab.id} is discarded. Routing to Phase 2 (Reloading enabled)`);
@@ -289,13 +241,9 @@ async function syncAllTabs() {
                     console.log(`[PHASE1] Tab ${tab.id} is loaded. Updating in-place.`);
                     await updateTabTitle(tab.id, tab);
                 }
-            } else {
-                // No update needed
-                if (matchedTitle) {
-                    if (tab.status !== 'complete' || (!tab.discarded && tab.status === 'loading')) {
-                        console.log(`[PHASE1] Tab ${tab.id} already matches rule "${matchingPattern.name}" but looks like a ZOMBIE (status=${tab.status})`);
-                    }
-                }
+            } else if (decision.matchedTitle && (tab.status !== 'complete' || (!tab.discarded && tab.status === 'loading'))) {
+                // No update needed to title, but tab looks like a zombie
+                console.log(`[PHASE1] Tab ${tab.id} already matches rule "${decision.matchingPattern.name}" but looks like a ZOMBIE (status=${tab.status})`);
             }
         }
 
