@@ -4,6 +4,45 @@
 const tabOriginalTitles = new Map(); // tabId -> String (the site's true, native title)
 const tabModifiedTitles = new Map(); // tabId -> String (the manipulated title we set)
 
+const syncStateUtils = (() => {
+    if (globalThis.serializeSyncState && globalThis.hydrateSyncState) {
+        return {
+            serializeSyncState: globalThis.serializeSyncState,
+            hydrateSyncState: globalThis.hydrateSyncState,
+        };
+    }
+
+    if (typeof require !== 'undefined') {
+        try {
+            return require('../lib/sync-state-utils');
+        } catch (_) {
+            // Fall through to local fallback implementation.
+        }
+    }
+
+    return {
+        serializeSyncState(modifiedTitles, originalTitles) {
+            return {
+                modifiedTitles: Array.from(modifiedTitles.entries()),
+                originalTitles: Array.from(originalTitles.entries()),
+            };
+        },
+        hydrateSyncState(statePayload, targetModified, targetOriginal) {
+            if (!statePayload) return;
+            if (Array.isArray(statePayload.modifiedTitles)) {
+                statePayload.modifiedTitles.forEach(([id, title]) => {
+                    targetModified.set(id, title);
+                });
+            }
+            if (Array.isArray(statePayload.originalTitles)) {
+                statePayload.originalTitles.forEach(([id, title]) => {
+                    targetOriginal.set(id, title);
+                });
+            }
+        },
+    };
+})();
+
 // Persistence Helpers
 let isInitialStateLoaded = false;
 let saveTimeout = null;
@@ -11,10 +50,7 @@ let saveTimeout = null;
 async function saveState() {
     if (saveTimeout) clearTimeout(saveTimeout);
     saveTimeout = setTimeout(async () => {
-        const data = {
-            modifiedTitles: Array.from(tabModifiedTitles.entries()),
-            originalTitles: Array.from(tabOriginalTitles.entries())
-        };
+        const data = syncStateUtils.serializeSyncState(tabModifiedTitles, tabOriginalTitles);
         await browser.storage.local.set({ '_sync_state': data }).catch(() => {});
         saveTimeout = null;
     }, 500); // Debounce to allow batch updates
@@ -24,16 +60,7 @@ async function loadState() {
     try {
         const result = await browser.storage.local.get('_sync_state');
         if (result && result._sync_state) {
-            if (result._sync_state.modifiedTitles) {
-                result._sync_state.modifiedTitles.forEach(([id, title]) => {
-                    tabModifiedTitles.set(id, title);
-                });
-            }
-            if (result._sync_state.originalTitles) {
-                result._sync_state.originalTitles.forEach(([id, title]) => {
-                    tabOriginalTitles.set(id, title);
-                });
-            }
+            syncStateUtils.hydrateSyncState(result._sync_state, tabModifiedTitles, tabOriginalTitles);
             console.log(`[STATE] Loaded records from storage (Modified: ${tabModifiedTitles.size}, Original: ${tabOriginalTitles.size})`);
         }
     } catch (e) {
@@ -431,4 +458,15 @@ async function syncAllTabs() {
         }
     }
 }
-
+
+// Export for Node test environments.
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        saveState,
+        loadState,
+        isInjectable,
+        updateTabTitle,
+        syncAllTabs,
+    };
+}
+

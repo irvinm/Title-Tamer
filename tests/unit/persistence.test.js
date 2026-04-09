@@ -1,51 +1,34 @@
 /**
  * persistence.test.js
  * 
- * Unit tests for state serialization used in saveState/loadState
+ * Unit tests for production state persistence helpers.
  */
 
 const { expect } = require('../test-setup');
+const { serializeSyncState, hydrateSyncState } = require('../../src/lib/sync-state-utils');
 
 describe('State Persistence Logic', function () {
     
     it('should correctly serialize Maps to storage format', function () {
         const modified = new Map([[1, 'Title 1'], [20, 'Title 20']]);
         const original = new Map([[1, 'Orig 1'], [20, 'Orig 20']]);
-        
-        // This is the logic inside saveState()
-        const data = {
-            modifiedTitles: Array.from(modified.entries()),
-            originalTitles: Array.from(original.entries())
-        };
+
+        const data = serializeSyncState(modified, original);
         
         expect(data.modifiedTitles).to.deep.equal([[1, 'Title 1'], [20, 'Title 20']]);
         expect(data.originalTitles).to.deep.equal([[1, 'Orig 1'], [20, 'Orig 20']]);
     });
 
     it('should correctly deserialize storage format back to Maps', function () {
-        const storageData = {
-            _sync_state: {
-                modifiedTitles: [[100, 'Mod 100'], [200, 'Mod 200']],
-                originalTitles: [[100, 'Site 100'], [200, 'Site 200']]
-            }
+        const storageState = {
+            modifiedTitles: [[100, 'Mod 100'], [200, 'Mod 200']],
+            originalTitles: [[100, 'Site 100'], [200, 'Site 200']],
         };
 
         const resultModified = new Map();
         const resultOriginal = new Map();
 
-        // This is the logic inside loadState()
-        if (storageData._sync_state) {
-            if (storageData._sync_state.modifiedTitles) {
-                storageData._sync_state.modifiedTitles.forEach(([id, title]) => {
-                    resultModified.set(id, title);
-                });
-            }
-            if (storageData._sync_state.originalTitles) {
-                storageData._sync_state.originalTitles.forEach(([id, title]) => {
-                    resultOriginal.set(id, title);
-                });
-            }
-        }
+        hydrateSyncState(storageState, resultModified, resultOriginal);
 
         expect(resultModified.get(100)).to.equal('Mod 100');
         expect(resultModified.get(200)).to.equal('Mod 200');
@@ -56,15 +39,16 @@ describe('State Persistence Logic', function () {
 
     it('should handle empty or missing storage data gracefully', function () {
         const resultModified = new Map();
-        const storageData = {}; // Empty result from storage.get
-
-        // Should not throw
-        if (storageData._sync_state && storageData._sync_state.modifiedTitles) {
-             storageData._sync_state.modifiedTitles.forEach(([id, title]) => {
-                resultModified.set(id, title);
-            });
-        }
+        hydrateSyncState(undefined, resultModified, new Map());
         
         expect(resultModified.size).to.equal(0);
+    });
+
+    it('should ignore malformed state arrays', function () {
+        const resultModified = new Map();
+        const resultOriginal = new Map();
+        hydrateSyncState({ modifiedTitles: 'bad', originalTitles: null }, resultModified, resultOriginal);
+        expect(resultModified.size).to.equal(0);
+        expect(resultOriginal.size).to.equal(0);
     });
 });

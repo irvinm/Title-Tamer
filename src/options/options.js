@@ -6,6 +6,58 @@ let showRecentGroupFirstPreference = false;
 let showGroupRuleCountPreference = false;
 let recentGroupSelection = '';
 
+const optionsMutationHelpers = {
+    buildSavePatternUpdate: globalThis.buildSavePatternUpdate || ((existingPatterns, input) => {
+        const next = [...existingPatterns];
+        const pattern = { search: input.search, title: input.title };
+        if (input.groupValue) pattern.group = input.groupValue;
+        next.push(pattern);
+        const update = { patterns: next };
+        if (input.groupValue) update.recentGroupSelection = input.groupValue;
+        return update;
+    }),
+    buildSaveRowUpdate: globalThis.buildSaveRowUpdate || ((existingPatterns, targetIndex, input) => {
+        const next = existingPatterns.map(p => ({ ...p }));
+        if (!next[targetIndex]) return { patterns: next };
+
+        const oldGroup = next[targetIndex].group || '';
+        const newGroup = input.groupValue || '';
+        const updatedPattern = {
+            search: input.search,
+            title: input.title,
+            enabled: next[targetIndex].enabled !== false,
+        };
+        if (newGroup) updatedPattern.group = newGroup;
+
+        if (newGroup !== oldGroup) {
+            next.splice(targetIndex, 1);
+            let insertAt = -1;
+            for (let i = 0; i < next.length; i++) {
+                if ((next[i].group || '') === newGroup) insertAt = i;
+            }
+            if (insertAt === -1) next.push(updatedPattern);
+            else next.splice(insertAt + 1, 0, updatedPattern);
+        } else {
+            next[targetIndex] = updatedPattern;
+        }
+
+        const update = { patterns: next };
+        if (newGroup) update.recentGroupSelection = newGroup;
+        return update;
+    }),
+    buildPatternEnabledUpdate: globalThis.buildPatternEnabledUpdate || ((existingPatterns, targetIndex, enabled) => {
+        const next = existingPatterns.map(p => ({ ...p }));
+        if (next[targetIndex]) next[targetIndex].enabled = enabled;
+        return { patterns: next };
+    }),
+    buildDisabledGroupsUpdate: globalThis.buildDisabledGroupsUpdate || ((current, targetGroup, disabled) => {
+        const next = new Set(Array.from(current || []));
+        if (disabled) next.add(targetGroup);
+        else next.delete(targetGroup);
+        return Array.from(next);
+    }),
+};
+
 // Auto-scroll during drag
 let lastDragEvent = null;
 let autoScrollRAF = null;
@@ -438,15 +490,11 @@ async function savePattern(event) {
     try {
         const result = await browser.storage.local.get('patterns');
         const patterns = result.patterns || [];
-        const pattern = { search, title };
-        if (groupValue) pattern.group = groupValue;
-        patterns.push(pattern);
-        const storageUpdate = { patterns };
-        if (groupValue) {
-            recentGroupSelection = groupValue;
-            storageUpdate.recentGroupSelection = groupValue;
-        }
+        const storageUpdate = optionsMutationHelpers.buildSavePatternUpdate(patterns, { search, title, groupValue });
         await browser.storage.local.set(storageUpdate);
+        if (storageUpdate.recentGroupSelection) {
+            recentGroupSelection = storageUpdate.recentGroupSelection;
+        }
         await restoreOptions();
 
         // Clear the input fields
@@ -1512,40 +1560,15 @@ async function saveRow(index) {
     try {
         const result = await browser.storage.local.get('patterns');
         const patterns = result.patterns || [];
-        const oldGroup = patterns[index].group || '';
-        const newGroup = groupValue;
-        const pattern = {
+        const storageUpdate = optionsMutationHelpers.buildSaveRowUpdate(patterns, index, {
             search: searchInput,
             title: titleInput,
-            enabled: patterns[index].enabled !== false // Preserve existing status
-        };
-        if (newGroup) pattern.group = newGroup;
-
-        if (newGroup !== oldGroup) {
-            // Remove pattern from its current position, then re-insert it
-            // adjacent to other members of the new group so the group order
-            // in the flat array (and thus the rendered order) is preserved.
-            patterns.splice(index, 1);
-            let insertAt = -1;
-            for (let i = 0; i < patterns.length; i++) {
-                if ((patterns[i].group || '') === newGroup) insertAt = i;
-            }
-            if (insertAt === -1) {
-                // New group name — append at end
-                patterns.push(pattern);
-            } else {
-                patterns.splice(insertAt + 1, 0, pattern);
-            }
-        } else {
-            patterns[index] = pattern;
-        }
-
-        const storageUpdate = { patterns };
-        if (newGroup) {
-            recentGroupSelection = newGroup;
-            storageUpdate.recentGroupSelection = newGroup;
-        }
+            groupValue,
+        });
         await browser.storage.local.set(storageUpdate);
+        if (storageUpdate.recentGroupSelection) {
+            recentGroupSelection = storageUpdate.recentGroupSelection;
+        }
         await restoreOptions(); // Refresh the list after saving
 
         // The background script automatically syncs tabs via storage listener
@@ -1614,9 +1637,10 @@ async function updateTabTitle(tabId, changeInfo, tab) {
 async function updatePatternEnabled(index, isEnabled) {
     const result = await browser.storage.local.get('patterns');
     const patterns = result.patterns || [];
-    if (patterns[index]) {
-        patterns[index].enabled = isEnabled;
-        await browser.storage.local.set({ patterns });
+    const storageUpdate = optionsMutationHelpers.buildPatternEnabledUpdate(patterns, index, isEnabled);
+
+    if (storageUpdate.patterns[index]) {
+        await browser.storage.local.set(storageUpdate);
 
         // Update visual state of the row
         const row = document.querySelector(`.pattern-row[data-index="${index}"]`);
@@ -1633,12 +1657,11 @@ async function updatePatternEnabled(index, isEnabled) {
 }
 
 async function updateGroupDisabled(groupName, isDisabled) {
-    if (isDisabled) {
-        disabledGroups.add(groupName);
-    } else {
-        disabledGroups.delete(groupName);
-    }
-    await browser.storage.local.set({ disabledGroups: Array.from(disabledGroups) });
+    const nextDisabledGroups = optionsMutationHelpers.buildDisabledGroupsUpdate(disabledGroups, groupName, isDisabled);
+    disabledGroups.clear();
+    nextDisabledGroups.forEach(group => disabledGroups.add(group));
+
+    await browser.storage.local.set({ disabledGroups: nextDisabledGroups });
 
     // Update visual state of the group header and its child rows
     const headerRow = document.querySelector(`.group-header[data-group="${groupName}"]`);

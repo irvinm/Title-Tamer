@@ -1,0 +1,73 @@
+// import-export-utils.js — Shared pure helpers for import/export flows.
+
+/**
+ * Sort patterns to match visual ordering used by the options UI:
+ * ungrouped first, then grouped sections ordered by first group appearance.
+ * @param {Array<{group?: string}>} rawPatterns
+ * @returns {Array<object>}
+ */
+function sortPatternsForVisualOrder(rawPatterns) {
+    const groupOrder = [...new Set(rawPatterns.map(p => p.group).filter(Boolean))];
+    const patterns = [...rawPatterns.filter(p => !p.group)];
+    for (const groupName of groupOrder) {
+        patterns.push(...rawPatterns.filter(p => p.group === groupName));
+    }
+    return patterns;
+}
+
+/**
+ * Build export payload from runtime storage values.
+ * @param {Array<object>} rawPatterns
+ * @param {string[]} collapsedGroups
+ * @param {string[]} disabledGroups
+ * @returns {{ metadata: { version: string, collapsedGroups: string[], disabledGroups: string[] }, patterns: Array<object> }}
+ */
+function buildExportPayload(rawPatterns, collapsedGroups = [], disabledGroups = []) {
+    return {
+        metadata: {
+            version: '1.0',
+            collapsedGroups: Array.isArray(collapsedGroups) ? collapsedGroups : [],
+            disabledGroups: Array.isArray(disabledGroups) ? disabledGroups : [],
+        },
+        patterns: sortPatternsForVisualOrder(Array.isArray(rawPatterns) ? rawPatterns : []),
+    };
+}
+
+/**
+ * Normalize imported payload shape and remove stale UI metadata groups.
+ * @param {Array<object>|{patterns?: Array<object>, metadata?: {collapsedGroups?: string[], disabledGroups?: string[]}}} parsedData
+ * @returns {{ patterns: Array<object>, collapsedGroups: string[], disabledGroups: string[] }}
+ */
+function normalizeImportPayload(parsedData) {
+    const rawPatterns = Array.isArray(parsedData)
+        ? parsedData
+        : (Array.isArray(parsedData?.patterns) ? parsedData.patterns : []);
+
+    const importedCollapsedGroups = Array.isArray(parsedData?.metadata?.collapsedGroups)
+        ? parsedData.metadata.collapsedGroups
+        : [];
+
+    const importedDisabledGroups = Array.isArray(parsedData?.metadata?.disabledGroups)
+        ? parsedData.metadata.disabledGroups
+        : [];
+
+    const patterns = sortPatternsForVisualOrder(rawPatterns);
+    const activeGroups = [...new Set(patterns.map(p => p.group).filter(Boolean))];
+    const activeSet = new Set(activeGroups);
+
+    return {
+        patterns,
+        collapsedGroups: importedCollapsedGroups.filter(g => activeSet.has(g)),
+        disabledGroups: importedDisabledGroups.filter(g => activeSet.has(g)),
+    };
+}
+
+if (typeof globalThis !== 'undefined') {
+    globalThis.sortPatternsForVisualOrder = sortPatternsForVisualOrder;
+    globalThis.buildExportPayload = buildExportPayload;
+    globalThis.normalizeImportPayload = normalizeImportPayload;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { sortPatternsForVisualOrder, buildExportPayload, normalizeImportPayload };
+}

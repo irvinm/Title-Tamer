@@ -77,10 +77,11 @@ function sortPatternsForDisplay(rawPatterns) {
  * @param {string[]} disabledGroups
  * @returns {Array<{group?: string, enabled?: boolean}>}
  */
-function filterActivePatterns(patterns, disabledGroups) {
+function filterActivePatterns(patterns, disabledGroups = []) {
+    const groups = Array.isArray(disabledGroups) ? disabledGroups : [];
     return patterns.filter(p => {
         if (p.enabled === false) return false;
-        if (p.group && disabledGroups.includes(p.group)) return false;
+        if (p.group && groups.includes(p.group)) return false;
         return true;
     });
 }

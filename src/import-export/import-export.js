@@ -1,3 +1,39 @@
+const importExportHelpers = {
+    buildExportPayload: globalThis.buildExportPayload || ((patterns, collapsedGroups = [], disabledGroups = []) => {
+        const groupOrder = [...new Set(patterns.map(p => p.group).filter(Boolean))];
+        const sorted = [...patterns.filter(p => !p.group)];
+        for (const groupName of groupOrder) {
+            sorted.push(...patterns.filter(p => p.group === groupName));
+        }
+        return {
+            metadata: {
+                version: '1.0',
+                collapsedGroups,
+                disabledGroups,
+            },
+            patterns: sorted,
+        };
+    }),
+    normalizeImportPayload: globalThis.normalizeImportPayload || ((payload) => {
+        const rawPatterns = Array.isArray(payload) ? payload : payload.patterns || [];
+        const groupOrder = [...new Set(rawPatterns.map(p => p.group).filter(Boolean))];
+        const patterns = [...rawPatterns.filter(p => !p.group)];
+        for (const groupName of groupOrder) {
+            patterns.push(...rawPatterns.filter(p => p.group === groupName));
+        }
+
+        const importedCollapsedGroups = payload.metadata?.collapsedGroups || [];
+        const importedDisabledGroups = payload.metadata?.disabledGroups || [];
+        const activeSet = new Set(groupOrder);
+
+        return {
+            patterns,
+            collapsedGroups: importedCollapsedGroups.filter(g => activeSet.has(g)),
+            disabledGroups: importedDisabledGroups.filter(g => activeSet.has(g)),
+        };
+    }),
+};
+
 function showCustomAlert(lines) {
     const customAlert = document.getElementById('custom-alert');
     const customAlertMessage = document.getElementById('custom-alert-message');
@@ -8,7 +44,12 @@ function showCustomAlert(lines) {
         return;
     }
 
-    customAlertMessage.innerHTML = lines.map(line => `<p>${line}</p>`).join('');
+    customAlertMessage.textContent = '';
+    lines.forEach(line => {
+        const paragraph = document.createElement('p');
+        paragraph.textContent = line;
+        customAlertMessage.appendChild(paragraph);
+    });
     
     if (typeof customAlert.showModal === 'function') {
         customAlert.showModal();
@@ -47,28 +88,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Sort patterns dynamically to match UI visual rendering before export
-            const groupOrder = [...new Set(rawPatterns.map(p => p.group).filter(Boolean))];
-            const patterns = [...rawPatterns.filter(p => !p.group)];
-            for (const g of groupOrder) {
-                patterns.push(...rawPatterns.filter(p => p.group === g));
-            }
-
             // Generate filename with current date and time
             const now = new Date();
             const dateTime = now.toISOString().replace(/[:.]/g, '-'); // Replace colons and dots to make it a valid filename
             const filename = `patterns(${dateTime}).json`;
 
             const { collapsedGroups = [], disabledGroups = [] } = await browser.storage.local.get(['collapsedGroups', 'disabledGroups']);
-
-            const exportData = {
-                metadata: {
-                    version: "1.0",
-                    collapsedGroups,
-                    disabledGroups
-                },
-                patterns
-            };
+            const exportData = importExportHelpers.buildExportPayload(rawPatterns, collapsedGroups, disabledGroups);
 
             // Create a blob with the patterns data
             const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
@@ -82,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.removeChild(link);
 
             showCustomAlert([
-                `${patterns.length} patterns exported successfully!`,
+                `${exportData.patterns.length} patterns exported successfully!`,
                 `Saved as: ${filename}`,
                 `Saved to: Default download directory`
             ]);
@@ -105,21 +131,11 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const text = await file.text();
                 const parsedData = JSON.parse(text);
-                const rawPatterns = Array.isArray(parsedData) ? parsedData : parsedData.patterns || [];
-                const importedCollapsedGroups = parsedData.metadata?.collapsedGroups || [];
-                const importedDisabledGroups = parsedData.metadata?.disabledGroups || [];
-    
-                // Strictly sort incoming patterns to maintain logical structural integrity
-                const activeGroups = [...new Set(rawPatterns.map(p => p.group).filter(Boolean))];
-                const patterns = [...rawPatterns.filter(p => !p.group)];
-                for (const g of activeGroups) {
-                    patterns.push(...rawPatterns.filter(p => p.group === g));
-                }
-
-                // Clean up any stale configuration from old groups that no longer exist
-                const activeSet = new Set(activeGroups);
-                const collapsedGroups = importedCollapsedGroups.filter(g => activeSet.has(g));
-                const disabledGroups = importedDisabledGroups.filter(g => activeSet.has(g));
+                const {
+                    patterns,
+                    collapsedGroups,
+                    disabledGroups,
+                } = importExportHelpers.normalizeImportPayload(parsedData);
     
                 // Save patterns and UI active states to storage
                 await browser.storage.local.set({ patterns, collapsedGroups, disabledGroups });

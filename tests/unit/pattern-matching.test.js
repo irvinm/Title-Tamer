@@ -367,4 +367,18 @@ describe('filterActivePatterns', function () {
         expect(result).to.have.length(1);
         expect(result[0].name).to.equal('B');
     });
+
+    it('should not throw when disabledGroups is omitted and grouped patterns exist', function () {
+        const patterns = [{ name: 'A', group: 'Work' }, { name: 'B' }];
+        const result = filterActivePatterns(patterns);
+        expect(result).to.have.length(2);
+        expect(result.map(p => p.name)).to.deep.equal(['A', 'B']);
+    });
+
+    it('should treat non-array disabledGroups input as empty', function () {
+        const patterns = [{ name: 'A', group: 'Work' }, { name: 'B', enabled: false }];
+        const result = filterActivePatterns(patterns, null);
+        expect(result).to.have.length(1);
+        expect(result[0].name).to.equal('A');
+    });
 });

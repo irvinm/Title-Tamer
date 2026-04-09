@@ -1,4 +1,4 @@
-// group-utils.test.js — Unit tests for group-related pure functions (Groups branch)
+// group-utils.test.js — Unit tests for group-related pure functions
 const { expect } = require('../test-setup');
 const { escapeHTML, getOrderedGroupNames, computeScrollThumb } = require('../../src/lib/group-utils');
 

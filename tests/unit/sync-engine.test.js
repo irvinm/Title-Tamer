@@ -1,15 +1,10 @@
-/**
- * sync-engine.test.js
- * 
- * Unit tests for evaluateTabSyncState in src/lib/sync-engine-logic.js
- */
+// sync-engine.test.js — Unit tests for sync decision logic
 
 const { expect } = require('../test-setup');
 const { applyPattern } = require('../../src/lib/pattern-utils');
 const { evaluateTabSyncState } = require('../../src/lib/sync-engine-logic');
 
-// Mock applyPattern (or use the real one since it's pure)
-// The test environment needs applyPattern to be in scope for evaluateTabSyncState.
+// evaluateTabSyncState expects applyPattern in global scope.
 global.applyPattern = applyPattern;
 
 describe('Sync Engine Decision Logic', function () {

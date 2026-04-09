@@ -12,6 +12,7 @@
   "background": {
     "scripts": [
       "src/lib/pattern-utils.js",
+      "src/lib/sync-state-utils.js",
       "src/lib/sync-engine-logic.js",
       "src/background/background.js"
     ],
