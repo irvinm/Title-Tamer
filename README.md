@@ -25,6 +25,7 @@
 
 ## Limitations
 - Will not work on browser built-in pages like `about:debugging`, `about:addons`, etc.
+- Will not work on Firefox protected domains like `addons.mozilla.org`.
 - Requires host permission for certain pages like reader view, view-source, and PDF viewer pages.
 - Title Tamer updates the `document.title` to update the title, and that can only be done with a loaded tab.
 - Discarded tabs' title cannot be updated until loaded.
