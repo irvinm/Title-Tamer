@@ -2,8 +2,8 @@
 
 ![CI/CD](https://github.com/irvinm/Title-Tamer/workflows/CI/CD/badge.svg) ![Mozilla Add-on](https://img.shields.io/amo/users/Title-Tamer.svg?style=flat-square) ![](https://img.shields.io/amo/v/Title-Tamer.svg?style=flat-square)
 
-<img src="https://github.com/user-attachments/assets/78f5973c-f9d5-4dff-8d72-113df255fe10" alt="Light Mode" width="800" height="600">
-<img src="https://github.com/user-attachments/assets/4ba17621-4a1b-4849-9042-5b24499ae298" alt="Dark Mode" width="800" height="600">
+<img src="docs/screenshots/MainWindowLight.png" alt="Light Mode" width="800">
+<img src="docs/screenshots/MainWindowDark.png" alt="Dark Mode" width="800">
 
 ## Features
 - Monitor tab URLs and change their titles based on user-defined search patterns.
@@ -11,11 +11,13 @@
 - **Advanced RegEx Support**: Full support for JavaScript Regular Expressions, including capture groups and anchors.
 - **Special Character Support**: All patterns and titles are escaped to ensure characters like `<`, `>`, and `&` are rendered correctly in the options interface.
 - **Rule Grouping System**: Organize patterns into logical groups with collapsible headers, enable/disable toggles that cascade to child rules, and easily rename or delete entire groups.
+  ![Add New Rule](docs/screenshots/AddNewRule.png)
 - **Drag-and-Drop Support**: Reorder individual rules and entire rule groups with full context-aware snapping that allows moving rules between groups.
 - **Custom UI Framework**: Modern theme-aware interface with custom dropdowns, SVG logo, and HTML5 dialog modals replacing generic alerts.
 - **Intelligent Discard Management**: Configure custom discard delays, prevent infinite loading spinners with anti-throbber fixes, and restore manipulated titles even after extension reloads.
 - **Throttled Tab Synchronization**: Uses a rolling worker pool to process discarded tabs in controllable batches (default 10), preventing memory exhaustion and system crashes during large-scale sync operations.
 - **Import/Export**: Easily backup or share your pattern collections via JSON files, including group metadata and states.
+  ![Additional Options](docs/screenshots/AdditionalOptions.png)
 - **Flexible Management**: Add, delete, update, and reorder patterns in priority order via a dedicated options page with responsive scrolling and auto-scroll features.
 
 ## Examples
