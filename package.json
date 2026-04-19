@@ -1,6 +1,6 @@
 {
     "name": "title-tamer",
-    "version": "0.9.4",
+    "version": "1.0.0",
     "description": "Firefox extension that monitors tabs and changes their titles based on user-defined search patterns.",
     "main": "index.js",
     "directories": {

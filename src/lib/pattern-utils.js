@@ -52,7 +52,41 @@ function applyPattern(url, pattern) {
     return { matched: true, newTitle: buildTitle(pattern.title, matches) };
 }
 
+/**
+ * Sort a flat patterns array into the order used for tab-title matching:
+ * ungrouped patterns first (preserving their relative order), followed by
+ * grouped patterns ordered by the first appearance of each group name.
+ * This mirrors the top-to-bottom visual rendering in the options table.
+ * @param {Array<{group?: string}>} rawPatterns
+ * @returns {Array<{group?: string}>}
+ */
+function sortPatternsForDisplay(rawPatterns) {
+    const groupOrder = [...new Set(rawPatterns.map(p => p.group).filter(Boolean))];
+    const sorted = [...rawPatterns.filter(p => !p.group)];
+    for (const g of groupOrder) {
+        sorted.push(...rawPatterns.filter(p => p.group === g));
+    }
+    return sorted;
+}
+
+/**
+ * Filter a sorted patterns array to only those that should be applied:
+ * - skips patterns where `enabled === false`
+ * - skips patterns whose group is in the disabledGroups list
+ * @param {Array<{group?: string, enabled?: boolean}>} patterns
+ * @param {string[]} disabledGroups
+ * @returns {Array<{group?: string, enabled?: boolean}>}
+ */
+function filterActivePatterns(patterns, disabledGroups = []) {
+    const groups = Array.isArray(disabledGroups) ? disabledGroups : [];
+    return patterns.filter(p => {
+        if (p.enabled === false) return false;
+        if (p.group && groups.includes(p.group)) return false;
+        return true;
+    });
+}
+
 // Export for both Node (testing) and browser (extension)
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { matchUrl, buildTitle, applyPattern };
+    module.exports = { matchUrl, buildTitle, applyPattern, sortPatternsForDisplay, filterActivePatterns };
 }

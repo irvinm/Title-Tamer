@@ -1,18 +1,42 @@
 function showCustomAlert(lines) {
     const customAlert = document.getElementById('custom-alert');
     const customAlertMessage = document.getElementById('custom-alert-message');
-    const customAlertClose = document.querySelector('.custom-alert-close');
+    const customAlertOk = document.getElementById('custom-alert-ok');
 
-    customAlertMessage.innerHTML = lines.map(line => `<p>${line}</p>`).join('');
-    customAlert.style.display = 'block';
+    if (!customAlert || !customAlertMessage || !customAlertOk) {
+        console.error('Custom alert elements not found');
+        return;
+    }
 
-    customAlertClose.onclick = function() {
-        customAlert.style.display = 'none';
+    customAlertMessage.textContent = '';
+    lines.forEach(line => {
+        const paragraph = document.createElement('p');
+        paragraph.textContent = line;
+        customAlertMessage.appendChild(paragraph);
+    });
+    
+    if (typeof customAlert.showModal === 'function') {
+        customAlert.showModal();
+    } else {
+        customAlert.style.display = 'block';
+    }
+
+    customAlertOk.onclick = function() {
+        if (typeof customAlert.close === 'function') {
+            customAlert.close();
+        } else {
+            customAlert.style.display = 'none';
+        }
     };
 
-    window.onclick = function(event) {
+    // Optional: Close on backdrop click
+    customAlert.onclick = function(event) {
         if (event.target === customAlert) {
-            customAlert.style.display = 'none';
+            if (typeof customAlert.close === 'function') {
+                customAlert.close();
+            } else {
+                customAlert.style.display = 'none';
+            }
         }
     };
 }
@@ -22,8 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             // Fetch the patterns and titles from storage (assuming browser.storage.local)
             const result = await browser.storage.local.get('patterns');
-            const patterns = result.patterns || [];
-            if (patterns.length === 0) {
+            const rawPatterns = result.patterns || [];
+            if (rawPatterns.length === 0) {
                 showCustomAlert(['No patterns to export.']);
                 return;
             }
@@ -33,8 +57,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const dateTime = now.toISOString().replace(/[:.]/g, '-'); // Replace colons and dots to make it a valid filename
             const filename = `patterns(${dateTime}).json`;
 
+            const { collapsedGroups = [], disabledGroups = [] } = await browser.storage.local.get(['collapsedGroups', 'disabledGroups']);
+            const exportData = globalThis.buildExportPayload(rawPatterns, collapsedGroups, disabledGroups);
+
             // Create a blob with the patterns data
-            const blob = new Blob([JSON.stringify(patterns, null, 2)], { type: 'application/json' });
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
 
             // Create a link element and trigger the download
             const link = document.createElement('a');
@@ -45,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.removeChild(link);
 
             showCustomAlert([
-                `${patterns.length} patterns exported successfully!`,
+                `${exportData.patterns.length} patterns exported successfully!`,
                 `Saved as: ${filename}`,
                 `Saved to: Default download directory`
             ]);
@@ -67,22 +94,31 @@ document.addEventListener('DOMContentLoaded', () => {
     
             try {
                 const text = await file.text();
-                const patterns = JSON.parse(text);
+                const parsedData = JSON.parse(text);
+                const {
+                    patterns,
+                    collapsedGroups,
+                    disabledGroups,
+                } = globalThis.normalizeImportPayload(parsedData);
     
-                // Assuming browser.storage.local is used to store the patterns
-                await browser.storage.local.set({ patterns });
+                if (!patterns || patterns.length === 0) {
+                    showCustomAlert(['Import failed: The selected file contains no patterns.', 'Existing patterns were not overwritten.']);
+                    return;
+                }
+
+                // Save patterns and UI active states to storage
+                await browser.storage.local.set({ patterns, collapsedGroups, disabledGroups });
     
                 showCustomAlert([
                     `${patterns.length} patterns imported successfully!`,
                     `Filename: ${file.name}`
                 ]);
 
-                // Send a message to background.js to rerun the patterns
-                browser.runtime.sendMessage({ action: 'rerunPatterns' });
+                // The background script automatically syncs tabs via storage listener
             } catch (error) {
                 console.error('Error parsing JSON:', error);
                 showCustomAlert(['Failed to import patterns.', 'Invalid JSON format.']);
             }
         };
     });
-});
+});

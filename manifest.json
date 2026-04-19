@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Title Tamer",
-  "version": "0.9.4",
+  "version": "1.0.0",
   "description": "Monitors tabs and changes their titles based on user-defined search patterns.",
   "homepage_url": "https://github.com/irvinm/Title-Tamer",
   "permissions": [
@@ -12,6 +12,8 @@
   "background": {
     "scripts": [
       "src/lib/pattern-utils.js",
+      "src/lib/sync-state-utils.js",
+      "src/lib/sync-engine-logic.js",
       "src/background/background.js"
     ],
     "persistent": false

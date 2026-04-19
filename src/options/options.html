@@ -3,32 +3,55 @@
 
 <head>
     <title>Title Tamer Options</title>
+    <link rel="icon" type="image/svg+xml" href="../icons/icon-dark.svg">
+    <script src="../lib/options-mutation-utils.js"></script>
     <script type="module" src="options.js"></script>
     <link rel="stylesheet" type="text/css" href="options.css">
 </head>
 
 <body>
-    <a href="options.html" target="_blank" class="open-options-link">Open options in new (wider) tab</a>
-    <h1>Title Tamer Options</h1>
+    <header class="app-header">
+        <div class="header-logo">
+            <img src="../icons/icon-dark.svg" class="icon-for-light" alt="Title Tamer Icon">
+            <img src="../icons/icon-light.svg" class="icon-for-dark" alt="Title Tamer Icon">
+        </div>
+        <h1>Title Tamer Options</h1>
+        <a href="options.html" target="_blank" class="open-options-link">Open options in new (wider) tab</a>
+    </header>
     <form id="pattern-form">
-        <div class="form-group">
-            <label for="search" class="fixed-width-label">Search term:</label>
-            <input type="text" id="search" class="monospace-font" placeholder="Enter Search" required>
-        </div>
-        <div class="form-group">
-            <label for="title" class="fixed-width-label">Title to use if found:</label>
-            <input type="text" id="title" class="monospace-font" placeholder="Enter Title" required>
-        </div>
-        <div class="form-group">
-            <div class="button-link-container">
-                <label></label>
-                <button type="submit" class="add-pattern-button" id="add-pattern-button">Add Pattern</button>
-                <button type="button" class="notes-link" id="notes-button">
-                    Notes & Examples <img src="../icons/open.png" alt="Open in new tab" class="open-icon">
-                </button>
+        <button type="button" id="toggle-add-rule" class="toggle-arrow">Add New Rule</button>
+        <div id="add-rule-content" class="collapsible-content">
+            <div class="form-group">
+                <label for="search" class="fixed-width-label">Search term:</label>
+                <input type="text" id="search" class="monospace-font" placeholder="Enter Search" required>
+            </div>
+            <div class="form-group">
+                <label for="title" class="fixed-width-label">Title to use if found:</label>
+                <input type="text" id="title" class="monospace-font" placeholder="Enter Title" required>
+            </div>
+            <div class="form-group">
+                <label for="group-select" class="fixed-width-label">Group:</label>
+                <div class="custom-select" id="group-select-wrapper">
+                    <input type="hidden" id="group-select" value="">
+                    <div class="custom-select-trigger" tabindex="0">
+                        <span class="custom-select-text">(No group)</span>
+                    </div>
+                    <div class="custom-select-options"></div>
+                </div>
+                <input type="text" id="new-group-input" class="monospace-font" placeholder="New group name"
+                    style="display:none; margin-left:8px;">
+            </div>
+            <div class="form-group">
+                <div class="button-link-container">
+                    <label></label>
+                    <button type="submit" class="add-pattern-button" id="add-pattern-button">Add Pattern</button>
+                    <button type="button" class="notes-link" id="notes-button">
+                        Notes & Examples <img src="../icons/open.png" alt="Open in new tab" class="open-icon">
+                    </button>
+                </div>
             </div>
         </div>
-        <div id="toggle-options" class="toggle-arrow">Additional Options</div>
+        <button type="button" id="toggle-options" class="toggle-arrow">Additional Options</button>
         <div id="additional-options" class="collapsible-content">
             <!-- Discarded Tab Preferences Section -->
             <div class="form-group2">
@@ -40,9 +63,16 @@
                     </label>
                     <div class="nested-options show" id="discarded-tabs-options-details">
                         <label class="discard-delay-label">
+                            <input type="checkbox" id="limit-concurrent-tabs-enabled" checked />
+                            Limit concurrent tabs loaded to
+                            <input type="number" id="max-concurrent-tabs" placeholder="Enter number"
+                                min="1" value="10" />
+                        </label>
+                        <label class="discard-delay-label">
                             <input type="checkbox" id="discard-delay-enabled" checked />
                             Discard these tabs after
-                            <input type="number" id="discard-delay" class="inline-input" placeholder="Enter seconds" min="0" value="1" />
+                            <input type="number" id="discard-delay" class="inline-input" placeholder="Enter seconds"
+                                min="0" value="1" />
                             seconds
                         </label>
                     </div>
@@ -52,51 +82,129 @@
             <div class="form-group2">
                 <fieldset class="theme-preferences-fieldset">
                     <legend class="theme-preferences-legend">Theme</legend>
-                    <div class="theme-options-row">
-                        <label class="block-label">
+                    <div class="segmented-control">
+                        <label>
                             <input type="radio" name="theme" id="theme-light" value="light" checked />
                             Light
                         </label>
-                        <label class="block-label">
+                        <label>
                             <input type="radio" name="theme" id="theme-dark" value="dark" />
                             Dark
                         </label>
-                        <label class="block-label">
+                        <label>
                             <input type="radio" name="theme" id="theme-system" value="system" />
                             System
                         </label>
                     </div>
                 </fieldset>
             </div>
+            <div class="form-group2">
+                <fieldset class="group-sort-order-fieldset">
+                    <legend class="group-sort-order-legend">Group Options</legend>
+                    <div class="group-sort-order-row">
+                        <label for="group-sort-order">Sort <span class="ui-ref">Groups</span> in the <span class="ui-ref">Add New Rule</span> dropdown as:</label>
+                        <div class="custom-select" id="group-sort-order-wrapper">
+                            <input type="hidden" id="group-sort-order" value="alphabetic">
+                            <div class="custom-select-trigger" tabindex="0">
+                                <span class="custom-select-text">Alphabetic</span>
+                            </div>
+                            <div class="custom-select-options">
+                                <div class="custom-select-option selected" data-value="alphabetic">Alphabetic</div>
+                                <div class="custom-select-option" data-value="table">Table order</div>
+                            </div>
+                        </div>
+                    </div>
+                    <label class="block-label group-dropdown-preference-label">
+                        <input type="checkbox" id="group-show-recent-first" />
+                        Show the most recently used group at the top of the Group dropdown
+                    </label>
+                    <label class="block-label group-dropdown-preference-label">
+                        <input type="checkbox" id="group-show-rule-count" />
+                        Show rule count next to group name in the table (example: My Group (5))
+                    </label>
+                </fieldset>
+            </div>
             <!-- Export and Import Options -->
             <div class="form-group2">
-                <button type="button" id="import-export-button" class="add-pattern-button">
-                    Import/Export Options <img class="open-icon" src="../icons/open.png" alt="Open in new tab" class="open-icon">
-                </button>
+                <fieldset class="import-export-fieldset">
+                    <legend>Import/Export</legend>
+                    <div style="display: flex; justify-content: flex-end; width: 100%;">
+                        <button type="button" id="import-export-button" class="add-pattern-button">
+                            Import/Export Options <img class="open-icon" src="../icons/open.png" alt="Open in new tab">
+                        </button>
+                    </div>
+                </fieldset>
             </div>
         </div>
-        <div class="patterns-table-container">
-            <table id="pattern-table">
-                <thead>
-                    <tr>
-                        <th>Action</th>
-                        <th>
-                            <div class="header-cell">
-                                <span>Search</span>
-                                <span>Title</span>
-                            </div>
-                        </th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr id="no-values-message">
-                        <td colspan="3">No values stored</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
     </form>
+    <div class="patterns-table-container">
+        <table id="pattern-table">
+            <thead>
+                <tr>
+                    <th>Action</th>
+                    <th>
+                        <div class="header-cell">
+                            <span>Search</span>
+                            <span>Title</span>
+                        </div>
+                    </th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr id="no-values-message">
+                    <td colspan="3">No values stored</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <dialog id="delete-group-dialog">
+        <div class="dialog-header">
+            <img src="../icons/icon-dark.svg" class="icon-for-light" alt="Icon">
+            <img src="../icons/icon-light.svg" class="icon-for-dark" alt="Icon">
+            <span>Title Tamer</span>
+        </div>
+        <div class="dialog-body">
+            <p id="delete-group-dialog-message"></p>
+            <div class="delete-modal-buttons">
+                <button type="button" id="delete-group-ungroup-btn" class="add-pattern-button">Ungroup patterns</button>
+                <button type="button" id="delete-group-deleteall-btn" class="delete-group-deleteall-btn">Delete all
+                    patterns</button>
+                <button type="button" id="delete-group-cancel-btn" class="delete-group-cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </dialog>
+
+    <dialog id="rename-group-dialog">
+        <div class="dialog-header">
+            <img src="../icons/icon-dark.svg" class="icon-for-light" alt="Icon">
+            <img src="../icons/icon-light.svg" class="icon-for-dark" alt="Icon">
+            <span>Title Tamer</span>
+        </div>
+        <div class="dialog-body">
+            <p id="rename-group-dialog-message"></p>
+            <input type="text" id="rename-group-input" class="monospace-font" style="width: 100%; margin-bottom: 16px;">
+            <div class="delete-modal-buttons">
+                <button type="button" id="rename-group-ok-btn" class="add-pattern-button">OK</button>
+                <button type="button" id="rename-group-cancel-btn" class="delete-group-cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </dialog>
+    <dialog id="delete-rule-dialog">
+        <div class="dialog-header">
+            <img src="../icons/icon-dark.svg" class="icon-for-light" alt="Icon">
+            <img src="../icons/icon-light.svg" class="icon-for-dark" alt="Icon">
+            <span>Title Tamer</span>
+        </div>
+        <div class="dialog-body">
+            <p>Are you sure you want to delete this rule?</p>
+            <div id="delete-rule-preview" style="font-style: italic; color: var(--text-color); opacity: 0.8; margin-bottom: 16px; word-break: break-all;"></div>
+            <div class="delete-modal-buttons">
+                <button type="button" id="confirm-delete-rule-btn" class="delete-group-deleteall-btn">Delete</button>
+                <button type="button" id="cancel-delete-rule-btn" class="delete-group-cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </dialog>
 </body>
 
 </html>
