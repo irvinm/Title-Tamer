@@ -26,6 +26,11 @@
 ## Limitations
 - Will not work on browser built-in pages like `about:debugging`, `about:addons`, etc.
 - Will not work on Firefox protected domains like `addons.mozilla.org`.
+- **Private Browsing**: Extension must be explicitly allowed to run in "Private Windows" via the browser's extension settings.
+- **Competing Dynamic Titles**: Sites that frequently update their titles (like news tickers or chat notification counts) may occasionally overwrite the "tamed" title.
+- **Conflicts**: Other extensions that manage tab titles may conflict with this addon.
+- **Loaded State**: A tab must be at least partially loaded before a title rule can be applied (except for discarded tabs handled by the sync engine).
+- **OS Truncation**: Very long titles may still be truncated by the operating system's task switcher or the browser's UI.
 - Requires host permission for certain pages like reader view, view-source, and PDF viewer pages.
 - Title Tamer updates the `document.title` to update the title, and that can only be done with a loaded tab.
 - Discarded tabs' title cannot be updated until loaded.
