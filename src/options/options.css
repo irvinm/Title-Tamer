@@ -2,25 +2,69 @@
     box-sizing: border-box;
 }
 
-.theme-preferences-fieldset {
+/* Unified fieldset styling for additional options */
+#additional-options fieldset {
     display: flex;
     flex-direction: column;
-    gap: 0.2em;
+    gap: 2px;
+    padding: 4px 10px;
+    margin-bottom: 4px;
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    background: var(--secondary-bg);
 }
 
-.theme-preferences-fieldset .theme-options-row {
+#additional-options fieldset legend {
+    font-weight: bold;
+    color: var(--primary-color);
+    background: transparent;
+    font-size: 0.85em;
+    letter-spacing: 0.3px;
+    padding: 0 5px;
+}
+
+.segmented-control {
+    display: inline-flex;
+    align-self: flex-start;
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: var(--input-bg);
+    margin-top: 2px;
+}
+
+.segmented-control label {
+    padding: 4px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    border-right: 1px solid var(--input-border);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
     display: flex;
-    flex-direction: row;
-    gap: 1.5em;
     align-items: center;
+    justify-content: center;
+    margin-bottom: 0 !important;
 }
 
-.theme-preferences-fieldset .theme-options-row label {
-    margin-bottom: 0;
-    display: flex;
-    align-items: baseline;
-    gap: 0.3em;
-    line-height: 1.1;
+.segmented-control label:last-child {
+    border-right: none;
+}
+
+.segmented-control input[type="radio"] {
+    display: none;
+}
+
+.segmented-control label:has(input:checked) {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.segmented-control label:hover:not(:has(input:checked)) {
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+.theme-dark .segmented-control label:hover:not(:has(input:checked)) {
+    background-color: rgba(51, 153, 255, 0.1);
 }
 
 .group-sort-order-row {
@@ -28,7 +72,7 @@
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
-    margin-bottom: 4px;
+    margin-bottom: 0px;
 }
 
 .group-sort-order-row label {
@@ -56,9 +100,9 @@
 
 .collapsible-content {
     display: none;
-    margin-top: 10px;
+    margin-top: 8px;
     border: 1px solid var(--input-border);
-    padding: 10px 10px 10px 10px;
+    padding: 4px 8px;
     width: 100%;
     background-color: var(--secondary-bg);
     border-radius: 5px;
@@ -69,11 +113,9 @@
     margin-bottom: 0 !important;
 }
 
-/* Container for fieldsets and theme section */
+/* Container for fieldsets and standalone options */
 .form-group2 {
-    margin-bottom: 5px;
-    background: var(--secondary-bg);
-    border-radius: 6px;
+    margin-bottom: 0; /* Let fieldsets handle spacing */
     color: var(--text-color);
 }
 
@@ -166,8 +208,12 @@ thead th {
 
 /* Replaces inline style="display:block; margin-bottom:8px;" */
 .block-label {
-    display: block;
-    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 2px;
+    width: 100%;
+    cursor: pointer;
 }
 
 /* Replaces inline style="display: block;" for nested options */
@@ -177,28 +223,31 @@ thead th {
 }
 
 /* Moved from options.html inline styles */
-.discarded-tab-preferences-fieldset {
-    border: 1px solid #ccc;
-    border-radius: 6px;
-}
-
-.discarded-tab-preferences-legend {
-    font-weight: bold;
-    color: #007bff;
-}
+/* Specific fieldset overrides removed in favor of unified #additional-options fieldset rule */
 
 .discard-delay-label {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 2px;
+}
+
+.discard-delay-label input[type="number"] {
+    margin: 0 4px;
 }
 
 #discard-delay,
 #max-concurrent-tabs {
-    width: 80px;
-    padding: 3px 6px;
+    width: 60px;
+    padding: 1px 4px;
+    height: 22px;
     border: 1px solid var(--input-border);
-    border-radius: 5px;
+    border-radius: 4px;
     background-color: var(--input-bg);
     color: var(--text-color);
+    text-align: center;
+    font-family: 'Consolas', 'Menlo', 'Source Code Pro', 'Fira Code', 'Courier New', Courier, 'Lucida Console', 'Monaco', monospace;
+    font-size: 13px;
 }
 
 .delete-modal-reload-label {
@@ -397,30 +446,7 @@ textarea:disabled {
     opacity: 0.7;
 }
 
-/* Fieldset and legend for both light and dark themes */
-fieldset,
-.discarded-tab-preferences-fieldset,
-.theme-preferences-fieldset {
-    background: var(--secondary-bg);
-    border: 1px solid var(--input-border);
-    color: var(--text-color);
-}
-
-legend,
-.discarded-tab-preferences-legend,
-.theme-preferences-legend {
-    font-weight: bold;
-    color: var(--primary-color);
-    background: transparent;
-    font-size: 0.95em;
-    letter-spacing: 0.3px;
-}
-
-/* Theme section styling */
-.theme-preferences-fieldset {
-    border-radius: 6px;
-    margin-bottom: 4px;
-}
+/* Removed redundant individual fieldset padding/margins */
 
 h1 {
     font-size: 1.4em;
@@ -728,7 +754,7 @@ button:disabled {
 #import-export-button {
     display: flex;
     align-items: center;
-    margin-top: 0.5em;
+    margin-top: 0.2em;
 }
 
 #import-export-button img.open-icon {
@@ -1317,14 +1343,14 @@ input:checked+.slider:before {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 4px 8px;
+    padding: 2px 8px;
     border: 1px solid var(--input-border);
     border-radius: 5px;
     background-color: var(--input-bg);
     color: var(--text-color);
     cursor: pointer;
-    min-height: 28px;
-    height: 30px;
+    min-height: 22px;
+    height: 24px;
     line-height: normal;
     box-sizing: border-box;
     transition: border-color 0.2s;
@@ -1463,7 +1489,8 @@ input:checked+.slider:before {
 }
 
 .group-sort-order-row .custom-select-trigger {
-    min-height: 26px;
+    min-height: 22px;
+    height: 24px;
 }
 
 /* ── Responsive Tab View Support ───────────────────────────── */
@@ -1479,4 +1506,19 @@ input:checked+.slider:before {
     body {
         margin: 0;
     }
+}
+
+/* UI Reference Pill Styling */
+.ui-ref {
+    color: var(--primary-color);
+    font-weight: bold;
+    background: rgba(0, 123, 255, 0.15);
+    padding: 0px 4px;
+    border-radius: 4px;
+    font-size: 0.95em;
+    white-space: nowrap;
+}
+
+.theme-dark .ui-ref {
+    background: rgba(51, 153, 255, 0.2);
 }
