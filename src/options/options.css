@@ -100,7 +100,8 @@
 
 .collapsible-content {
     display: none;
-    margin-top: 8px;
+    margin-top: 2px;
+    margin-bottom: 12px;
     border: 1px solid var(--input-border);
     padding: 4px 8px;
     width: 100%;
@@ -126,7 +127,7 @@
     min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
-    margin-top: 5px;
+    margin-top: 1px;
     border-radius: 10px;
     position: relative;
     background: var(--secondary-bg);
@@ -246,7 +247,7 @@ thead th {
     background-color: var(--input-bg);
     color: var(--text-color);
     text-align: center;
-    font-family: 'Consolas', 'Menlo', 'Source Code Pro', 'Fira Code', 'Courier New', Courier, 'Lucida Console', 'Monaco', monospace;
+    font-family: Consolas, Menlo, "Source Code Pro", "Fira Code", "Courier New", Courier, "Lucida Console", Monaco, monospace;
     font-size: 13px;
 }
 
@@ -456,7 +457,7 @@ h1 {
     margin-top: 4px;
     margin-bottom: 4px;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-    font-family: 'Arial', sans-serif;
+    font-family: Arial, sans-serif;
 }
 
 /* Container for fieldsets and theme section */
@@ -559,7 +560,7 @@ h1 {
 /* Style for input fields within the table */
 .search-input,
 .title-input {
-    font-family: 'Consolas', 'Menlo', 'Source Code Pro', 'Fira Code', 'Courier New', Courier, 'Lucida Console', 'Monaco', monospace;
+    font-family: Consolas, Menlo, "Source Code Pro", "Fira Code", "Courier New", Courier, "Lucida Console", Monaco, monospace;
     font-size: 14px;
     width: 100%;
     /* Set a fixed width for the input fields within the table */
@@ -634,7 +635,7 @@ h1 {
 }
 
 #pattern-table td:nth-child(2) {
-    font-family: 'Consolas', 'Menlo', 'Source Code Pro', 'Fira Code', 'Courier New', Courier, 'Lucida Console', 'Monaco', monospace;
+    font-family: Consolas, Menlo, "Source Code Pro", "Fira Code", "Courier New", Courier, "Lucida Console", Monaco, monospace;
     padding-left: 6px;
     vertical-align: middle;
 }
@@ -774,8 +775,40 @@ button:disabled {
 }
 
 .toggle-arrow {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 6px 12px;
+    margin: 2px 0;
     cursor: pointer;
     user-select: none;
+    background-color: var(--secondary-bg);
+    color: var(--text-color);
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.toggle-arrow:hover {
+    background-color: var(--row-even-bg);
+    border-color: var(--primary-color);
+}
+
+.toggle-arrow:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+#toggle-add-rule {
+    margin-top: 0;
+}
+
+#toggle-options {
+    margin-top: 2px;
 }
 
 /* Remove top and bottom margins for cells in edit mode */
@@ -786,25 +819,8 @@ button:disabled {
     align-items: center;
 }
 
-
-
-#toggle-add-rule {
-    margin-top: 0;
-    /* First one don't need top margin */
-}
-
-#toggle-options {
-    margin-top: 16px;
-}
-
-/* Commented out block removed for safety */
-
-#toggle-options {
-    margin-top: 4px;
-}
-
 .monospace-font {
-    font-family: 'Consolas', 'Menlo', 'Source Code Pro', 'Fira Code', 'Courier New', Courier, 'Lucida Console', 'Monaco', monospace;
+    font-family: Consolas, Menlo, "Source Code Pro", "Fira Code", "Courier New", Courier, "Lucida Console", Monaco, monospace;
     border: 1px solid #ccc;
     /* Light grey border */
     border-radius: 5px;
@@ -1176,31 +1192,11 @@ body {
   }
 */
 
-.patterns-table-container {
-    flex: 1;
-    /* Stretch to fill all available vertical space */
-    min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    margin-top: 10px;
-    margin-bottom: 3px;
-    border-radius: 10px;
-    transform: translateZ(0);
-}
+/* .patterns-table-container redundant block removed */
 
-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-}
+/* table redundant block removed */
 
-thead {
-    position: sticky;
-    top: 0;
-    /* Sticks the header to the top of the container */
-    /* background-color: #f9f9f9;  Background color for better visibility */
-    /* z-index: 1;  Ensures the header stays above the body rows */
-}
+/* thead redundant block removed */
 
 thead th {
     /* border: 1px solid #ddd; */
@@ -1208,11 +1204,7 @@ thead th {
     text-align: left;
 }
 
-.header-cell {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
+/* .header-cell redundant block removed */
 
 /*
   tbody td {
@@ -1226,7 +1218,6 @@ thead th {
     text-align: center;
     font-style: italic;
     color: #666;
-    /* Optional styling for the "No values stored" row */
 }
 
 /* ── Sliding Toggle Switch ─────────────────────────────────── */
@@ -1330,7 +1321,7 @@ input:checked+.slider:before {
     display: inline-block;
     min-width: 140px;
     font-size: 13px;
-    font-family: 'Consolas', 'Menlo', 'Source Code Pro', 'Fira Code', 'Courier New', Courier, 'Lucida Console', 'Monaco', monospace;
+    font-family: Consolas, Menlo, "Source Code Pro", "Fira Code", "Courier New", Courier, "Lucida Console", Monaco, monospace;
     user-select: none;
 }
 
@@ -1393,7 +1384,7 @@ input:checked+.slider:before {
     border-radius: 0 0 5px 5px;
     background-color: var(--input-bg);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    font-family: 'Consolas', 'Menlo', 'Source Code Pro', 'Fira Code', 'Courier New', Courier, 'Lucida Console', 'Monaco', monospace;
+    font-family: Consolas, Menlo, "Source Code Pro", "Fira Code", "Courier New", Courier, "Lucida Console", Monaco, monospace;
     font-size: 13px !important;
 }
 

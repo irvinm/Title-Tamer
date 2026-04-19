@@ -1,39 +1,3 @@
-const importExportHelpers = {
-    buildExportPayload: globalThis.buildExportPayload || ((patterns, collapsedGroups = [], disabledGroups = []) => {
-        const groupOrder = [...new Set(patterns.map(p => p.group).filter(Boolean))];
-        const sorted = [...patterns.filter(p => !p.group)];
-        for (const groupName of groupOrder) {
-            sorted.push(...patterns.filter(p => p.group === groupName));
-        }
-        return {
-            metadata: {
-                version: '1.0',
-                collapsedGroups,
-                disabledGroups,
-            },
-            patterns: sorted,
-        };
-    }),
-    normalizeImportPayload: globalThis.normalizeImportPayload || ((payload) => {
-        const rawPatterns = Array.isArray(payload) ? payload : payload.patterns || [];
-        const groupOrder = [...new Set(rawPatterns.map(p => p.group).filter(Boolean))];
-        const patterns = [...rawPatterns.filter(p => !p.group)];
-        for (const groupName of groupOrder) {
-            patterns.push(...rawPatterns.filter(p => p.group === groupName));
-        }
-
-        const importedCollapsedGroups = payload.metadata?.collapsedGroups || [];
-        const importedDisabledGroups = payload.metadata?.disabledGroups || [];
-        const activeSet = new Set(groupOrder);
-
-        return {
-            patterns,
-            collapsedGroups: importedCollapsedGroups.filter(g => activeSet.has(g)),
-            disabledGroups: importedDisabledGroups.filter(g => activeSet.has(g)),
-        };
-    }),
-};
-
 function showCustomAlert(lines) {
     const customAlert = document.getElementById('custom-alert');
     const customAlertMessage = document.getElementById('custom-alert-message');
@@ -94,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const filename = `patterns(${dateTime}).json`;
 
             const { collapsedGroups = [], disabledGroups = [] } = await browser.storage.local.get(['collapsedGroups', 'disabledGroups']);
-            const exportData = importExportHelpers.buildExportPayload(rawPatterns, collapsedGroups, disabledGroups);
+            const exportData = globalThis.buildExportPayload(rawPatterns, collapsedGroups, disabledGroups);
 
             // Create a blob with the patterns data
             const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
@@ -135,8 +99,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     patterns,
                     collapsedGroups,
                     disabledGroups,
-                } = importExportHelpers.normalizeImportPayload(parsedData);
+                } = globalThis.normalizeImportPayload(parsedData);
     
+                if (!patterns || patterns.length === 0) {
+                    showCustomAlert(['Import failed: The selected file contains no patterns.', 'Existing patterns were not overwritten.']);
+                    return;
+                }
+
                 // Save patterns and UI active states to storage
                 await browser.storage.local.set({ patterns, collapsedGroups, disabledGroups });
     
@@ -152,4 +121,4 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
     });
-});
+});

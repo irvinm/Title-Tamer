@@ -292,7 +292,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     document.getElementById('discard-delay').addEventListener('input', function () {
-        const discardDelay = parseInt(this.value, 10) || 1;
+        const val = parseInt(this.value, 10);
+        const discardDelay = isNaN(val) ? 1 : val;
         browser.storage.local.set({ discardDelay });
     });
 
@@ -592,9 +593,17 @@ function initCustomSelect(wrapper) {
 
     // Keyboard navigation
     trigger.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
+        if (e.key === ' ') {
             e.preventDefault();
             trigger.click();
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (wrapper.classList.contains('open')) {
+                const highlighted = optionsContainer.querySelector('.custom-select-option.highlighted');
+                if (highlighted) highlighted.click();
+            } else {
+                trigger.click();
+            }
         } else if (e.key === 'Escape') {
             wrapper.closeSelect();
         } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
@@ -613,9 +622,6 @@ function initCustomSelect(wrapper) {
                 items[idx].classList.add('highlighted');
                 items[idx].scrollIntoView({ block: 'nearest' });
             }
-        } else if (e.key === 'Enter' && wrapper.classList.contains('open')) {
-            const highlighted = optionsContainer.querySelector('.custom-select-option.highlighted');
-            if (highlighted) highlighted.click();
         }
     });
 
@@ -837,6 +843,16 @@ async function renameGroup(oldName) {
                 const patterns = result.patterns || [];
                 patterns.forEach(p => { if (p.group === oldName) p.group = newName; });
                 await browser.storage.local.set({ patterns });
+
+                // Sync disabledGroups if needed
+                const { disabledGroups: storedDisabled } = await browser.storage.local.get('disabledGroups');
+                if (Array.isArray(storedDisabled) && storedDisabled.includes(oldName)) {
+                    const nextDisabled = storedDisabled.map(g => g === oldName ? newName : g);
+                    await browser.storage.local.set({ disabledGroups: nextDisabled });
+                    disabledGroups.clear();
+                    nextDisabled.forEach(g => disabledGroups.add(g));
+                }
+
                 if (collapsedGroups.has(oldName)) {
                     collapsedGroups.delete(oldName);
                     collapsedGroups.add(newName);
@@ -894,6 +910,16 @@ async function showDeleteGroupDialog(groupName) {
         patterns.forEach(p => { if (p.group === groupName) delete p.group; });
         await browser.storage.local.set({ patterns });
         collapsedGroups.delete(groupName);
+
+        // Sync disabledGroups
+        const { disabledGroups: storedDisabled } = await browser.storage.local.get('disabledGroups');
+        if (Array.isArray(storedDisabled) && storedDisabled.includes(groupName)) {
+            const nextDisabled = storedDisabled.filter(g => g !== groupName);
+            await browser.storage.local.set({ disabledGroups: nextDisabled });
+            disabledGroups.clear();
+            nextDisabled.forEach(g => disabledGroups.add(g));
+        }
+
         browser.storage.local.set({ collapsedGroups: [...collapsedGroups] });
         await restoreOptions();
     };
@@ -905,6 +931,16 @@ async function showDeleteGroupDialog(groupName) {
         patterns = patterns.filter(p => p.group !== groupName);
         await browser.storage.local.set({ patterns });
         collapsedGroups.delete(groupName);
+
+        // Sync disabledGroups
+        const { disabledGroups: storedDisabled } = await browser.storage.local.get('disabledGroups');
+        if (Array.isArray(storedDisabled) && storedDisabled.includes(groupName)) {
+            const nextDisabled = storedDisabled.filter(g => g !== groupName);
+            await browser.storage.local.set({ disabledGroups: nextDisabled });
+            disabledGroups.clear();
+            nextDisabled.forEach(g => disabledGroups.add(g));
+        }
+
         browser.storage.local.set({ collapsedGroups: [...collapsedGroups] });
         await restoreOptions();
     };
@@ -1437,7 +1473,6 @@ async function restoreOptions() {
 
                     await browser.storage.local.set({ patterns });
                     await restoreOptions();
-                    browser.runtime.sendMessage({ action: 'rerunPatterns' });
                 }, true);
             });
         }
@@ -1664,7 +1699,7 @@ async function updateGroupDisabled(groupName, isDisabled) {
     await browser.storage.local.set({ disabledGroups: nextDisabledGroups });
 
     // Update visual state of the group header and its child rows
-    const headerRow = document.querySelector(`.group-header[data-group="${groupName}"]`);
+    const headerRow = document.querySelector(`.group-header[data-group="${CSS.escape(groupName)}"]`);
     if (headerRow) {
         if (isDisabled) {
             headerRow.classList.add('disabled-visual');
@@ -1674,7 +1709,7 @@ async function updateGroupDisabled(groupName, isDisabled) {
     }
 
     // Update all pattern rows in this group
-    const rows = document.querySelectorAll(`.pattern-row[data-group="${groupName}"]`);
+    const rows = document.querySelectorAll(`.pattern-row[data-group="${CSS.escape(groupName)}"]`);
     const { patterns } = await browser.storage.local.get('patterns');
     for (const row of rows) {
         const index = row.getAttribute('data-index');

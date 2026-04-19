@@ -44,10 +44,10 @@ const syncStateUtils = (() => {
 })();
 
 // Persistence Helpers
-let isInitialStateLoaded = false;
 let saveTimeout = null;
 
 async function saveState() {
+    await initialStateLoadedPromise;
     if (saveTimeout) clearTimeout(saveTimeout);
     saveTimeout = setTimeout(async () => {
         const data = syncStateUtils.serializeSyncState(tabModifiedTitles, tabOriginalTitles);
@@ -66,11 +66,10 @@ async function loadState() {
     } catch (e) {
         console.error('[STATE] Failed to load sync state:', e);
     }
-    isInitialStateLoaded = true;
 }
 
 // Initial load
-loadState();
+const initialStateLoadedPromise = loadState();
 
 // Helper to identify tabs that we are legally allowed to inject script into
 function isInjectable(tab) {
@@ -82,9 +81,9 @@ function isInjectable(tab) {
 
 // Clean up state when tabs are closed
 browser.tabs.onRemoved.addListener((tabId) => {
-    tabOriginalTitles.delete(tabId);
-    if (tabModifiedTitles.has(tabId)) {
-        tabModifiedTitles.delete(tabId);
+    const hadOriginal = tabOriginalTitles.delete(tabId);
+    const hadModified = tabModifiedTitles.delete(tabId);
+    if (hadOriginal || hadModified) {
         saveState();
     }
 });
@@ -125,6 +124,7 @@ browser.tabs.onCreated.addListener((tab) => {
 
 // Core logic: Evaluate against all active rules and apply or revert the title
 async function updateTabTitle(tabId, tab) {
+    await initialStateLoadedPromise;
     // We only actively inject scripts into LOADED tabs.
     // Discarded tabs are evaluated via the sync engine wake-up process.
     if (!tab || tab.discarded || !isInjectable(tab)) return;
@@ -210,6 +210,7 @@ let isSyncing = false;
 let syncQueued = false;
 
 async function syncAllTabs() {
+    await initialStateLoadedPromise;
     if (isSyncing) {
         syncQueued = true;
         return;
@@ -362,39 +363,39 @@ async function syncAllTabs() {
                         console.log(`[TAB ${tabId}] STATE: discarded=${afterLoad.discarded}, status=${afterLoad.status}, title="${afterLoad.title?.substring(0, 40)}"`);
                     }
 
+                    // Verify/inject the correct title after waking the tab
+                    try {
+                        const finalTab = await browser.tabs.get(tabId);
+                        if (expectedTitle && finalTab.title !== expectedTitle) {
+                            console.log(`[TAB ${tabId}] TITLE UPDATE REQUIRED: have="${finalTab.title?.substring(0, 30)}...", want="${expectedTitle?.substring(0, 30)}..."`);
+                            await browser.tabs.executeScript(tabId, {
+                                code: `document.title = ${JSON.stringify(expectedTitle)};`
+                            }).catch((e) => console.log(`[TAB ${tabId}] INJECT FAILED for ${originalTab.url}:`, e));
+                            tabModifiedTitles.set(tabId, expectedTitle);
+                            saveState();
+                        } else {
+                            if (expectedTitle) {
+                                const ruleId = matchingPattern.name || matchingPattern.search;
+                                console.log(`[TAB ${tabId}] TITLE OK: Matches rule "${ruleId}"`);
+                            } else {
+                                // No rule matches, and title is correct? ensure we are clean.
+                                if (tabModifiedTitles.has(tabId)) {
+                                    tabModifiedTitles.delete(tabId);
+                                    saveState();
+                                    console.log(`[TAB ${tabId}] REVERT COMPLETE: Persistent record cleared.`);
+                                } else {
+                                    console.log(`[TAB ${tabId}] TITLE RETAINED: No active rule match.`);
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        console.log(`[TAB ${tabId}] TITLE CHECK ERROR:`, e);
+                    }
+
                     // Re-discard the tab if required
                     if (reDiscardTabs) {
                         if (discardDelay > 0) {
                             await new Promise(r => setTimeout(r, discardDelay * 1000));
-                        }
-
-                        // Verify/inject the correct title
-                        try {
-                            const finalTab = await browser.tabs.get(tabId);
-                            if (expectedTitle && finalTab.title !== expectedTitle) {
-                                console.log(`[TAB ${tabId}] TITLE UPDATE REQUIRED: have="${finalTab.title?.substring(0, 30)}...", want="${expectedTitle?.substring(0, 30)}..."`);
-                                await browser.tabs.executeScript(tabId, {
-                                    code: `document.title = ${JSON.stringify(expectedTitle)};`
-                                }).catch((e) => console.log(`[TAB ${tabId}] INJECT FAILED for ${originalTab.url}:`, e));
-                                tabModifiedTitles.set(tabId, expectedTitle);
-                                saveState();
-                            } else {
-                                if (expectedTitle) {
-                                    const ruleId = matchingPattern.name || matchingPattern.search;
-                                    console.log(`[TAB ${tabId}] TITLE OK: Matches rule "${ruleId}"`);
-                                } else {
-                                    // No rule matches, and title is correct? ensure we are clean.
-                                    if (tabModifiedTitles.has(tabId)) {
-                                        tabModifiedTitles.delete(tabId);
-                                        saveState();
-                                        console.log(`[TAB ${tabId}] REVERT COMPLETE: Persistent record cleared.`);
-                                    } else {
-                                        console.log(`[TAB ${tabId}] TITLE RETAINED: No active rule match.`);
-                                    }
-                                }
-                            }
-                        } catch (e) {
-                            console.log(`[TAB ${tabId}] TITLE CHECK ERROR:`, e);
                         }
 
                         // Stop page loading and wait for Firefox to settle the throbber
