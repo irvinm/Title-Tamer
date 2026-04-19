@@ -99,6 +99,9 @@
 - **Scroll & UX Polish**: 
     - **Scrolling**: Added overlay scrollbar support and `scrollbar-gutter` logic to prevent layout shifting when the rules table grows.
     - **Auto-Scroll**: Automatically scrolls the active editing row into view to guarantee "last row" visibility during form submission.
+    - **Ultra-Compact Layout**: Redesigned the "Additional Options" section with standardized fieldsets and minimized vertical spacing for maximum efficiency.
+    - **Segmented Theme Control**: Switched to a unified pill-style toggle for theme selection.
+    - **Unified Typography**: Synchronized all input controls to a 13px Monospace font and added high-visibility "pill" highlights for UI terminology.
     - Adjusted the entire layout to use 100% width for full-page responsive viewing.
 </details>
 
