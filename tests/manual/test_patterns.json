@@ -24,6 +24,7 @@
     { "search": "bing\\.com/search\\?q=([^&]+)", "title": "B: $1", "enabled": true, "group": "Search" },
     { "search": "youtube\\.com/watch\\?v=([^&]+)", "title": "YT: $1", "enabled": true, "group": "Media" },
     { "search": "amazon\\.com/dp/([^/]+)", "title": "Amazon: $1", "enabled": true, "group": "Shopping" },
-    { "search": "ebay\\.com/itm/([^/]+)", "title": "eBay: $1", "enabled": true, "group": "Shopping" }
+    { "search": "ebay\\.com/itm/([^/]+)", "title": "eBay: $1", "enabled": true, "group": "Shopping" },
+    { "search": "costco\\.com/([^/]+)\\.html$", "title": "Costco: $1", "enabled": true, "group": "Shopping" }
   ]
 }

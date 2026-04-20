@@ -78,26 +78,7 @@
                     </div>
                 </fieldset>
             </div>
-            <!-- Theme Section -->
-            <div class="form-group2">
-                <fieldset class="theme-preferences-fieldset">
-                    <legend class="theme-preferences-legend">Theme</legend>
-                    <div class="segmented-control">
-                        <label>
-                            <input type="radio" name="theme" id="theme-light" value="light" checked />
-                            Light
-                        </label>
-                        <label>
-                            <input type="radio" name="theme" id="theme-dark" value="dark" />
-                            Dark
-                        </label>
-                        <label>
-                            <input type="radio" name="theme" id="theme-system" value="system" />
-                            System
-                        </label>
-                    </div>
-                </fieldset>
-            </div>
+            <!-- Group Options (full-width row) -->
             <div class="form-group2">
                 <fieldset class="group-sort-order-fieldset">
                     <legend class="group-sort-order-legend">Group Options</legend>
@@ -124,8 +105,29 @@
                     </label>
                 </fieldset>
             </div>
-            <!-- Export and Import Options -->
-            <div class="form-group2">
+            <!-- Theme + Import/Export on one row -->
+            <div class="options-inline-row">
+            <div class="form-group2 options-inline-cell">
+                <fieldset class="theme-preferences-fieldset">
+                    <legend class="theme-preferences-legend">Theme</legend>
+                    <div class="segmented-control">
+                        <label>
+                            <input type="radio" name="theme" id="theme-light" value="light" checked />
+                            Light
+                        </label>
+                        <label>
+                            <input type="radio" name="theme" id="theme-dark" value="dark" />
+                            Dark
+                        </label>
+                        <label>
+                            <input type="radio" name="theme" id="theme-system" value="system" />
+                            System
+                        </label>
+                    </div>
+                </fieldset>
+            </div>
+            <!-- Import/Export (paired with Theme) -->
+            <div class="form-group2 options-inline-cell options-inline-cell--shrink">
                 <fieldset class="import-export-fieldset">
                     <legend>Import/Export</legend>
                     <div style="display: flex; justify-content: flex-end; width: 100%;">
@@ -133,6 +135,18 @@
                             Import/Export Options <img class="open-icon" src="../icons/open.png" alt="Open in new tab">
                         </button>
                     </div>
+                </fieldset>
+            </div>
+            </div><!-- end options-inline-row -->
+            <!-- Developer Tools -->
+            <div class="form-group2">
+                <fieldset class="dev-tools-fieldset">
+                    <legend>Developer Tools</legend>
+                    <label class="block-label">
+                        <input type="checkbox" id="diag-logging-option" />
+                        Enable verbose diagnostic logging
+                        <span class="dev-tools-hint">&mdash; view output in <em>about:debugging</em> &rarr; This Firefox &rarr; Title Tamer &rarr; Inspect</span>
+                    </label>
                 </fieldset>
             </div>
         </div>

@@ -60,8 +60,8 @@
     *   *Expected:* All 10 tabs instantly swap to the imported definitions without a single page reload (unless discarded with wake-up enabled).
 *   **Step 5.2:** **Hard Refresh:** Navigate to matching URL, check manipulated title, perform Hard Refresh (Ctrl+F5 or Shift+Refresh). 
     *   *Expected:* The `tabs.onUpdated` listener correctly registers the native title pipeline and immediately enforces the manipulated title again. No tracker memory loops or duplicate overwrites.
-*   **Step 5.3:** **Simultaneous Native Override:** Navigate to a site that actively fights you via constant `setInterval` looping `document.title = "Buy Now!"`.
-    *   *Expected:* The extension intercepts the frequent changes, logs them to `tabOriginalTitles`, and re-asserts the manipulated title. (Some extreme visual flickering is normal here, but absolute application stability is expected without Extension-Side crashes).
+*   **Step 5.3:** **Simultaneous Native Override:** Navigate to a site that actively fights you via constant `setInterval` or SPA re-hydration (e.g., `https://www.costco.com/fish-oil-omega-3.html` with a matching rule).
+    *   *Expected:* **Zero flickering.** The extension injects a `MutationObserver` guard directly into the page that synchronously re-asserts the custom title whenever the site's JavaScript attempts to change it. Because this runs inside the page's own JS context, it wins the race with zero round-trip latency. The tab title should lock to the custom value immediately after page load and never visually revert to the site's title. Application stability is also expected (no crashes, no infinite loops).
 
 ---
 
