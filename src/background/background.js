@@ -101,6 +101,8 @@ browser.tabs.onRemoved.addListener((tabId) => {
 
 // Monitor tab updates (navigation, title changes, loading complete)
 browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+    await loggingReady;
+    
     // [DIAG] Log every onUpdated event so we can see the full sequence
     const ci = {};
     if (changeInfo.title  !== undefined) ci.title  = changeInfo.title?.substring(0, 60);
@@ -112,7 +114,6 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     // the incoming title from the new page is treated as the new original, not as the
     // site "fighting back" against our override.
     if (changeInfo.url && tabModifiedTitles.has(tabId)) {
-        await loggingReady;
         diagLog(`[DIAG][TAB ${tabId}] URL change detected — clearing modified title record and disconnecting guard.`);
         
         // Explicitly disconnect the guard before clearing the record.
@@ -132,7 +133,6 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 
     // Intercept title changes
     if (changeInfo.title) {
-        await loggingReady;
         if (changeInfo.title === tabModifiedTitles.get(tabId)) {
             // Echo from our own executeScript modifier. Ignore to prevent loops.
             diagLog(`[DIAG][TAB ${tabId}] ECHO GUARD hit — title matches our injected value. Returning early.`);
@@ -172,11 +172,11 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 
 // Capture native title on tab creation
 browser.tabs.onCreated.addListener(async (tab) => {
+    await loggingReady;
     if (!isInjectable(tab)) return;
     if (tab.title) {
         tabOriginalTitles.set(tab.id, tab.title);
     }
-    await loggingReady;
     updateTabTitle(tab.id, tab);
 });
 
