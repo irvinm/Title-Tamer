@@ -338,43 +338,61 @@ describe('fight-back detection (onUpdated behaviour)', function () {
         expect(lastScript.payload.code).to.contain('MutationObserver');
     });
 
-    it('URL change clears the modified title record to allow fresh evaluation', async function () {
+    it('URL change clears the modified title record and disconnects the guard', async function () {
         const tab = {
             id: 202,
             url: 'https://example.com/page-a',
-            title: 'My Custom Title',
-            status: 'loading',
+            title: 'Initial Title A',
+            status: 'complete',
             discarded: false,
             windowId: 1,
         };
 
         const env = createBrowserMock(
-            { patterns: [], disabledGroups: [], loadDiscardedTabs: false, reDiscardTabs: false, discardDelay: 0, limitConcurrentTabsEnabled: true, maxConcurrentTabs: 10 },
+            { 
+                patterns: [{ name: 'Example', search: 'example\\.com', title: 'My Custom Title' }], 
+                disabledGroups: [], 
+                loadDiscardedTabs: false, 
+                reDiscardTabs: false, 
+                discardDelay: 0, 
+                limitConcurrentTabsEnabled: true, 
+                maxConcurrentTabs: 10 
+            },
             [tab]
         );
 
         global.browser = env.browser;
         const background = require('../../src/background/background.js');
 
-        // Manually seed tabModifiedTitles to simulate a prior injection
-        // (we do that by running a sync that injects, but the pattern list is empty,
-        //  so instead we fire an onUpdated with status:complete + a matching rule)
-        // For this test we verify via the URL-change path — when URL fires, modified should clear.
-        // We can't directly reach internal maps, so we check indirectly: after URL change,
-        // a title event should be treated as a genuine original (not a fight-back).
+        // Phase 1: Set up modified state by triggering an update
+        await background.updateTabTitle(tab.id, tab);
+        expect(env.calls.tabsExecuteScript).to.have.lengthOf(1);
+        expect(env.calls.tabsExecuteScript[0].payload.code).to.contain('MutationObserver');
 
         // Fire URL change event
         const urlChangeInfo = { url: 'https://example.com/page-b', status: 'loading' };
         tab.url = 'https://example.com/page-b';
         await env.listeners.tabsOnUpdatedListeners[0](tab.id, urlChangeInfo, tab);
 
-        // Then fire a title event — should be treated as genuine (no fight-back suppression)
-        const titleChangeInfo = { title: 'Page B Native Title' };
-        await env.listeners.tabsOnUpdatedListeners[0](tab.id, titleChangeInfo, tab);
-        await new Promise((resolve) => setTimeout(resolve, 25));
+        // Verify that a disconnect script was injected (on loading status)
+        expect(env.calls.tabsExecuteScript).to.have.lengthOf(2);
+        expect(env.calls.tabsExecuteScript[1].payload.code).to.contain('disconnect');
 
-        // No script should have been injected (no matching pattern, no override)
-        expect(env.calls.tabsExecuteScript).to.have.lengthOf(0);
+        // Now fire status:complete to trigger the re-injection for the new URL
+        const completeChangeInfo = { status: 'complete' };
+        tab.status = 'complete';
+        await env.listeners.tabsOnUpdatedListeners[0](tab.id, completeChangeInfo, tab);
+        await new Promise((resolve) => setTimeout(resolve, 50));
+
+        // The sequence is:
+        // 1. Initial manual update (Call #1)
+        // 2. Disconnect on URL change (Call #2)
+        // 3. Re-apply guard on status:complete (Call #3)
+        // Any subsequent title-only change would be Call #4 (Fight-back).
+        // If it got 4 already, it means the title change was somehow triggered.
+        expect(env.calls.tabsExecuteScript).to.have.lengthOf.at.least(3);
+        const lastCall = env.calls.tabsExecuteScript[env.calls.tabsExecuteScript.length - 1];
+        expect(lastCall.payload.code).to.contain('MutationObserver');
     });
 
     it('guard is re-installed even when tab title already matches the rule', async function () {

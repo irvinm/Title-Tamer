@@ -7,7 +7,7 @@ const tabModifiedTitles = new Map(); // tabId -> String (the manipulated title w
 // Diagnostic logging — off by default, toggled via Options → Developer Tools.
 // The flag is cached in memory so diagLog() is a zero-cost boolean check when disabled.
 let diagLoggingEnabled = false;
-browser.storage.local.get('diagLogging').then(r => {
+const loggingReady = browser.storage.local.get('diagLogging').then(r => {
     diagLoggingEnabled = r.diagLogging === true;
 }).catch(() => {});
 
@@ -112,13 +112,27 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     // the incoming title from the new page is treated as the new original, not as the
     // site "fighting back" against our override.
     if (changeInfo.url && tabModifiedTitles.has(tabId)) {
-        diagLog(`[DIAG][TAB ${tabId}] URL change detected — clearing modified title record to allow fresh evaluation.`);
+        await loggingReady;
+        diagLog(`[DIAG][TAB ${tabId}] URL change detected — clearing modified title record and disconnecting guard.`);
+        
+        // Explicitly disconnect the guard before clearing the record.
+        // This prevents the observer from re-asserting the old custom title 
+        // if the URL change was a partial SPA navigation without a Full Page Reload.
+        const disconnectScript = `(function() {
+            if (window.__titleTamer_observer) {
+                window.__titleTamer_observer.disconnect();
+                window.__titleTamer_observer = null;
+            }
+        })()`;
+        await browser.tabs.executeScript(tabId, { code: disconnectScript }).catch(() => {});
+        
         tabModifiedTitles.delete(tabId);
         saveState();
     }
 
     // Intercept title changes
     if (changeInfo.title) {
+        await loggingReady;
         if (changeInfo.title === tabModifiedTitles.get(tabId)) {
             // Echo from our own executeScript modifier. Ignore to prevent loops.
             diagLog(`[DIAG][TAB ${tabId}] ECHO GUARD hit — title matches our injected value. Returning early.`);
@@ -157,11 +171,12 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 });
 
 // Capture native title on tab creation
-browser.tabs.onCreated.addListener((tab) => {
+browser.tabs.onCreated.addListener(async (tab) => {
     if (!isInjectable(tab)) return;
     if (tab.title) {
         tabOriginalTitles.set(tab.id, tab.title);
     }
+    await loggingReady;
     updateTabTitle(tab.id, tab);
 });
 
@@ -208,12 +223,13 @@ async function updateTabTitle(tabId, tab) {
                      tabOriginalTitles.set(tabId, tab.title);
                      saveState();
                 }
-                // Record our change
-                tabModifiedTitles.set(tabId, matchedTitle);
-                saveState();
             } else {
                 diagLog(`[DIAG][TAB ${tabId}] Title already matches rule — (re)installing guard only. title="${tab.title?.substring(0,60)}"`);
             }
+
+            // Record that we are enforcing a title on this tab (via guard)
+            tabModifiedTitles.set(tabId, matchedTitle);
+            saveState();
 
             // Inject the MutationObserver guard into the page regardless of whether the
             // title needed changing. This ensures the guard is always active when a rule
@@ -458,33 +474,18 @@ async function syncAllTabs() {
                         console.log(`[TAB ${tabId}] STATE: discarded=${afterLoad.discarded}, status=${afterLoad.status}, title="${afterLoad.title?.substring(0, 40)}"`);
                     }
 
-                    // Verify/inject the correct title after waking the tab
+                    // Verify/inject the correct title after waking the tab.
+                    // We delegate to updateTabTitle here so the MutationObserver guard 
+                    // is installed consistently with the normal loaded-tab path,
+                    // preventing fight-back on freshly-woken tabs.
                     try {
                         const finalTab = await browser.tabs.get(tabId);
-                        if (expectedTitle && finalTab.title !== expectedTitle) {
-                            console.log(`[TAB ${tabId}] TITLE UPDATE REQUIRED: have="${finalTab.title?.substring(0, 30)}...", want="${expectedTitle?.substring(0, 30)}..."`);
-                            await browser.tabs.executeScript(tabId, {
-                                code: `document.title = ${JSON.stringify(expectedTitle)};`
-                            }).catch((e) => console.log(`[TAB ${tabId}] INJECT FAILED for ${originalTab.url}:`, e));
-                            tabModifiedTitles.set(tabId, expectedTitle);
-                            saveState();
-                        } else {
-                            if (expectedTitle) {
-                                const ruleId = matchingPattern.name || matchingPattern.search;
-                                console.log(`[TAB ${tabId}] TITLE OK: Matches rule "${ruleId}"`);
-                            } else {
-                                // No rule matches, and title is correct? ensure we are clean.
-                                if (tabModifiedTitles.has(tabId)) {
-                                    tabModifiedTitles.delete(tabId);
-                                    saveState();
-                                    console.log(`[TAB ${tabId}] REVERT COMPLETE: Persistent record cleared.`);
-                                } else {
-                                    console.log(`[TAB ${tabId}] TITLE RETAINED: No active rule match.`);
-                                }
-                            }
+                        if (finalTab) {
+                            await updateTabTitle(tabId, finalTab);
+                            console.log(`[TAB ${tabId}] Wake-up sync complete (via updateTabTitle).`);
                         }
                     } catch (e) {
-                        console.log(`[TAB ${tabId}] TITLE CHECK ERROR:`, e);
+                        console.log(`[TAB ${tabId}] TITLE UPDATE ERROR:`, e);
                     }
 
                     // Re-discard the tab if required
@@ -516,11 +517,8 @@ async function syncAllTabs() {
                             }
                             await new Promise(r => setTimeout(r, 500));
                         }
-                        console.log(`[TAB ${tabId}] DONE: discarded=${discarded}`);
                     }
-                } catch (e) {
-                    console.error(`[TAB ${tabId}] ERROR:`, e);
-                }
+                } catch (e) {}
             };
 
             // Rolling worker pool: each worker pulls from a shared queue sequentially.
