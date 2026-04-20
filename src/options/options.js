@@ -204,7 +204,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         groupSortOrder,
         showRecentGroupFirst,
         showGroupRuleCount,
-        recentGroupSelection: storedRecentGroupSelection
+        recentGroupSelection: storedRecentGroupSelection,
+        diagLogging,
     } = await browser.storage.local.get([
         'loadDiscardedTabs',
         'reDiscardTabs',
@@ -214,7 +215,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         'groupSortOrder',
         'showRecentGroupFirst',
         'showGroupRuleCount',
-        'recentGroupSelection'
+        'recentGroupSelection',
+        'diagLogging',
     ]);
 
     groupSortOrderPreference = groupSortOrder || 'alphabetic';
@@ -311,6 +313,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             browser.storage.local.set({ maxConcurrentTabs });
         }
     });
+
+    // Diagnostic logging toggle
+    const diagLoggingCheckbox = document.getElementById('diag-logging-option');
+    if (diagLoggingCheckbox) {
+        diagLoggingCheckbox.checked = diagLogging === true;
+        diagLoggingCheckbox.addEventListener('change', function () {
+            browser.storage.local.set({ diagLogging: this.checked });
+        });
+    }
 
     const table = document.getElementById('pattern-table');
     const scrollContainer = document.querySelector('.patterns-table-container');

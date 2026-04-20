@@ -18,3 +18,5 @@ https://www.ebay.com/itm/123456789
 https://codesandbox.io/s/new
 https://circleci.com/developer/orbs
 https://en.wikipedia.org/wiki/Space_Exploration
+# Fight-back regression test (React/Next.js SPA that re-asserts its own title post-hydration)
+https://www.costco.com/fish-oil-omega-3.html

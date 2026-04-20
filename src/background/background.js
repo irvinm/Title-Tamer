@@ -4,6 +4,17 @@
 const tabOriginalTitles = new Map(); // tabId -> String (the site's true, native title)
 const tabModifiedTitles = new Map(); // tabId -> String (the manipulated title we set)
 
+// Diagnostic logging — off by default, toggled via Options → Developer Tools.
+// The flag is cached in memory so diagLog() is a zero-cost boolean check when disabled.
+let diagLoggingEnabled = false;
+const loggingReady = browser.storage.local.get('diagLogging').then(r => {
+    diagLoggingEnabled = r.diagLogging === true;
+}).catch(() => {});
+
+function diagLog(...args) {
+    if (diagLoggingEnabled) console.log(...args);
+}
+
 const syncStateUtils = (() => {
     if (globalThis.serializeSyncState && globalThis.hydrateSyncState) {
         return {
@@ -90,16 +101,55 @@ browser.tabs.onRemoved.addListener((tabId) => {
 
 // Monitor tab updates (navigation, title changes, loading complete)
 browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+    await loggingReady;
+    
+    // [DIAG] Log every onUpdated event so we can see the full sequence
+    const ci = {};
+    if (changeInfo.title  !== undefined) ci.title  = changeInfo.title?.substring(0, 60);
+    if (changeInfo.url    !== undefined) ci.url    = changeInfo.url?.substring(0, 60);
+    if (changeInfo.status !== undefined) ci.status = changeInfo.status;
+    diagLog(`[DIAG][TAB ${tabId}] onUpdated | changeInfo=${JSON.stringify(ci)} | storedModified="${tabModifiedTitles.get(tabId)?.substring(0,40) ?? '(none)'}" | storedOriginal="${tabOriginalTitles.get(tabId)?.substring(0,40) ?? '(none)'}"`);
+
+    // A URL change signals genuine SPA/navigation. Reset our modified-title record so
+    // the incoming title from the new page is treated as the new original, not as the
+    // site "fighting back" against our override.
+    if (changeInfo.url && tabModifiedTitles.has(tabId)) {
+        diagLog(`[DIAG][TAB ${tabId}] URL change detected — clearing modified title record and disconnecting guard.`);
+        
+        // Explicitly disconnect the guard before clearing the record.
+        // This prevents the observer from re-asserting the old custom title 
+        // if the URL change was a partial SPA navigation without a Full Page Reload.
+        const disconnectScript = `(function() {
+            if (window.__titleTamer_observer) {
+                window.__titleTamer_observer.disconnect();
+                window.__titleTamer_observer = null;
+            }
+        })()`;
+        await browser.tabs.executeScript(tabId, { code: disconnectScript }).catch(() => {});
+        
+        tabModifiedTitles.delete(tabId);
+        saveState();
+    }
+
     // Intercept title changes
     if (changeInfo.title) {
         if (changeInfo.title === tabModifiedTitles.get(tabId)) {
             // Echo from our own executeScript modifier. Ignore to prevent loops.
+            diagLog(`[DIAG][TAB ${tabId}] ECHO GUARD hit — title matches our injected value. Returning early.`);
             return;
         }
-        // Genuine native title change by the website (e.g. SPA navigation)
-        tabOriginalTitles.set(tabId, changeInfo.title);
+
         if (tabModifiedTitles.has(tabId)) {
-            saveState();
+            // We have an active override and the title changed WITHOUT a URL change.
+            // This is almost certainly the site re-asserting its own title post-hydration
+            // or via a JS framework (e.g. React, Angular, Costco-style SPA re-render).
+            // Do NOT update tabOriginalTitles — the value we stored on first load is still
+            // the true original. Simply fall through so updateTabTitle() re-applies our rule.
+            diagLog(`[DIAG][TAB ${tabId}] FIGHT-BACK detected — site set title to "${changeInfo.title?.substring(0, 60)}" while override is active. Will re-assert.`);
+        } else {
+            // No active override: this is a genuine native title change (e.g. SPA nav, new page).
+            diagLog(`[DIAG][TAB ${tabId}] Genuine native title change (no override active). Storing as original: "${changeInfo.title?.substring(0, 60)}".`);
+            tabOriginalTitles.set(tabId, changeInfo.title);
         }
     }
     
@@ -107,14 +157,22 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     if (changeInfo.title || changeInfo.url || changeInfo.status === 'complete') {
         // Fetch fresh tab to avoid race conditions (e.g. tab.url or tab.status being out-of-date)
         const freshTab = await browser.tabs.get(tabId).catch(() => null);
-        if (freshTab && freshTab.status === 'complete' && isInjectable(freshTab)) {
+        if (!freshTab) {
+            diagLog(`[DIAG][TAB ${tabId}] freshTab is null — tab may have closed. Skipping.`);
+        } else if (freshTab.status !== 'complete') {
+            diagLog(`[DIAG][TAB ${tabId}] freshTab.status=${freshTab.status} (not complete) — skipping updateTabTitle for now.`);
+        } else if (!isInjectable(freshTab)) {
+            diagLog(`[DIAG][TAB ${tabId}] freshTab is not injectable (url=${freshTab.url?.substring(0,60)}) — skipping.`);
+        } else {
+            diagLog(`[DIAG][TAB ${tabId}] Calling updateTabTitle | freshTab.title="${freshTab.title?.substring(0,60)}" | freshTab.status=${freshTab.status}`);
             updateTabTitle(tabId, freshTab);
         }
     }
 });
 
 // Capture native title on tab creation
-browser.tabs.onCreated.addListener((tab) => {
+browser.tabs.onCreated.addListener(async (tab) => {
+    await loggingReady;
     if (!isInjectable(tab)) return;
     if (tab.title) {
         tabOriginalTitles.set(tab.id, tab.title);
@@ -139,54 +197,119 @@ async function updateTabTitle(tabId, tab) {
         const activePatterns = filterActivePatterns(sorted, disabledGroups);
 
         let matchedTitle = null;
+        let matchedPattern = null;
         for (const pattern of activePatterns) {
             const matchTest = applyPattern(tab.url, pattern);
             if (matchTest && matchTest.matched && matchTest.newTitle) {
                 matchedTitle = matchTest.newTitle;
+                matchedPattern = pattern;
                 break;
             }
         }
 
+        diagLog(`[DIAG][TAB ${tabId}] updateTabTitle | tab.title="${tab.title?.substring(0,60)}" | matchedTitle="${matchedTitle ?? '(none)'}" | activePatterns=${activePatterns.length}`);
+
         if (matchedTitle) {
-            // A pattern matched.
-            if (tab.title !== matchedTitle) {
+            // A pattern matched. Always (re)install the guard so the MutationObserver
+            // is present regardless of whether the current title already matches.
+            // This prevents a gap where the guard is absent if we skip injection because
+            // tab.title happened to equal matchedTitle at evaluation time.
+
+            const needsTitleChange = tab.title !== matchedTitle;
+            if (needsTitleChange) {
+                diagLog(`[DIAG][TAB ${tabId}] INJECTING title: "${matchedTitle}" (was: "${tab.title?.substring(0,60)}")`);
                 // Ensure we have captured the original title before overwriting it
                 if (!tabOriginalTitles.has(tabId) && typeof tab.title === 'string') {
                      tabOriginalTitles.set(tabId, tab.title);
                      saveState();
                 }
-                
-                // Record our change
-                tabModifiedTitles.set(tabId, matchedTitle);
-                saveState();
-                
-                // Inject the change
-                await browser.tabs.executeScript(tabId, {
-                    code: `document.title = ${JSON.stringify(matchedTitle)};`
-                }).catch(e => {
-                    // Suppress "Missing host permission" noise for transient reload states
-                    if (e.message && e.message.includes("Missing host permission")) {
-                        console.log(`[TAB ${tabId}] NOTICE: Transient host permission mismatch (Sync Engine will retry)`);
-                    } else {
-                        console.log(`[TAB ${tabId}] executeScript failed for ${tab.url}:`, e);
+            } else {
+                diagLog(`[DIAG][TAB ${tabId}] Title already matches rule — (re)installing guard only. title="${tab.title?.substring(0,60)}"`);
+            }
+
+            // Inject the MutationObserver guard into the page regardless of whether the
+            // title needed changing. This ensures the guard is always active when a rule
+            // matches, even if the title happened to already be correct at evaluation time.
+            const injectGuard = (
+                `(function() {
+                    const TARGET = ${JSON.stringify(matchedTitle)};
+                    // Disconnect any previous Title Tamer observer first
+                    if (window.__titleTamer_observer) {
+                        window.__titleTamer_observer.disconnect();
+                        window.__titleTamer_observer = null;
                     }
-                });
+                    // Apply the title immediately
+                    document.title = TARGET;
+                    // Find or create the <title> element
+                    let titleEl = document.querySelector('title');
+                    if (!titleEl) {
+                        titleEl = document.createElement('title');
+                        document.head.appendChild(titleEl);
+                    }
+                    // Install a MutationObserver to re-assert our title if the site changes it
+                    const obs = new MutationObserver(() => {
+                        if (document.title !== TARGET) {
+                            document.title = TARGET;
+                        }
+                    });
+                    obs.observe(titleEl, { childList: true, characterData: true, subtree: true });
+                    // Also observe the <head> in case the site removes/replaces <title>
+                    // We use subtree: true to ensure we catch characterData changes
+                    // even if the <title> node itself is replaced by the site.
+                    obs.observe(document.head, { childList: true, subtree: true, characterData: true });
+                    window.__titleTamer_observer = obs;
+                })()`
+            );
+            
+            try {
+                await browser.tabs.executeScript(tabId, { code: injectGuard });
+                
+                // Record that we are enforcing a title on this tab (via guard)
+                // ONLY after successful injection.
+                tabModifiedTitles.set(tabId, matchedTitle);
+                await saveState();
+                
+                diagLog(`[DIAG][TAB ${tabId}] GUARD ${needsTitleChange ? 'INJECT+' : 're-'}installed. tabModifiedTitles: "${tabModifiedTitles.get(tabId)?.substring(0,60)}"`);
+            } catch (e) {
+                if (e.message && e.message.includes("Missing host permission")) {
+                    console.log(`[TAB ${tabId}] NOTICE: Transient host permission mismatch (Sync Engine will retry)`);
+                } else {
+                    console.log(`[TAB ${tabId}] executeScript failed for ${tab.url}:`, e);
+                }
             }
         } else {
             // NO patterns matched. 
             // If we previously modified this tab, we need to REVERT it natively.
             if (tabModifiedTitles.has(tabId)) {
                 const revertTo = tabOriginalTitles.get(tabId) || tab.title;
-                tabModifiedTitles.delete(tabId);
-                saveState();
+                diagLog(`[DIAG][TAB ${tabId}] No pattern matched. REVERTING from "${tab.title?.substring(0,60)}" to "${revertTo?.substring(0,60)}".`);
+                
                 // We keep the original in the map just in case.
                 
-                // Inject the revert
-                if (tab.title !== revertTo) {
-                    await browser.tabs.executeScript(tabId, {
-                        code: `document.title = ${JSON.stringify(revertTo)};`
-                    }).catch(e => console.log(`[TAB ${tabId}] executeScript revert failed for ${tab.url}:`, e));                
+                // Tear down the MutationObserver guard and revert the title
+                const revertScript = (
+                    `(function() {
+                        if (window.__titleTamer_observer) {
+                            window.__titleTamer_observer.disconnect();
+                            window.__titleTamer_observer = null;
+                        }
+                        document.title = ${JSON.stringify(revertTo)};
+                    })()`
+                );
+                
+                try {
+                    await browser.tabs.executeScript(tabId, { code: revertScript });
+                    
+                    // We only stop tracking the modification if the revert script actually ran.
+                    // This keeps the engine aware that the tab might still have an active guard
+                    // if the revert failed.
+                    tabModifiedTitles.delete(tabId);
+                    await saveState();
+                } catch (e) {
+                    console.log(`[TAB ${tabId}] executeScript revert failed for ${tab.url}:`, e);
                 }
+            } else {
+                diagLog(`[DIAG][TAB ${tabId}] No pattern matched, no override active. Nothing to do.`);
             }
         }
 
@@ -198,6 +321,10 @@ async function updateTabTitle(tabId, tab) {
 // Universal Sync Receiver: Triggered automatically whenever rules or active statuses change in storage
 browser.storage.onChanged.addListener((changes, areaName) => {
     if (areaName === 'local') {
+        // Keep the in-memory diagLogging flag in sync so the toggle takes effect immediately
+        if (changes.diagLogging !== undefined) {
+            diagLoggingEnabled = changes.diagLogging.newValue === true;
+        }
         if (changes.patterns || changes.disabledGroups) {
             console.log('Rule set updated. Triggering universal sync.');
             syncAllTabs();
@@ -363,33 +490,18 @@ async function syncAllTabs() {
                         console.log(`[TAB ${tabId}] STATE: discarded=${afterLoad.discarded}, status=${afterLoad.status}, title="${afterLoad.title?.substring(0, 40)}"`);
                     }
 
-                    // Verify/inject the correct title after waking the tab
+                    // Verify/inject the correct title after waking the tab.
+                    // We delegate to updateTabTitle here so the MutationObserver guard 
+                    // is installed consistently with the normal loaded-tab path,
+                    // preventing fight-back on freshly-woken tabs.
                     try {
                         const finalTab = await browser.tabs.get(tabId);
-                        if (expectedTitle && finalTab.title !== expectedTitle) {
-                            console.log(`[TAB ${tabId}] TITLE UPDATE REQUIRED: have="${finalTab.title?.substring(0, 30)}...", want="${expectedTitle?.substring(0, 30)}..."`);
-                            await browser.tabs.executeScript(tabId, {
-                                code: `document.title = ${JSON.stringify(expectedTitle)};`
-                            }).catch((e) => console.log(`[TAB ${tabId}] INJECT FAILED for ${originalTab.url}:`, e));
-                            tabModifiedTitles.set(tabId, expectedTitle);
-                            saveState();
-                        } else {
-                            if (expectedTitle) {
-                                const ruleId = matchingPattern.name || matchingPattern.search;
-                                console.log(`[TAB ${tabId}] TITLE OK: Matches rule "${ruleId}"`);
-                            } else {
-                                // No rule matches, and title is correct? ensure we are clean.
-                                if (tabModifiedTitles.has(tabId)) {
-                                    tabModifiedTitles.delete(tabId);
-                                    saveState();
-                                    console.log(`[TAB ${tabId}] REVERT COMPLETE: Persistent record cleared.`);
-                                } else {
-                                    console.log(`[TAB ${tabId}] TITLE RETAINED: No active rule match.`);
-                                }
-                            }
+                        if (finalTab) {
+                            await updateTabTitle(tabId, finalTab);
+                            console.log(`[TAB ${tabId}] Wake-up sync complete (via updateTabTitle).`);
                         }
                     } catch (e) {
-                        console.log(`[TAB ${tabId}] TITLE CHECK ERROR:`, e);
+                        console.log(`[TAB ${tabId}] TITLE UPDATE ERROR:`, e);
                     }
 
                     // Re-discard the tab if required
@@ -417,14 +529,15 @@ async function syncAllTabs() {
                                     if (otherTab) {
                                         await browser.tabs.update(otherTab.id, { active: true });
                                     }
-                                } catch (_) {}
+                                } catch (err) {
+                                    diagLog(`[DIAG][TAB ${tabId}] Recovery: Failed to switch active tab during discard attempt ${attempt + 1}:`, err);
+                                }
                             }
                             await new Promise(r => setTimeout(r, 500));
                         }
-                        console.log(`[TAB ${tabId}] DONE: discarded=${discarded}`);
                     }
                 } catch (e) {
-                    console.error(`[TAB ${tabId}] ERROR:`, e);
+                    console.error(`[SYNC][TAB ${tabId}] Phase 2 (wake/reload/discard) failed:`, e);
                 }
             };
 

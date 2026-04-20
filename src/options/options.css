@@ -217,6 +217,35 @@ thead th {
     cursor: pointer;
 }
 
+/* Inline hint in the Developer Tools checkbox label */
+.dev-tools-hint {
+    font-size: 0.8em;
+    opacity: 0.6;
+    white-space: nowrap;
+}
+
+/* Inline row: places two form-group2 cells side-by-side on one line */
+.options-inline-row {
+    display: flex;
+    gap: 0;
+    align-items: stretch;
+    margin-bottom: 4px;
+}
+
+.options-inline-cell {
+    flex: 1 1 auto;
+}
+
+.options-inline-cell fieldset {
+    height: 100%;
+    box-sizing: border-box;
+}
+
+/* Shrinks to fit its content (Import/Export button) instead of growing */
+.options-inline-cell--shrink {
+    flex: 0 0 auto;
+}
+
 /* Replaces inline style="display: block;" for nested options */
 .nested-options.show {
     display: block;

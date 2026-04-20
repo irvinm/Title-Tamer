@@ -60,8 +60,8 @@
     *   *Expected:* All 10 tabs instantly swap to the imported definitions without a single page reload (unless discarded with wake-up enabled).
 *   **Step 5.2:** **Hard Refresh:** Navigate to matching URL, check manipulated title, perform Hard Refresh (Ctrl+F5 or Shift+Refresh). 
     *   *Expected:* The `tabs.onUpdated` listener correctly registers the native title pipeline and immediately enforces the manipulated title again. No tracker memory loops or duplicate overwrites.
-*   **Step 5.3:** **Simultaneous Native Override:** Navigate to a site that actively fights you via constant `setInterval` looping `document.title = "Buy Now!"`.
-    *   *Expected:* The extension intercepts the frequent changes, logs them to `tabOriginalTitles`, and re-asserts the manipulated title. (Some extreme visual flickering is normal here, but absolute application stability is expected without Extension-Side crashes).
+*   **Step 5.3:** **Simultaneous Native Override:** Navigate to a site that actively fights you via constant `setInterval` or SPA re-hydration (e.g., `https://www.costco.com/fish-oil-omega-3.html` with a matching rule).
+    *   *Expected:* **Zero flickering.** The extension injects a `MutationObserver` guard directly into the page that synchronously re-asserts the custom title whenever the site's JavaScript attempts to change it. Because this runs inside the page's own JS context, it wins the race with zero round-trip latency. The tab title should lock to the custom value immediately after page load and never visually revert to the site's title. Application stability is also expected (no crashes, no infinite loops).
 
 ---
 
@@ -93,3 +93,17 @@
 *   **Step 8.3:** Run "Sync All Tabs".
     *   *Expected:* The Skeptical Engine Phase 1 should log: `Suspicious title prefix detected`. 
     *   *Expected:* Phase 2 wakes the tab, reloads it, and restores the native title because it matches the Title Tamer "Ghost" pattern (`HTTP\d*!`).
+
+---
+
+## 9. Background Hardening & Diagnostics
+**Goal:** Verify diagnostic reliability, guard disconnection during navigation, and Phase 2 guard injection.
+*   **Step 9.1: Diagnostic Toggle:** Enable "Diagnostic Logging" in Options. Open the Background Script Console (Firefox `about:debugging`). 
+    *   *Expected:* Detailed `[DIAG]` logs appear for every navigation and sync. Disable it; logs should stop immediately.
+*   **Step 9.2: Guard Disconnection:** Match a site (e.g., Costco), verify the guard is re-asserting titles. In the same tab, navigate to `google.com`.
+    *   *Expected:* On Google, manually changing the title via console should NOT snap back to the old Costco title. (Proves `onUpdated` URL-change cleanup).
+*   **Step 9.3: Phase 2 Guard Injection:** Have a discarded matching tab. Change its rule in Options.
+    *   *Expected:* Tab wakes up, reloads, and the guard is successfully installed on the active page (verify by attempting to manually change the title).
+*   **Step 9.4: Boot Synchronization:** Enable Diagnostic Logging, restart the extension (Disable/Enable), and immediately open a matching tab.
+    *   *Expected:* Logs show that the background script correctly awaited `loggingReady` before processing the tab event.
+
