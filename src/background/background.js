@@ -254,7 +254,9 @@ async function updateTabTitle(tabId, tab) {
                     });
                     obs.observe(titleEl, { childList: true, characterData: true, subtree: true });
                     // Also observe the <head> in case the site removes/replaces <title>
-                    obs.observe(document.head, { childList: true });
+                    // We use subtree: true to ensure we catch characterData changes
+                    // even if the <title> node itself is replaced by the site.
+                    obs.observe(document.head, { childList: true, subtree: true, characterData: true });
                     window.__titleTamer_observer = obs;
                 })()`
             );
