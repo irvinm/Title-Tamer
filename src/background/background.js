@@ -529,12 +529,16 @@ async function syncAllTabs() {
                                     if (otherTab) {
                                         await browser.tabs.update(otherTab.id, { active: true });
                                     }
-                                } catch (_) {}
+                                } catch (err) {
+                                    diagLog(`[DIAG][TAB ${tabId}] Recovery: Failed to switch active tab during discard attempt ${attempt + 1}:`, err);
+                                }
                             }
                             await new Promise(r => setTimeout(r, 500));
                         }
                     }
-                } catch (e) {}
+                } catch (e) {
+                    console.error(`[SYNC][TAB ${tabId}] Phase 2 (wake/reload/discard) failed:`, e);
+                }
             };
 
             // Rolling worker pool: each worker pulls from a shared queue sequentially.
