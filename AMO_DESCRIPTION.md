@@ -18,6 +18,7 @@ Title Tamer is a powerful extension designed to give you total command over your
 - **Flexible Pattern Matching**: Use simple substring matches for quick fixes or JavaScript Regular Expressions (with capture group support) for advanced URL parsing.
 - **Variable Injection**: Use captured URL segments ($1, $2, etc.) to inject dynamic data directly into your tab titles.
 - **URL Decoding**: Automatically handles percent-encoded characters (like %20 or %F) so your titles look clean and readable.
+- **Zero-Flicker Guardian**: Leverages a robust in-page MutationObserver to instantly re-assert your custom title if a website attempts to overwrite it.
 - **Real-Time Monitoring**: Detects and applies rules the moment a URL changes or a new tab is opened.
 
 **Performance & Reliability**
@@ -29,6 +30,7 @@ Title Tamer is a powerful extension designed to give you total command over your
 - **Modern Theme-Aware UI**: A sleek, responsive interface designed to feel native in both Light and Dark modes.
 - **Wider View**: Support for opening the configuration interface in a separate tab for a full-screen overview of your rules.
 - **Import/Export**: Easily backup or share your entire pattern collection via JSON files.
+- **Developer Tools**: Built-in diagnostic logging to help power users troubleshoot complex title collisions and matching behavior.
 
 **Limitations**
 - Does not work on browser-internal pages (e.g., `about:addons`, `about:config`).

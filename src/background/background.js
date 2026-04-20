@@ -86,7 +86,8 @@ const initialStateLoadedPromise = loadState();
 function isInjectable(tab) {
     if (!tab || !tab.url) return false;
     // We strictly limit injection to web pages to avoid "Missing host permission" on system pages.
-    const injectableSchemes = ['http:', 'https:', 'file:', 'ftp:'];
+    // Also support special protocols like view-source: and about:reader.
+    const injectableSchemes = ['http:', 'https:', 'file:', 'ftp:', 'view-source:', 'about:reader'];
     return injectableSchemes.some(scheme => tab.url.startsWith(scheme));
 }
 

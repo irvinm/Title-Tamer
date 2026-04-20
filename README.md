@@ -18,6 +18,8 @@
 - Monitor tab URLs and change their titles based on user-defined search patterns.
 - **URL Decoding Support**: Automatically decodes percent-encoded characters (like `%20`, `%22`, etc.) within captured URL segments. This ensures that titles like `Search: My%20Query` are rendered as `Search: My Query` in your tab.
 - **Advanced RegEx Support**: Full support for JavaScript Regular Expressions, including capture groups and anchors.
+- **Real-Time Title Guardian**: Uses a robust in-page `MutationObserver` to instantly re-assert your custom title if a website attempts to overwrite it (fixing "flicker" on SPAs).
+- **Developer Diagnostic Tools**: Optional internal logging system to help power users troubleshoot complex matching rules and site-specific behaviors.
 - **Special Character Support**: All patterns and titles are escaped to ensure characters like `<`, `>`, and `&` are rendered correctly in the options interface.
 - **Rule Grouping System**: Organize patterns into logical groups with collapsible headers, enable/disable toggles that cascade to child rules, and easily rename or delete entire groups.
   <p align="center">
@@ -45,7 +47,7 @@
 - Will not work on Firefox protected domains like `addons.mozilla.org` or `support.mozilla.org`.
 - Will not work on Firefox-only "protected" pages (e.g., Reader Mode, PDF Viewer) without explicit user-granted host permissions.
 - **Private Browsing**: Extension must be explicitly allowed to run in "Private Windows" via the browser's extension settings.
-- **Competing Dynamic Titles**: Sites that frequently update their titles (like news tickers or chat notification counts) may occasionally overwrite the "tamed" title.
+- **Competing Titles**: While Title Tamer includes a "Guardian" mode to defend your titles, extremely aggressive sites may still cause brief flickering before the override is re-applied.
 - **Conflicts**: Other extensions that manage tab titles may conflict with this addon.
 - **Loaded State**: A tab must be at least partially loaded before a title rule can be applied (except for discarded tabs handled by the sync engine).
 - **OS Truncation**: Very long titles may still be truncated by the operating system's task switcher or the browser's UI.
@@ -86,6 +88,24 @@
 - Tab ReTitle - https://addons.mozilla.org/en-US/firefox/addon/tab-retitle/
 
 ## Changelog
+
+<details open>
+<summary><b>Version 1.1.0 (April 20, 2026) — Hardening & Guardian Update</b></summary>
+
+- **Real-Time Title Guardian**: 
+    - Implemented a robust `MutationObserver` system that runs directly in the page context.
+    - Instantly re-asserts custom titles if the website attempts to overwrite them (fixes "title fight" on SPAs like Costco, Gmail, or YouTube).
+    - Hardened to observe the entire `<head>` subtree, capturing cases where the `<title>` tag itself is replaced.
+- **Developer & Diagnostic Tools**:
+    - Added a new **"Developer Tools"** section in the Options page.
+    - Integrated a toggleable diagnostic logging engine to help troubleshoot complex URL matching and title sync behavior.
+    - Improved logging sequence to be deterministic during extension startup and rapid tab events.
+- **Sync Engine Hardening**:
+    - Unified the "Wake-up" and "Real-time" injection paths to ensure the Guardian is consistently applied to all tabs.
+    - Implemented atomic state persistence: modified records are now only saved after a successful title injection, preventing stale internal state on errors.
+    - Added explicit guard disconnection during URL changes to prevent lingering observers from interfering with new navigations.
+    - Improved error boundaries in the rolling worker pool to provide better diagnostic output for failed operations.
+</details>
 
 <details>
 <summary><b>Version 1.0.0 (April 19, 2026)</b></summary>
