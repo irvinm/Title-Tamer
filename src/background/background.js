@@ -227,10 +227,6 @@ async function updateTabTitle(tabId, tab) {
                 diagLog(`[DIAG][TAB ${tabId}] Title already matches rule — (re)installing guard only. title="${tab.title?.substring(0,60)}"`);
             }
 
-            // Record that we are enforcing a title on this tab (via guard)
-            tabModifiedTitles.set(tabId, matchedTitle);
-            saveState();
-
             // Inject the MutationObserver guard into the page regardless of whether the
             // title needed changing. This ensures the guard is always active when a rule
             // matches, even if the title happened to already be correct at evaluation time.
@@ -262,22 +258,30 @@ async function updateTabTitle(tabId, tab) {
                     window.__titleTamer_observer = obs;
                 })()`
             );
-            await browser.tabs.executeScript(tabId, { code: injectGuard }).catch(e => {
+            
+            try {
+                await browser.tabs.executeScript(tabId, { code: injectGuard });
+                
+                // Record that we are enforcing a title on this tab (via guard)
+                // ONLY after successful injection.
+                tabModifiedTitles.set(tabId, matchedTitle);
+                await saveState();
+                
+                diagLog(`[DIAG][TAB ${tabId}] GUARD ${needsTitleChange ? 'INJECT+' : 're-'}installed. tabModifiedTitles: "${tabModifiedTitles.get(tabId)?.substring(0,60)}"`);
+            } catch (e) {
                 if (e.message && e.message.includes("Missing host permission")) {
                     console.log(`[TAB ${tabId}] NOTICE: Transient host permission mismatch (Sync Engine will retry)`);
                 } else {
                     console.log(`[TAB ${tabId}] executeScript failed for ${tab.url}:`, e);
                 }
-            });
-            diagLog(`[DIAG][TAB ${tabId}] GUARD ${needsTitleChange ? 'INJECT+' : 're-'}installed. tabModifiedTitles: "${tabModifiedTitles.get(tabId)?.substring(0,60)}"`);
+            }
         } else {
             // NO patterns matched. 
             // If we previously modified this tab, we need to REVERT it natively.
             if (tabModifiedTitles.has(tabId)) {
                 const revertTo = tabOriginalTitles.get(tabId) || tab.title;
                 diagLog(`[DIAG][TAB ${tabId}] No pattern matched. REVERTING from "${tab.title?.substring(0,60)}" to "${revertTo?.substring(0,60)}".`);
-                tabModifiedTitles.delete(tabId);
-                saveState();
+                
                 // We keep the original in the map just in case.
                 
                 // Tear down the MutationObserver guard and revert the title
@@ -290,8 +294,18 @@ async function updateTabTitle(tabId, tab) {
                         document.title = ${JSON.stringify(revertTo)};
                     })()`
                 );
-                await browser.tabs.executeScript(tabId, { code: revertScript })
-                    .catch(e => console.log(`[TAB ${tabId}] executeScript revert failed for ${tab.url}:`, e));
+                
+                try {
+                    await browser.tabs.executeScript(tabId, { code: revertScript });
+                    
+                    // We only stop tracking the modification if the revert script actually ran.
+                    // This keeps the engine aware that the tab might still have an active guard
+                    // if the revert failed.
+                    tabModifiedTitles.delete(tabId);
+                    await saveState();
+                } catch (e) {
+                    console.log(`[TAB ${tabId}] executeScript revert failed for ${tab.url}:`, e);
+                }
             } else {
                 diagLog(`[DIAG][TAB ${tabId}] No pattern matched, no override active. Nothing to do.`);
             }
