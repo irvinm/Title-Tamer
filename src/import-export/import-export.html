@@ -6,16 +6,173 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Import/Export Options</title>
     <link rel="stylesheet" href="../options/options.css"> <!-- Link to your CSS file -->
+    <style>
+        body {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: var(--main-bg, #f8f9fa);
+            color: var(--text-color, #333);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .header-container {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header-container h1 {
+            color: var(--primary-color, #007bff);
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            margin-top: 0;
+            text-align: center;
+        }
+
+        .header-container p {
+            color: var(--text-color);
+            opacity: 0.8;
+            font-size: 1.1em;
+            max-width: 550px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        .cards-container {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .action-card {
+            background: var(--secondary-bg, #ffffff);
+            border: 1px solid var(--input-border, #e0e0e0);
+            border-radius: 12px;
+            padding: 30px;
+            width: 100%;
+            max-width: 360px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .action-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.1);
+        }
+
+        .card-icon {
+            font-size: 40px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .action-card h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+            text-align: center;
+            color: var(--text-color);
+        }
+
+        .action-card p, .action-card ul {
+            font-size: 0.95em;
+            line-height: 1.6;
+            color: var(--text-color);
+            opacity: 0.9;
+            margin-top: 0;
+        }
+
+        .action-card ul {
+            padding-left: 20px;
+            margin-top: 10px;
+            margin-bottom: 0;
+            flex-grow: 1; /* Pushes button to bottom */
+        }
+        
+        .action-card li {
+            margin-bottom: 8px;
+        }
+
+        .action-card em {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .card-button-container {
+            margin-top: auto;
+            padding-top: 25px;
+            text-align: center;
+        }
+
+        .action-card .add-pattern-button {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1em;
+            display: block; /* Overrides inline-block from options.css */
+            box-sizing: border-box;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .action-card { box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+            .action-card:hover { box-shadow: 0 12px 20px rgba(0,0,0,0.5); }
+        }
+    </style>
 </head>
 
 <body>
-    <h1>Import/Export Options</h1>
-    <p>Use the buttons below to export your current patterns to a file or import patterns from a file.</p>
-    <div class="form-group2">
-        <button type="button" id="export-button" class="add-pattern-button">Export Patterns</button>
-        <input type="file" id="import-file" style="display: none;" />
-        <button type="button" id="import-button" class="add-pattern-button">Import Patterns</button>
+    <div class="header-container">
+        <h1>Import & Export</h1>
+        <p>Safely backup your configurations or rapidly install custom Rule Packs from the community.</p>
     </div>
+
+    <div class="cards-container">
+        <!-- Export Card -->
+        <div class="action-card">
+            <div class="card-icon">📦</div>
+            <h2>Export Patterns</h2>
+            <p>Generate a perfect snapshot of your current patterns, groups, and settings as a <code>.json</code> file.</p>
+            <ul>
+                <li><strong>Backups:</strong> Keep your rules safe before making major changes.</li>
+                <li><strong>Sharing:</strong> Send your custom rules to friends or colleagues.</li>
+            </ul>
+            <div class="card-button-container">
+                <button type="button" id="export-button" class="add-pattern-button">Export Download</button>
+            </div>
+        </div>
+
+        <!-- Import Card -->
+        <div class="action-card">
+            <div class="card-icon">📥</div>
+            <h2>Import Patterns</h2>
+            <p>Load patterns from a <code>.json</code> file. After selecting a file, you can choose how they apply:</p>
+            <ul>
+                <li><strong>Append:</strong> Merges new rules safely. Identical duplicates are skipped.<br><em>Best for installing Rule Packs.</em></li>
+                <li><strong>Replace:</strong> Completely overwrites your current setup.<br><em>Best for restoring backups.</em></li>
+            </ul>
+            <div class="card-button-container">
+                <input type="file" id="import-file" style="display: none;" />
+                <button type="button" id="import-button" class="add-pattern-button">Select File...</button>
+            </div>
+        </div>
+    </div>
+    <dialog id="import-mode-dialog">
+        <div class="dialog-header">
+            <img src="../icons/icon-dark.svg" class="icon-for-light" alt="" aria-hidden="true">
+            <img src="../icons/icon-light.svg" class="icon-for-dark" alt="" aria-hidden="true">
+            <span>Title Tamer</span>
+        </div>
+        <div class="dialog-body">
+            <div id="import-mode-message" style="text-align: center; font-weight: 500;">How would you like to import these patterns?</div>
+            <div style="text-align: center; margin-top: 15px;">
+                <button type="button" id="import-mode-append" class="add-pattern-button" style="margin-right: 8px;">Append</button>
+                <button type="button" id="import-mode-replace" class="delete-group-deleteall-btn" style="margin-right: 8px;">Replace</button>
+                <button type="button" id="import-mode-cancel" class="delete-group-cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </dialog>
     <dialog id="custom-alert">
         <div class="dialog-header">
             <img src="../icons/icon-dark.svg" class="icon-for-light" alt="" aria-hidden="true">

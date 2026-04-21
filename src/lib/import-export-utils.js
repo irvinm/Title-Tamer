@@ -62,12 +62,49 @@ function normalizeImportPayload(parsedData) {
     };
 }
 
+/**
+ * Merges an imported payload into the current storage payload (Append mode).
+ * Drops exact duplicates (search + title + group).
+ * @param {{ patterns: Array<object>, collapsedGroups: string[], disabledGroups: string[] }} current 
+ * @param {{ patterns: Array<object>, collapsedGroups: string[], disabledGroups: string[] }} imported 
+ * @returns {{ patterns: Array<object>, collapsedGroups: string[], disabledGroups: string[], stats: { added: number, duplicatesSkipped: number } }}
+ */
+function mergeImportPayload(current, imported) {
+    const existingPatterns = current.patterns || [];
+    const importedPatterns = imported.patterns || [];
+    
+    // Strict duplication filter: must match search, title, and group exactly.
+    const isDuplicate = (p) => existingPatterns.some(
+        e => e.search === p.search && e.title === p.title && (e.group || '') === (p.group || '')
+    );
+
+    const uniqueImportedPatterns = importedPatterns.filter(p => !isDuplicate(p));
+    const mergedPatterns = sortPatternsForVisualOrder([...existingPatterns, ...uniqueImportedPatterns]);
+
+    const mergedCollapsed = [...new Set([...(current.collapsedGroups || []), ...(imported.collapsedGroups || [])])];
+    const mergedDisabled = [...new Set([...(current.disabledGroups || []), ...(imported.disabledGroups || [])])];
+
+    // Filter to only active groups
+    const activeGroups = new Set(mergedPatterns.map(p => p.group).filter(Boolean));
+    
+    return {
+        patterns: mergedPatterns,
+        collapsedGroups: mergedCollapsed.filter(g => activeGroups.has(g)),
+        disabledGroups: mergedDisabled.filter(g => activeGroups.has(g)),
+        stats: {
+            added: uniqueImportedPatterns.length,
+            duplicatesSkipped: importedPatterns.length - uniqueImportedPatterns.length
+        }
+    };
+}
+
 if (typeof globalThis !== 'undefined') {
     globalThis.sortPatternsForVisualOrder = sortPatternsForVisualOrder;
     globalThis.buildExportPayload = buildExportPayload;
     globalThis.normalizeImportPayload = normalizeImportPayload;
+    globalThis.mergeImportPayload = mergeImportPayload;
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { sortPatternsForVisualOrder, buildExportPayload, normalizeImportPayload };
+    module.exports = { sortPatternsForVisualOrder, buildExportPayload, normalizeImportPayload, mergeImportPayload };
 }
