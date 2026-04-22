@@ -28,7 +28,8 @@
     <i>Rule Creation and Group Management</i>
   </p>
 - **Drag-and-Drop Support**: Reorder individual rules and entire rule groups with full context-aware snapping that allows moving rules between groups.
-- **Custom UI Framework**: Modern theme-aware interface with custom dropdowns, SVG logo, and HTML5 dialog modals replacing generic alerts.
+- **Custom UI Framework**: Modern theme-aware interface with custom dropdowns, a dedicated SVG logo, and HTML5 `<dialog>` modals that replace generic browser alerts.
+- **Dynamic Icon Coloring**: Supports Firefox's native `context-properties`, allowing the toolbar icon to perfectly match your browser's theme coloring. When enabled via a browser preference, the icon dynamically adapts its fill and stroke to remain high-contrast and aesthetically integrated with any Firefox theme (Light, Dark, or custom).
 - **Intelligent Discard Management**: Configure custom discard delays, prevent infinite loading spinners with anti-throbber fixes, and restore manipulated titles even after extension reloads.
 - **Throttled Tab Synchronization**: Uses a rolling worker pool to process discarded tabs in controllable batches (default 10), preventing memory exhaustion and system crashes during large-scale sync operations.
 - **Advanced Import/Export**: Easily backup or share your entire pattern collection via JSON files. Install community "Rule Packs" using a smart Append mode that prevents duplicates, or use Replace mode to restore your configuration from a hard backup.
@@ -90,13 +91,21 @@
 ## Changelog
 
 <details open>
-<summary><b>Version 1.2.0 (April 20, 2026) — Rule Packs & Import Engine</b></summary>
+<summary><b>Version 1.2.0 (April 22, 2026) — Rule Packs & Performance Optimization</b></summary>
 
 - **Advanced Import/Export Options**: 
     - Introduced a dedicated, immersive card-based UI for managing your Title Tamer files.
     - Added new **Append** and **Replace** modes, allowing you to reliably merge imported configurations without losing your current setup.
     - Implemented a smart deduplication engine that automatically drops redundant rules when installing community "Rule Packs."
     - Safely merges group metadata during imports to preserve your group state (collapsed/expanded) settings seamlessly.
+    - Added ARIA labeling and Escape key handling for improved accessibility and UX.
+- **Theme-Aware Branding**:
+    - Introduced a new **Theme-Aware Favicon** that automatically switches between light and dark modes based on your browser's theme.
+    - Added support for Firefox **Dynamic Icon Coloring**, allowing the toolbar icon to match your browser's theme colors via `context-properties`.
+    - Added a dedicated instruction page (linked from Options) to guide users through enabling the `svg.context-properties.content.enabled` preference in Firefox.
+- **XPI Optimization**:
+    - Completely restructured the project to isolate production code from development assets.
+    - Reduced final XPI size by ~88% (from 680KB down to 80KB) by excluding non-essential documentation and screenshots from the package.
 </details>
 
 <details>

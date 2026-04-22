@@ -27,9 +27,10 @@ Title Tamer is a powerful extension designed to give you total command over your
 - **Intelligent Discard Management**: Optionally wake, re-title, and re-discard tabs automatically with configurable delays and anti-throbber fixes.
 
 **User Experience**
-- **Modern Theme-Aware UI**: A sleek, responsive interface designed to feel native in both Light and Dark modes.
+- **Modern Theme-Aware UI**: A sleek, responsive interface that syncs with your browser's Light/Dark mode, including a **Theme-Aware Favicon** for internal extension tabs.
+- **Dynamic Icon Coloring**: Supports Firefox's native context-properties, allowing the toolbar icon to perfectly match your browser's theme coloring (requires a one-time `about:config` preference).
 - **Wider View**: Support for opening the configuration interface in a separate tab for a full-screen overview of your rules.
-- **Advanced Import/Export**: Easily backup or share your entire pattern collection via JSON files. Install community "Rule Packs" using a smart 'Append' mode that prevents duplicates, or use 'Replace' mode to restore your configuration from a hard backup.
+- **Advanced Import/Export**: Backup or share your entire collection via JSON. Use **Append** mode to install community "Rule Packs" with automatic deduplication, or **Replace** mode for full restores.
 - **Developer Tools**: Built-in diagnostic logging to help power users troubleshoot complex title collisions and matching behavior.
 
 **Limitations**
