@@ -3,7 +3,7 @@
 
 <head>
     <title>Title Tamer Options</title>
-    <link rel="icon" type="image/svg+xml" href="../icons/icon-dark.svg">
+    <link rel="icon" type="image/svg+xml" href="../icons/icon-theme-aware.svg">
     <script src="../lib/options-mutation-utils.js"></script>
     <script type="module" src="options.js"></script>
     <link rel="stylesheet" type="text/css" href="options.css">
@@ -126,11 +126,22 @@
                     </div>
                 </fieldset>
             </div>
+            <!-- Icon Coloring -->
+            <div class="form-group2 options-inline-cell">
+                <fieldset class="icon-coloring-fieldset">
+                    <legend>Icon Coloring</legend>
+                    <div style="display: flex; justify-content: center; width: 100%;">
+                        <button type="button" id="icon-coloring-button" class="add-pattern-button">
+                            Icon Coloring Instructions <img class="open-icon" src="../icons/open.png" alt="Open in new tab">
+                        </button>
+                    </div>
+                </fieldset>
+            </div>
             <!-- Import/Export (paired with Theme) -->
-            <div class="form-group2 options-inline-cell options-inline-cell--shrink">
+            <div class="form-group2 options-inline-cell">
                 <fieldset class="import-export-fieldset">
                     <legend>Import/Export</legend>
-                    <div style="display: flex; justify-content: flex-end; width: 100%;">
+                    <div style="display: flex; justify-content: center; width: 100%;">
                         <button type="button" id="import-export-button" class="add-pattern-button">
                             Import/Export Options <img class="open-icon" src="../icons/open.png" alt="Open in new tab">
                         </button>

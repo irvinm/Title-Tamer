@@ -29,7 +29,7 @@ Title Tamer is a powerful extension designed to give you total command over your
 **User Experience**
 - **Modern Theme-Aware UI**: A sleek, responsive interface designed to feel native in both Light and Dark modes.
 - **Wider View**: Support for opening the configuration interface in a separate tab for a full-screen overview of your rules.
-- **Import/Export**: Easily backup or share your entire pattern collection via JSON files.
+- **Advanced Import/Export**: Easily backup or share your entire pattern collection via JSON files. Install community "Rule Packs" using a smart 'Append' mode that prevents duplicates, or use 'Replace' mode to restore your configuration from a hard backup.
 - **Developer Tools**: Built-in diagnostic logging to help power users troubleshoot complex title collisions and matching behavior.
 
 **Limitations**

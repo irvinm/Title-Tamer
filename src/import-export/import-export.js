@@ -81,43 +81,115 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    let pendingImportData = null;
+    let pendingImportFile = null;
+    const importModeDialog = document.getElementById('import-mode-dialog');
+
+    function closeImportModeDialog() {
+        if (typeof importModeDialog.close === 'function') {
+            importModeDialog.close();
+        } else {
+            importModeDialog.style.display = 'none';
+        }
+    }
+
+    document.getElementById('import-mode-cancel').addEventListener('click', () => {
+        closeImportModeDialog();
+        pendingImportData = null;
+        pendingImportFile = null;
+        document.getElementById('import-file').value = ''; // Reset input
+    });
+
+    // Handle dialog dismissal via Escape key (native cancel event)
+    importModeDialog.addEventListener('cancel', () => {
+        pendingImportData = null;
+        pendingImportFile = null;
+        document.getElementById('import-file').value = '';
+    });
+
+    document.getElementById('import-mode-replace').addEventListener('click', async () => {
+        if (!pendingImportData) return;
+        closeImportModeDialog();
+        try {
+            await browser.storage.local.set(pendingImportData);
+            showCustomAlert([
+                `${pendingImportData.patterns.length} patterns replaced successfully!`,
+                `Filename: ${pendingImportFile.name}`
+            ]);
+        } catch (error) {
+            console.error('Error replacing patterns:', error);
+        } finally {
+            pendingImportData = null;
+            pendingImportFile = null;
+            document.getElementById('import-file').value = '';
+        }
+    });
+
+    document.getElementById('import-mode-append').addEventListener('click', async () => {
+        if (!pendingImportData) return;
+        closeImportModeDialog();
+        try {
+            const currentStorage = await browser.storage.local.get(['patterns', 'collapsedGroups', 'disabledGroups']);
+            const result = globalThis.mergeImportPayload(currentStorage, pendingImportData);
+            
+            await browser.storage.local.set({
+                patterns: result.patterns,
+                collapsedGroups: result.collapsedGroups,
+                disabledGroups: result.disabledGroups
+            });
+
+            if (result.stats.duplicatesSkipped > 0) {
+                 showCustomAlert([
+                    `${result.stats.added} new patterns appended successfully!`,
+                    `(${result.stats.duplicatesSkipped} exact duplicates skipped.)`,
+                    `Filename: ${pendingImportFile.name}`
+                ]);
+            } else {
+                 showCustomAlert([
+                    `${result.stats.added} patterns appended successfully!`,
+                    `Filename: ${pendingImportFile.name}`
+                ]);
+            }
+        } catch (error) {
+            console.error('Error appending patterns:', error);
+        } finally {
+            pendingImportData = null;
+            pendingImportFile = null;
+            document.getElementById('import-file').value = '';
+        }
+    });
+
     document.getElementById('import-button').addEventListener('click', function() {
         const fileInput = document.getElementById('import-file');
         fileInput.click();
     
         fileInput.onchange = async function() {
             const file = fileInput.files[0];
-            if (!file) {
-                showCustomAlert(['No file selected.']);
-                return;
-            }
+            if (!file) return; // User cancelled dialog
     
             try {
                 const text = await file.text();
                 const parsedData = JSON.parse(text);
-                const {
-                    patterns,
-                    collapsedGroups,
-                    disabledGroups,
-                } = globalThis.normalizeImportPayload(parsedData);
+                const normalized = globalThis.normalizeImportPayload(parsedData);
     
-                if (!patterns || patterns.length === 0) {
+                if (!normalized.patterns || normalized.patterns.length === 0) {
                     showCustomAlert(['Import failed: The selected file contains no patterns.', 'Existing patterns were not overwritten.']);
+                    fileInput.value = ''; // Reset for next attempt
                     return;
                 }
 
-                // Save patterns and UI active states to storage
-                await browser.storage.local.set({ patterns, collapsedGroups, disabledGroups });
-    
-                showCustomAlert([
-                    `${patterns.length} patterns imported successfully!`,
-                    `Filename: ${file.name}`
-                ]);
+                pendingImportData = normalized;
+                pendingImportFile = file;
 
-                // The background script automatically syncs tabs via storage listener
+                if (typeof importModeDialog.showModal === 'function') {
+                    importModeDialog.showModal();
+                } else {
+                    importModeDialog.style.display = 'block';
+                }
             } catch (error) {
                 console.error('Error parsing JSON:', error);
                 showCustomAlert(['Failed to import patterns.', 'Invalid JSON format.']);
+                fileInput.value = '';
             }
         };
     });

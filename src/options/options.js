@@ -408,6 +408,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('import-export-button').addEventListener('click', () => {
         window.open('../import-export/import-export.html', '_blank');
     });
+    document.getElementById('icon-coloring-button').addEventListener('click', () => {
+        window.open('../notes/icon-coloring.html', '_blank');
+    });
 });
 
 function setupFirefoxOverlayScrollbar(container) {

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Icon Coloring - Title Tamer</title>
+    <link rel="icon" type="image/svg+xml" href="../icons/icon-theme-aware.svg">
+    <link rel="stylesheet" type="text/css" href="../options/options.css">
+    <style>
+        body { 
+            padding: 20px; 
+            font-size: 14px; 
+            line-height: 1.6; 
+            overflow: auto; 
+            height: auto; 
+            max-width: 800px; 
+            margin: 0 auto; 
+        }
+        p { margin-bottom: 15px; }
+        .code-block { 
+            background: var(--input-bg); 
+            padding: 5px 10px; 
+            border-radius: 5px; 
+            font-family: Consolas, Menlo, "Source Code Pro", "Fira Code", monospace; 
+            border: 1px solid var(--input-border); 
+            font-size: 0.95em;
+        }
+        .content-box {
+            background: var(--secondary-bg); 
+            padding: 24px; 
+            border-radius: 10px; 
+            border: 1px solid var(--input-border); 
+            margin-top: 20px;
+        }
+        ol {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-logo">
+            <img src="../icons/icon-dark.svg" class="icon-for-light" alt="Title Tamer Icon">
+            <img src="../icons/icon-light.svg" class="icon-for-dark" alt="Title Tamer Icon">
+        </div>
+        <h1>Icon Coloring</h1>
+    </header>
+    <div class="content-box">
+        <p>If you want the addon icon to adapt to your theme exactly, you need to set a specific preference in Firefox.</p>
+        
+        <div style="margin: 15px 0 25px 0; padding: 16px; background: rgba(0, 123, 255, 0.05); border-left: 4px solid var(--primary-color); border-radius: 6px; line-height: 1.5;">
+            <strong style="color: var(--primary-color); display: block; margin-bottom: 5px;">What is this preference?</strong>
+            By default, Firefox treats extension icons as static images. Enabling this setting allows the browser to pass theme data (like text color) to the icon. This lets Title Tamer dynamically adjust its icon color to match your toolbar, ensuring it stays visible on light, dark, or colorful themes.
+        </div>
+
+        <p>Please follow these steps:</p>
+        <ol>
+            <li>Type <span class="code-block">about:config</span> in your Firefox address bar and press Enter.</li>
+            <li>Accept the risk warning if prompted.</li>
+            <li>Search for <span class="code-block">svg.context-properties.content.enabled</span>.</li>
+            <li>Double-click the preference or click the toggle button to set its value to <strong>true</strong>.</li>
+        </ol>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <img src="iconcoloring.png" alt="Comparison showing the Title Tamer icon before and after enabling svg.context-properties.content.enabled" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 1px solid var(--input-border);">
+        </div>
+
+        <p style="opacity: 0.8; font-style: italic;"><strong>Note:</strong> If you do not enable this setting, the addon icon will remain black regardless of your theme. It will not support being able to have a light or dark version.</p>
+    </div>
+
+    <script>
+        // Apply current theme based on user settings
+        browser.storage.local.get('theme').then(({ theme = 'light' }) => {
+            if (theme === 'dark') {
+                document.body.classList.add('theme-dark');
+            } else if (theme === 'system') {
+                const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.body.classList.add(isDark ? 'theme-dark' : 'theme-light');
+            } else {
+                document.body.classList.add('theme-light');
+            }
+        });
+    </script>
+</body>
+</html>

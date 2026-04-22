@@ -31,7 +31,7 @@
 - **Custom UI Framework**: Modern theme-aware interface with custom dropdowns, SVG logo, and HTML5 dialog modals replacing generic alerts.
 - **Intelligent Discard Management**: Configure custom discard delays, prevent infinite loading spinners with anti-throbber fixes, and restore manipulated titles even after extension reloads.
 - **Throttled Tab Synchronization**: Uses a rolling worker pool to process discarded tabs in controllable batches (default 10), preventing memory exhaustion and system crashes during large-scale sync operations.
-- **Import/Export**: Easily backup or share your pattern collections via JSON files, including group metadata and states.
+- **Advanced Import/Export**: Easily backup or share your entire pattern collection via JSON files. Install community "Rule Packs" using a smart Append mode that prevents duplicates, or use Replace mode to restore your configuration from a hard backup.
   <p align="center">
     <img src="docs/screenshots/AdditionalOptions.png" alt="Additional Options" width="700">
     <br>
@@ -90,6 +90,16 @@
 ## Changelog
 
 <details open>
+<summary><b>Version 1.2.0 (April 20, 2026) — Rule Packs & Import Engine</b></summary>
+
+- **Advanced Import/Export Options**: 
+    - Introduced a dedicated, immersive card-based UI for managing your Title Tamer files.
+    - Added new **Append** and **Replace** modes, allowing you to reliably merge imported configurations without losing your current setup.
+    - Implemented a smart deduplication engine that automatically drops redundant rules when installing community "Rule Packs."
+    - Safely merges group metadata during imports to preserve your group state (collapsed/expanded) settings seamlessly.
+</details>
+
+<details>
 <summary><b>Version 1.1.0 (April 20, 2026) — Hardening & Guardian Update</b></summary>
 
 - **Real-Time Title Guardian**: 

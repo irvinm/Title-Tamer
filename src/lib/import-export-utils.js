@@ -62,12 +62,55 @@ function normalizeImportPayload(parsedData) {
     };
 }
 
+/**
+ * Merges an imported payload into the current storage payload (Append mode).
+ * Drops exact duplicates (search + title + group).
+ * @param {{ patterns: Array<object>, collapsedGroups: string[], disabledGroups: string[] }} current 
+ * @param {{ patterns: Array<object>, collapsedGroups: string[], disabledGroups: string[] }} imported 
+ * @returns {{ patterns: Array<object>, collapsedGroups: string[], disabledGroups: string[], stats: { added: number, duplicatesSkipped: number } }}
+ */
+function mergeImportPayload(current, imported) {
+    const existingPatterns = current.patterns || [];
+    const importedPatterns = imported.patterns || [];
+    
+    const isSame = (p1, p2) => p1.search === p2.search && p1.title === p2.title && (p1.group || '') === (p2.group || '');
+
+    // Step 1: Internal deduplication of the imported set
+    const deDuplicatedImported = [];
+    for (const p of importedPatterns) {
+        if (!deDuplicatedImported.some(e => isSame(e, p))) {
+            deDuplicatedImported.push(p);
+        }
+    }
+
+    // Step 2: Filter against existing patterns
+    const uniqueImportedPatterns = deDuplicatedImported.filter(p => !existingPatterns.some(e => isSame(e, p)));
+    const mergedPatterns = sortPatternsForVisualOrder([...existingPatterns, ...uniqueImportedPatterns]);
+
+    const mergedCollapsed = [...new Set([...(current.collapsedGroups || []), ...(imported.collapsedGroups || [])])];
+    const mergedDisabled = [...new Set([...(current.disabledGroups || []), ...(imported.disabledGroups || [])])];
+
+    // Filter to only active groups
+    const activeGroups = new Set(mergedPatterns.map(p => p.group).filter(Boolean));
+    
+    return {
+        patterns: mergedPatterns,
+        collapsedGroups: mergedCollapsed.filter(g => activeGroups.has(g)),
+        disabledGroups: mergedDisabled.filter(g => activeGroups.has(g)),
+        stats: {
+            added: uniqueImportedPatterns.length,
+            duplicatesSkipped: importedPatterns.length - uniqueImportedPatterns.length
+        }
+    };
+}
+
 if (typeof globalThis !== 'undefined') {
     globalThis.sortPatternsForVisualOrder = sortPatternsForVisualOrder;
     globalThis.buildExportPayload = buildExportPayload;
     globalThis.normalizeImportPayload = normalizeImportPayload;
+    globalThis.mergeImportPayload = mergeImportPayload;
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { sortPatternsForVisualOrder, buildExportPayload, normalizeImportPayload };
+    module.exports = { sortPatternsForVisualOrder, buildExportPayload, normalizeImportPayload, mergeImportPayload };
 }
