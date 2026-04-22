@@ -11,10 +11,10 @@
   ],
   "background": {
     "scripts": [
-      "src/lib/pattern-utils.js",
-      "src/lib/sync-state-utils.js",
-      "src/lib/sync-engine-logic.js",
-      "src/background/background.js"
+      "lib/pattern-utils.js",
+      "lib/sync-state-utils.js",
+      "lib/sync-engine-logic.js",
+      "background/background.js"
     ],
     "persistent": false
   },
@@ -30,12 +30,12 @@
     }
   },
   "options_ui": {
-    "page": "src/options/options.html",
+    "page": "options/options.html",
     "open_in_tab": true
   },
   "browser_action": {
-    "default_icon": "src/icons/icon-context.svg",
+    "default_icon": "icons/icon-context.svg",
     "default_title": "Title Tamer",
-    "default_popup": "src/options/options.html"
+    "default_popup": "options/options.html"
   }
 }

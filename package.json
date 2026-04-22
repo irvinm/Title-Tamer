@@ -10,9 +10,9 @@
         "test": "mocha tests/unit/*.test.js",
         "test:integration": "mocha tests/integration/*.test.js",
         "test:all": "mocha tests/**/*.test.js",
-        "build": "web-ext build --source-dir . --artifacts-dir web-ext-artifacts --overwrite-dest",
-        "lint": "web-ext lint --source-dir .",
-        "start": "web-ext run --source-dir ."
+        "build": "web-ext build --source-dir src --artifacts-dir web-ext-artifacts --overwrite-dest",
+        "lint": "web-ext lint --source-dir src",
+        "start": "web-ext run --source-dir src"
     },
     "keywords": [
         "firefox",
