@@ -71,18 +71,6 @@
         <p style="opacity: 0.8; font-style: italic;"><strong>Note:</strong> If you do not enable this setting, the addon icon will remain black regardless of your theme. It will not support being able to have a light or dark version.</p>
     </div>
 
-    <script>
-        // Apply current theme based on user settings
-        browser.storage.local.get('theme').then(({ theme = 'light' }) => {
-            if (theme === 'dark') {
-                document.body.classList.add('theme-dark');
-            } else if (theme === 'system') {
-                const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                document.body.classList.add(isDark ? 'theme-dark' : 'theme-light');
-            } else {
-                document.body.classList.add('theme-light');
-            }
-        });
-    </script>
+    <script src="icon-coloring.js"></script>
 </body>
 </html>
