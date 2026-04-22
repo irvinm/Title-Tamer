@@ -73,12 +73,18 @@ function mergeImportPayload(current, imported) {
     const existingPatterns = current.patterns || [];
     const importedPatterns = imported.patterns || [];
     
-    // Strict duplication filter: must match search, title, and group exactly.
-    const isDuplicate = (p) => existingPatterns.some(
-        e => e.search === p.search && e.title === p.title && (e.group || '') === (p.group || '')
-    );
+    const isSame = (p1, p2) => p1.search === p2.search && p1.title === p2.title && (p1.group || '') === (p2.group || '');
 
-    const uniqueImportedPatterns = importedPatterns.filter(p => !isDuplicate(p));
+    // Step 1: Internal deduplication of the imported set
+    const deDuplicatedImported = [];
+    for (const p of importedPatterns) {
+        if (!deDuplicatedImported.some(e => isSame(e, p))) {
+            deDuplicatedImported.push(p);
+        }
+    }
+
+    // Step 2: Filter against existing patterns
+    const uniqueImportedPatterns = deDuplicatedImported.filter(p => !existingPatterns.some(e => isSame(e, p)));
     const mergedPatterns = sortPatternsForVisualOrder([...existingPatterns, ...uniqueImportedPatterns]);
 
     const mergedCollapsed = [...new Set([...(current.collapsedGroups || []), ...(imported.collapsedGroups || [])])];
