@@ -100,6 +100,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('import-file').value = ''; // Reset input
     });
 
+    // Handle dialog dismissal via Escape key (native cancel event)
+    importModeDialog.addEventListener('cancel', () => {
+        pendingImportData = null;
+        pendingImportFile = null;
+        document.getElementById('import-file').value = '';
+    });
+
     document.getElementById('import-mode-replace').addEventListener('click', async () => {
         if (!pendingImportData) return;
         closeImportModeDialog();
