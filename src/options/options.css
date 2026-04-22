@@ -25,16 +25,20 @@
 
 .segmented-control {
     display: inline-flex;
-    align-self: flex-start;
+    align-self: center;
     border: 1px solid var(--input-border);
     border-radius: 6px;
     overflow: hidden;
     background-color: var(--input-bg);
-    margin-top: 2px;
+    margin: 0;
+    height: 24px;
+    box-sizing: border-box;
 }
 
 .segmented-control label {
-    padding: 4px 14px;
+    padding: 0 14px;
+    height: 100%;
+    box-sizing: border-box;
     cursor: pointer;
     font-size: 13px;
     border-right: 1px solid var(--input-border);
@@ -233,12 +237,12 @@ thead th {
 }
 
 .options-inline-cell {
-    flex: 1 1 auto;
+    flex: 1 1 0;
 }
 
 .options-inline-cell fieldset {
-    height: 100%;
     box-sizing: border-box;
+    /* height: 100% removed so the row collapses to natural height */
 }
 
 /* Shrinks to fit its content (Import/Export button) instead of growing */
@@ -422,6 +426,7 @@ h1 {
 .add-pattern-button,
 .notes-link,
 #import-export-button,
+#icon-coloring-button,
 .open-options-link {
     background-color: var(--button-bg);
     color: var(--button-text);
@@ -445,6 +450,7 @@ h1 {
 .add-pattern-button:hover,
 .notes-link:hover,
 #import-export-button:hover,
+#icon-coloring-button:hover,
 .open-options-link:hover {
     background-color: var(--button-hover-bg);
     transform: scale(1.03);
@@ -454,6 +460,7 @@ h1 {
 .add-pattern-button:active,
 .notes-link:active,
 #import-export-button:active,
+#icon-coloring-button:active,
 .open-options-link:active {
     transform: scale(0.96);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
@@ -781,13 +788,18 @@ button:disabled {
     /* Invert colors */
 }
 
-#import-export-button {
+#import-export-button,
+#icon-coloring-button {
     display: flex;
     align-items: center;
-    margin-top: 0.2em;
+    justify-content: center;
+    margin: 0 auto !important;
+    height: 24px !important;
+    padding: 0 10px !important;
 }
 
-#import-export-button img.open-icon {
+#import-export-button img.open-icon,
+#icon-coloring-button img.open-icon {
     width: 16px;
     /* Adjust icon size */
     height: 16px;

@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Title Tamer",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Monitors tabs and changes their titles based on user-defined search patterns.",
   "homepage_url": "https://github.com/irvinm/Title-Tamer",
   "permissions": [
@@ -34,25 +34,8 @@
     "open_in_tab": true
   },
   "browser_action": {
-    "default_icon": "src/icons/icon-dark.svg",
+    "default_icon": "src/icons/icon-context.svg",
     "default_title": "Title Tamer",
-    "theme_icons": [
-      {
-        "light": "src/icons/icon-light.svg",
-        "dark": "src/icons/icon-dark.svg",
-        "size": 16
-      },
-      {
-        "light": "src/icons/icon-light.svg",
-        "dark": "src/icons/icon-dark.svg",
-        "size": 32
-      },
-      {
-        "light": "src/icons/icon-light.svg",
-        "dark": "src/icons/icon-dark.svg",
-        "size": 48
-      }
-    ],
     "default_popup": "src/options/options.html"
   }
 }
