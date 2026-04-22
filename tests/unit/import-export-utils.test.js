@@ -91,4 +91,26 @@ describe('import-export utils', function () {
         expect(result.collapsedGroups).to.deep.equal(['G1', 'G3']);
         expect(result.disabledGroups).to.deep.equal(['G1', 'G2']);
     });
+    it('mergeImportPayload deduplicates internally within the import batch', function () {
+        const current = {
+            patterns: [{ search: 'existing', title: 'E' }],
+            collapsedGroups: [],
+            disabledGroups: []
+        };
+        const imported = {
+            patterns: [
+                { search: 'new', title: 'N' },
+                { search: 'new', title: 'N' }, // Internal duplicate
+                { search: 'existing', title: 'E' } // Duplicate against existing
+            ],
+            collapsedGroups: [],
+            disabledGroups: []
+        };
+
+        const result = mergeImportPayload(current, imported);
+
+        expect(result.patterns.length).to.equal(2); // 'existing' and one 'new'
+        expect(result.stats.added).to.equal(1);
+        expect(result.stats.duplicatesSkipped).to.equal(2);
+    });
 });
