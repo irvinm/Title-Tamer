@@ -91,7 +91,7 @@
 ## Changelog
 
 <details open>
-<summary><b>Version 1.2.0 (April 22, 2026) — Rule Packs & Performance Optimization</b></summary>
+<summary><b>Version 1.2.0 (April 22, 2026) — Import (Append) Mode, Theme-Aware Icons & XPI Optimization</b></summary>
 
 - **Advanced Import/Export Options**: 
     - Introduced a dedicated, immersive card-based UI for managing your Title Tamer files.
@@ -109,7 +109,7 @@
 </details>
 
 <details>
-<summary><b>Version 1.1.0 (April 20, 2026) — Hardening & Guardian Update</b></summary>
+<summary><b>Version 1.1.0 (April 20, 2026) — Real-Time Title Guardian & Diagnostic Tools</b></summary>
 
 - **Real-Time Title Guardian**: 
     - Implemented a robust `MutationObserver` system that runs directly in the page context.
@@ -127,7 +127,7 @@
 </details>
 
 <details>
-<summary><b>Version 1.0.0 (April 19, 2026)</b></summary>
+<summary><b>Version 1.0.0 (April 19, 2026) — Rule Groups, Drag-and-Drop & Intelligent Sync</b></summary>
 
 - **Rule Grouping System**: 
     - Introduced logical grouping for patterns with collapsible group headers.
@@ -163,7 +163,7 @@
 </details>
 
 <details>
-<summary><b>Version 0.9.4 (Mar 29, 2026)</b></summary>
+<summary><b>Version 0.9.4 (Mar 29, 2026) — URL Decoding & Engineering Foundation</b></summary>
 
 - **URL Decoding**: Added support for decoding percent-encoded characters in URLs before matching (Issue #7).
 - **Display Improvements**: Implemented HTML escaping to ensure special characters in patterns and titles are rendered correctly instead of being interpreted as HTML code.
@@ -173,26 +173,26 @@
 </details>
 
 <details>
-<summary><b>Version 0.9.3 (Jun 15, 2025)</b></summary>
+<summary><b>Version 0.9.3 (Jun 15, 2025) — Dark Mode Support & UI Polish</b></summary>
 
 - Added dark mode support for options popup (https://github.com/irvinm/Title-Tamer/issues/6)
 - Cleaned up popup UI a little
 </details>
 
 <details>
-<summary><b>Version 0.9.2 (Mar 24, 2025)</b></summary>
+<summary><b>Version 0.9.2 (Mar 24, 2025) — Icon Theme Fix</b></summary>
 
 - Fixed issue when dealing with dark mode and addon icon under certain conditions. (https://github.com/irvinm/Title-Tamer/issues/5)
 </details>
 
 <details>
-<summary><b>Version 0.9.1 (Dec 15, 2024)</b></summary>
+<summary><b>Version 0.9.1 (Dec 15, 2024) — UI Bug Fix</b></summary>
 
 - Fixed issue when editing rules that some buttons showed thru the header of the table. (https://github.com/irvinm/Title-Tamer/issues/1)
 </details>
 
 <details>
-<summary><b>Version 0.9.0 (Nov 26, 2024)</b></summary>
+<summary><b>Version 0.9.0 (Nov 26, 2024) — Initial Release</b></summary>
 
 - Monitor tab URLs and changes the tabs title based on user-defined search patterns.
 - Monitor for new tabs, changed URLs, and changed titles.
