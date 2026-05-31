@@ -12,10 +12,10 @@
 function matchUrl(url, searchPattern) {
     try {
         let decodedUrl;
-        try { decodedUrl = decodeURIComponent(url); } catch (e) { decodedUrl = url; }
+        try { decodedUrl = decodeURIComponent(url); } catch { decodedUrl = url; }
         const regex = new RegExp(searchPattern);
         return decodedUrl.match(regex);
-    } catch (e) {
+    } catch {
         return null;
     }
 }
@@ -185,16 +185,18 @@ function executeTransform(value, methodCall) {
         case "replace":
             if (args.length < 2) throw new Error("replace requires 2 arguments");
             return value.split(args[0]).join(args[1]);
-        case "limit":
+        case "limit": {
             if (args.length < 1) throw new Error("limit requires at least 1 argument");
             const limitVal = parseInt(args[0], 10);
             const suffix = args.length > 1 ? String(args[1]) : "";
             return value.length > limitVal ? value.substring(0, limitVal) + suffix : value;
-        case "slice":
+        }
+        case "slice": {
             if (args.length < 1) throw new Error("slice requires at least 1 argument");
             const start = parseInt(args[0], 10);
             const end = args.length > 1 ? parseInt(args[1], 10) : undefined;
             return value.slice(start, end);
+        }
         default:
             throw new Error(`Unknown method: ${name}`);
     }
@@ -222,14 +224,14 @@ function buildTitle(titleTemplate, matches) {
                 }
                 try {
                     let val = matches[chain.groupNumber] || "";
-                    try { val = decodeURIComponent(val); } catch (e) { /* keep as-is */ }
+                    try { val = decodeURIComponent(val); } catch { /* keep as-is */ }
                     for (const method of chain.methods) {
                         val = executeTransform(val, method);
                     }
                     result += val;
                     pos += chain.length;
                     continue;
-                } catch (e) {
+                } catch {
                     result += titleTemplate.substring(pos, pos + chain.length);
                     pos += chain.length;
                     continue;
@@ -255,7 +257,7 @@ function buildTitle(titleTemplate, matches) {
         pos++;
     }
 
-    try { result = decodeURIComponent(result); } catch (e) { /* malformed URI — keep as-is */ }
+    try { result = decodeURIComponent(result); } catch { /* malformed URI — keep as-is */ }
 
     return result;
 }

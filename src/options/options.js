@@ -1129,10 +1129,9 @@ async function restoreOptions() {
             // Render each named group with a collapsible header
             for (const groupName of groupOrder) {
                 const members = groups.get(groupName);
-                const escapedName = escapeHTML(groupName);
                 const displayedGroupName = showGroupRuleCountPreference
-                    ? `${escapedName} (${members.length})`
-                    : escapedName;
+                    ? `${groupName} (${members.length})`
+                    : groupName;
                 const isCollapsed = collapsedGroups.has(groupName);
                 const isGroupDisabled = disabledGroups.has(groupName);
 
