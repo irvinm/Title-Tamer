@@ -20,3 +20,17 @@ https://circleci.com/developer/orbs
 https://en.wikipedia.org/wiki/Space_Exploration
 # Fight-back regression test (React/Next.js SPA that re-asserts its own title post-hydration)
 https://www.costco.com/fish-oil-omega-3.html
+
+# Advanced Formatting Testing URLs (v1.3.0+)
+https://example.com/upper/jira-101
+https://example.com/lower/PROJECT-XYZ
+https://example.com/trim/%20%20hello%20%20
+https://example.com/capitalize/my%20TESTING%20string
+https://example.com/title/the-quick_brown-fox%20jumps
+https://example.com/replace/a_b_c
+https://example.com/limit-no-suffix/unnecessarilylongtext
+https://example.com/limit-suffix/unnecessarilylongtext
+https://example.com/slice-start/abcdefg
+https://example.com/slice-start-end/abcdefg
+https://example.com/chain/%20%20my_dirty-slug_name%20%20
+https://example.com/fallback/test
