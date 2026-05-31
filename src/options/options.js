@@ -965,8 +965,6 @@ async function showDeleteGroupDialog(groupName) {
 
 // Build a single pattern <tr> for the table body
 function createPatternRow(pattern, index, groupName, isGroupDisabled = false) {
-    const escapedSearch = escapeHTML(pattern.search);
-    const escapedTitle = escapeHTML(pattern.title);
     const isEnabled = pattern.enabled !== false;
     const row = document.createElement('tr');
     row.classList.add('pattern-row');
@@ -979,29 +977,58 @@ function createPatternRow(pattern, index, groupName, isGroupDisabled = false) {
     row.innerHTML = `
         <td>
             <span class="row-drag-handle" title="Drag to reorder">&#x28FF;</span>
-            <button class="edit-button action-button" data-index="${index}">Edit</button>
-            <button class="save-button action-button" data-index="${index}" style="display:none;">Save</button>
-            <button class="discard-button action-button" data-index="${index}" style="display:none;">Discard</button>
-            <button class="delete-button action-button" data-index="${index}">Delete</button>
+            <button class="edit-button action-button">Edit</button>
+            <button class="save-button action-button" style="display:none;">Save</button>
+            <button class="discard-button action-button" style="display:none;">Discard</button>
+            <button class="delete-button action-button">Delete</button>
         </td>
         <td>
             <div>
-                <span class="search-text">${escapedSearch}</span>
-                <input class="search-input" type="text" value="${escapedSearch}" style="display:none;">
+                <span class="search-text"></span>
+                <input class="search-input" type="text" style="display:none;">
             </div>
             <div>
-                <span class="title-text">${escapedTitle}</span>
-                <input class="title-input" type="text" value="${escapedTitle}" style="display:none;">
+                <span class="title-text"></span>
+                <input class="title-input" type="text" style="display:none;">
             </div>
             <div class="group-row" style="display:none;"></div>
         </td>
         <td style="text-align: center;">
             <label class="switch">
-                <input type="checkbox" class="pattern-enabled-toggle" ${(isEnabled && !isGroupDisabled) ? 'checked' : ''} ${isGroupDisabled ? 'disabled' : ''} data-index="${index}">
+                <input type="checkbox" class="pattern-enabled-toggle">
                 <span class="slider"></span>
             </label>
         </td>
     `;
+
+    // Set dynamic properties programmatically to avoid unsafe innerHTML warning
+    const editBtn = row.querySelector('.edit-button');
+    const saveBtn = row.querySelector('.save-button');
+    const discardBtn = row.querySelector('.discard-button');
+    const deleteBtn = row.querySelector('.delete-button');
+
+    editBtn.setAttribute('data-index', index);
+    saveBtn.setAttribute('data-index', index);
+    discardBtn.setAttribute('data-index', index);
+    deleteBtn.setAttribute('data-index', index);
+
+    const searchText = row.querySelector('.search-text');
+    const searchInput = row.querySelector('.search-input');
+    searchText.textContent = pattern.search;
+    searchInput.value = pattern.search;
+
+    const titleText = row.querySelector('.title-text');
+    const titleInput = row.querySelector('.title-input');
+    titleText.textContent = pattern.title;
+    titleInput.value = pattern.title;
+
+    const checkbox = row.querySelector('.pattern-enabled-toggle');
+    checkbox.setAttribute('data-index', index);
+    checkbox.checked = isEnabled && !isGroupDisabled;
+    if (isGroupDisabled) {
+        checkbox.disabled = true;
+    }
+
     // Build custom dropdown for group selection in the group-row
     const groupRow = row.querySelector('.group-row');
     const customSelect = createCustomSelectElement();
@@ -1119,22 +1146,39 @@ async function restoreOptions() {
                         <div class="group-header-inner">
                             <span class="group-header-left">
                                 <span class="drag-handle" title="Drag to reorder">&#x28FF;</span>
-                                <span class="group-toggle ${isCollapsed ? 'collapsed' : 'expanded'}"></span>
-                                <span class="group-name-text">${displayedGroupName}</span>
+                                <span class="group-toggle"></span>
+                                <span class="group-name-text"></span>
                             </span>
                             <span class="group-header-right">
-                                <button type="button" class="rename-group-button action-button" data-group="${escapedName}">Rename</button>
-                                <button type="button" class="delete-group-button action-button" data-group="${escapedName}">Delete Group</button>
+                                <button type="button" class="rename-group-button action-button">Rename</button>
+                                <button type="button" class="delete-group-button action-button">Delete Group</button>
                             </span>
                         </div>
                     </td>
                     <td style="text-align: center;">
                         <label class="switch" title="Enable/Disable Group">
-                            <input type="checkbox" class="group-enabled-toggle" ${!isGroupDisabled ? 'checked' : ''} data-group="${escapedName}">
+                            <input type="checkbox" class="group-enabled-toggle">
                             <span class="slider"></span>
                         </label>
                     </td>
                 `;
+
+                // Set dynamic properties programmatically to avoid unsafe innerHTML warning
+                const toggleSpan = headerRow.querySelector('.group-toggle');
+                toggleSpan.classList.add(isCollapsed ? 'collapsed' : 'expanded');
+
+                const nameTextSpan = headerRow.querySelector('.group-name-text');
+                nameTextSpan.textContent = displayedGroupName;
+
+                const renameBtn = headerRow.querySelector('.rename-group-button');
+                const deleteBtn = headerRow.querySelector('.delete-group-button');
+                renameBtn.setAttribute('data-group', groupName);
+                deleteBtn.setAttribute('data-group', groupName);
+
+                const groupCheckbox = headerRow.querySelector('.group-enabled-toggle');
+                groupCheckbox.checked = !isGroupDisabled;
+                groupCheckbox.setAttribute('data-group', groupName);
+
                 patternTableBody.appendChild(headerRow);
 
                 members.forEach(({ pattern, index }) => {

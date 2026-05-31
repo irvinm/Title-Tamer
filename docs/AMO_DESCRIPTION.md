@@ -15,6 +15,7 @@ Title Tamer is a powerful extension designed to give you total command over your
 - **Visual Drag-and-Drop**: Effortlessly reorder rules and groups to prioritize exactly which patterns take precedence.
 
 **Advanced Matching Logic**
+- **Advanced String Formatting**: Transform regex capture groups directly in replacement templates using simple dot-notation methods (like casing: upper/lower/capitalize/title, replacing characters, slicing, or limiting lengths with conditional ellipsis). Chaining and graceful syntax fallbacks included.
 - **Flexible Pattern Matching**: Use simple substring matches for quick fixes or JavaScript Regular Expressions (with capture group support) for advanced URL parsing.
 - **Variable Injection**: Use captured URL segments ($1, $2, etc.) to inject dynamic data directly into your tab titles.
 - **URL Decoding**: Automatically handles percent-encoded characters (like %20 or %F) so your titles look clean and readable.
