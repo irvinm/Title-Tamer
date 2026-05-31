@@ -133,6 +133,88 @@ describe('buildTitle', function () {
         const result = buildTitle('Static Title', ['full']);
         expect(result).to.equal('Static Title');
     });
+
+    describe('Advanced String Formatting', function () {
+        it('should support upper() method', function () {
+            const result = buildTitle('Ticket: $1.upper()', ['full', 'tit-123']);
+            expect(result).to.equal('Ticket: TIT-123');
+        });
+
+        it('should support lower() method', function () {
+            const result = buildTitle('Title: $1.lower()', ['full', 'MY-TITLE']);
+            expect(result).to.equal('Title: my-title');
+        });
+
+        it('should support trim() method', function () {
+            const result = buildTitle('Name: $1.trim()', ['full', '   john doe   ']);
+            expect(result).to.equal('Name: john doe');
+        });
+
+        it('should support capitalize() method', function () {
+            const result = buildTitle('Cap: $1.capitalize()', ['full', 'my TAB']);
+            expect(result).to.equal('Cap: My tab');
+        });
+
+        it('should support title() method', function () {
+            const result = buildTitle('Title: $1.title()', ['full', 'my-repo_name for test']);
+            expect(result).to.equal('Title: My-Repo_Name For Test');
+        });
+
+        it('should support replace() method with string parameters', function () {
+            const result = buildTitle('Rep: $1.replace("-", " ")', ['full', 'title-tamer']);
+            expect(result).to.equal('Rep: title tamer');
+        });
+
+        it('should support limit() method with default empty suffix', function () {
+            const result = buildTitle('Lim: $1.limit(5)', ['full', 'title-tamer']);
+            expect(result).to.equal('Lim: title');
+        });
+
+        it('should support limit() method with custom suffix', function () {
+            const result = buildTitle('Lim: $1.limit(5, "...")', ['full', 'title-tamer']);
+            expect(result).to.equal('Lim: title...');
+        });
+
+        it('should support limit() method without suffix if length <= limit', function () {
+            const result = buildTitle('Lim: $1.limit(10, "...")', ['full', 'short']);
+            expect(result).to.equal('Lim: short');
+        });
+
+        it('should support slice() method with start and end', function () {
+            const result = buildTitle('Slice: $1.slice(1, 4)', ['full', 'abcdef']);
+            expect(result).to.equal('Slice: bcd');
+        });
+
+        it('should support slice() method with start only', function () {
+            const result = buildTitle('Slice: $1.slice(2)', ['full', 'abcdef']);
+            expect(result).to.equal('Slice: cdef');
+        });
+
+        it('should support method chaining', function () {
+            const result = buildTitle('Chain: $1.trim().replace("_", " ").upper()', ['full', '  _slug_  ']);
+            expect(result).to.equal('Chain:  SLUG ');
+        });
+
+        it('should handle unclosed quotes or syntax errors in method calls gracefully by falling back to literal', function () {
+            const result = buildTitle('Fail: $1.replace("a", )', ['full', 'value']);
+            expect(result).to.equal('Fail: $1.replace("a", )');
+        });
+
+        it('should handle unknown methods by falling back to literal', function () {
+            const result = buildTitle('Fail: $1.unknown()', ['full', 'value']);
+            expect(result).to.equal('Fail: $1.unknown()');
+        });
+
+        it('should treat empty or undefined capture groups as empty string', function () {
+            const result = buildTitle('Empty: $2.upper().trim()', ['full', 'value']);
+            expect(result).to.equal('Empty: ');
+        });
+
+        it('should decode percent-encoding at the group level before processing methods', function () {
+            const result = buildTitle('Decoded: $1.replace(" ", "-")', ['full', 'hello%20world']);
+            expect(result).to.equal('Decoded: hello-world');
+        });
+    });
 });
 
 describe('applyPattern', function () {
@@ -219,6 +301,80 @@ describe('applyPattern', function () {
         );
         expect(result.matched).to.be.true;
         expect(result.newTitle).to.equal('Search: \u4f60\u597d\u4e16\u754c');
+    });
+
+    describe('Documentation Examples', function () {
+        it('should verify Google Domain (Catch-All) example', function () {
+            const result = applyPattern('https://www.google.com/search?client=firefox-b-1-d&q=url+regex+examples', {
+                search: 'https?:\\/\\/([a-zA-Z0-9-]+\\.)*google\\.[a-z]+(\\/|$)',
+                title: 'Google (Any)'
+            });
+            expect(result.matched).to.be.true;
+            expect(result.newTitle).to.equal('Google (Any)');
+        });
+
+        it('should verify Cleaner Titles for Spaces and Symbols example', function () {
+            const result = applyPattern('https://docs.example.com/search?topic=My%20Project%2BDesign', {
+                search: 'topic=([^&]+)',
+                title: 'Topic: $1'
+            });
+            expect(result.matched).to.be.true;
+            expect(result.newTitle).to.equal('Topic: My Project+Design');
+        });
+
+        it('should verify Upper Casing & Trimming example', function () {
+            const result = applyPattern('https://jira.com/browse/%20tit-123%20', {
+                search: 'jira\\.com\\/browse\\/([^/]+)',
+                title: 'Ticket: $1.upper().trim()'
+            });
+            expect(result.matched).to.be.true;
+            expect(result.newTitle).to.equal('Ticket: TIT-123');
+        });
+
+        it('should verify Replacing & Title Casing Slugs example', function () {
+            const result = applyPattern('https://en.wikipedia.org/wiki/advanced_string_formatting', {
+                search: 'wiki\\/([^/]+)',
+                title: 'Wiki: $1.replace("_", " ").title()'
+            });
+            expect(result.matched).to.be.true;
+            expect(result.newTitle).to.equal('Wiki: Advanced String Formatting');
+        });
+
+        it('should verify Title Truncation with Suffix example', function () {
+            const result = applyPattern('https://blog.com/article/unnecessarily-long-slug-here', {
+                search: 'article\\/([^/]+)',
+                title: '$1.limit(15, "...")'
+            });
+            expect(result.matched).to.be.true;
+            expect(result.newTitle).to.equal('unnecessarily-l...');
+        });
+
+        it('should verify Title Truncation without Suffix example', function () {
+            const result = applyPattern('https://blog.com/article/unnecessarily-long-slug-here', {
+                search: 'article\\/([^/]+)',
+                title: '$1.limit(10)'
+            });
+            expect(result.matched).to.be.true;
+            expect(result.newTitle).to.equal('unnecessar');
+        });
+
+        it('should verify Slice Sub-segments example', function () {
+            const result = applyPattern('https://example.com/code/abcdefg', {
+                search: 'code\\/([^/]+)',
+                title: 'Code: $1.slice(0, 4)'
+            });
+            expect(result.matched).to.be.true;
+            expect(result.newTitle).to.equal('Code: abcd');
+        });
+
+        it('should verify Graceful Fallback Safety example', function () {
+            const result = applyPattern('https://en.wikipedia.org/wiki/slug', {
+                search: 'wiki\\/([^/]+)',
+                title: '$1.invalidMethod().upper()'
+            });
+            expect(result.matched).to.be.true;
+            expect(result.newTitle).to.equal('$1.invalidMethod().upper()');
+        });
     });
 });
 

@@ -1,0 +1,81 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "collapsedGroups": [],
+    "disabledGroups": []
+  },
+  "patterns": [
+    {
+      "search": "example\\.com/upper/([^/]+)",
+      "title": "Upper: $1.upper()",
+      "enabled": true,
+      "group": "Advanced Formatting"
+    },
+    {
+      "search": "example\\.com/lower/([^/]+)",
+      "title": "Lower: $1.lower()",
+      "enabled": true,
+      "group": "Advanced Formatting"
+    },
+    {
+      "search": "example\\.com/trim/([^/]+)",
+      "title": "Trimmed: $1.trim()",
+      "enabled": true,
+      "group": "Advanced Formatting"
+    },
+    {
+      "search": "example\\.com/capitalize/([^/]+)",
+      "title": "Cap: $1.capitalize()",
+      "enabled": true,
+      "group": "Advanced Formatting"
+    },
+    {
+      "search": "example\\.com/title/([^/]+)",
+      "title": "Title: $1.title()",
+      "enabled": true,
+      "group": "Advanced Formatting"
+    },
+    {
+      "search": "example\\.com/replace/([^/]+)",
+      "title": "Rep: $1.replace(\"_\", \"-\")",
+      "enabled": true,
+      "group": "Advanced Formatting"
+    },
+    {
+      "search": "example\\.com/limit-no-suffix/([^/]+)",
+      "title": "Limit: $1.limit(10)",
+      "enabled": true,
+      "group": "Advanced Formatting"
+    },
+    {
+      "search": "example\\.com/limit-suffix/([^/]+)",
+      "title": "Limit: $1.limit(10, \"...\")",
+      "enabled": true,
+      "group": "Advanced Formatting"
+    },
+    {
+      "search": "example\\.com/slice-start/([^/]+)",
+      "title": "Slice: $1.slice(2)",
+      "enabled": true,
+      "group": "Advanced Formatting"
+    },
+    {
+      "search": "example\\.com/slice-start-end/([^/]+)",
+      "title": "Slice: $1.slice(1, 4)",
+      "enabled": true,
+      "group": "Advanced Formatting"
+    },
+    {
+      "search": "example\\.com/chain/([^/]+)",
+      "title": "Chain: $1.trim().replace(\"_\", \" \").title()",
+      "enabled": true,
+      "group": "Advanced Formatting"
+    },
+    {
+      "search": "example\\.com/fallback/([^/]+)",
+      "title": "Fallback: $1.invalidMethod().upper()",
+      "enabled": true,
+      "group": "Advanced Formatting"
+    }
+  ]
+}

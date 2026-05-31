@@ -16,6 +16,22 @@
 
 ## Features
 - Monitor tab URLs and change their titles based on user-defined search patterns.
+- **Advanced String Formatting**: Transform regex capture groups directly in replacement templates using simple dot-notation methods. Methods execute sequentially from left to right:
+  | Method | Description | Example Input | Example Template | Result |
+  | :--- | :--- | :--- | :--- | :--- |
+  | `.upper()` | Converts all characters to uppercase. | `tit-123` | `$1.upper()` | `TIT-123` |
+  | `.lower()` | Converts all characters to lowercase. | `MY-TITLE` | `$1.lower()` | `my-title` |
+  | `.capitalize()` | Capitalizes the first character and lowercases the rest. | `my TAB` | `$1.capitalize()` | `My tab` |
+  | `.title()` | Capitalizes the first letter of each word. | `my-repo_name` | `$1.title()` | `My-Repo_Name` |
+  | `.trim()` | Strips leading and trailing whitespace. | `"  slug  "` | `$1.trim()` | `"slug"` |
+  | `.replace(old, new)` | Replaces occurrences of the target string with replacement text. | `hello_world` | `$1.replace("_", " ")` | `hello world` |
+  | `.limit(len)` | Truncates to `len` characters with no suffix. | `unnecessarily-long` | `$1.limit(10)` | `unnecessar` |
+  | `.limit(len, suffix)` | Truncates to `len` characters and appends `suffix` only if truncated. | `unnecessarily-long` | `$1.limit(10, "...")` | `unnecessar...` |
+  | `.slice(start)` | Extracts a substring from `start` index (0-based) to the end of the string. | `abcdef` | `$1.slice(2)` | `cdef` |
+  | `.slice(start, end)` | Extracts a substring from `start` index up to (but not including) `end` (0-based). | `abcdef` | `$1.slice(1, 4)` | `bcd` |
+
+  * **Chaining (Cascading)**: Methods can be chained sequentially. For example, `$1.trim().replace("_", " ").title()` on `"  my_slug  "` results in `"My Slug"`.
+  * **Safe Fallback**: If an unknown method or a syntax error (e.g., unclosed quotes) is encountered, the template falls back safely to the literal text (e.g. `$1.invalid()`) without crashing the extension.
 - **URL Decoding Support**: Automatically decodes percent-encoded characters (like `%20`, `%22`, etc.) within captured URL segments. This ensures that titles like `Search: My%20Query` are rendered as `Search: My Query` in your tab.
 - **Advanced RegEx Support**: Full support for JavaScript Regular Expressions, including capture groups and anchors.
 - **Real-Time Title Guardian**: Uses a robust in-page `MutationObserver` to instantly re-assert your custom title if a website attempts to overwrite it (fixing "flicker" on SPAs).
@@ -91,7 +107,20 @@
 ## Changelog
 
 <details open>
+<summary><b>Version 1.3.0 (May 30, 2026) — Advanced Capture Group Formatting</b></summary>
+
+- **Advanced String Transformations**:
+    - Added support for dot-notation method chains on regex capture groups (e.g., `$1.trim().replace("_", " ").upper()`).
+    - Whitelisted case conversion methods: `.upper()`, `.lower()`, `.trim()`, `.capitalize()`, and `.title()`.
+    - Whitelisted string manipulation methods: `.replace(old, new)` (global replacement), `.limit(n, [suffix])` (clean truncation by default; optional ellipsis), and `.slice(start, [end])`.
+    - Sandbox-safe parser complies with Manifest V3 CSP restrictions (no `eval()` or `new Function()`).
+    - Secure individual URI decoding at the capture group level before executing transformations.
+    - Robust syntax fallbacks ensure malformed chains or unknown methods fail silently and display as literal template text.
+</details>
+
+<details>
 <summary><b>Version 1.2.0 (April 22, 2026) — Import (Append) Mode, Theme-Aware Icons & XPI Optimization</b></summary>
+
 
 - **Advanced Import/Export Options**: 
     - Introduced a dedicated, immersive card-based UI for managing your Title Tamer files.
